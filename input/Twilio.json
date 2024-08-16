@@ -1,0 +1,346 @@
+[
+   {
+      "country": {
+         "name": "United States",
+         "price": 0.0109,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "India",
+         "price": 0.0682,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Indonesia",
+         "price": 0.3603,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Brazil",
+         "price": 0.0599,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Russia",
+         "price": 0.7096,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Japan",
+         "price": 0.084,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Nigeria",
+         "price": 0.252,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Mexico",
+         "price": 0.0515,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Pakistan",
+         "price": 0.331,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Egypt",
+         "price": 0.1,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Germany",
+         "price": 0.094,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Philippines",
+         "price": 0.1699,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Vietnam",
+         "price": 0.1552,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Iran",
+         "price": 0.1833,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Turkey",
+         "price": 0.0305,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "France",
+         "price": 0.0798,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "United Kingdom",
+         "price": 0.042,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Bangladesh",
+         "price": 0.2653,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Italy",
+         "price": 0.0927,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Thailand",
+         "price": 0.0305,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "South Korea",
+         "price": 0.0494,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Spain",
+         "price": 0.0875,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Poland",
+         "price": 0.0431,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Argentina",
+         "price": 0.0743,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Canada",
+         "price": 0.0109,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "South Africa",
+         "price": 0.0284,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Saudi Arabia",
+         "price": 0.1,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Tanzania",
+         "price": 0.2136,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Colombia",
+         "price": 0.0525,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Algeria",
+         "price": 0.2575,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Myanmar",
+         "price": 0.1894,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Venezuela",
+         "price": 0.0852,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Ukraine",
+         "price": 0.147,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Morocco",
+         "price": 0.1873,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Ethiopia",
+         "price": 0.2282,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Iraq",
+         "price": 0.3401,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Uzbekistan",
+         "price": 0.3828,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Peru",
+         "price": 0.1,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Sudan",
+         "price": 0.229,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Uganda",
+         "price": 0.2122,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Kenya",
+         "price": 0.105,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Congo",
+         "price": 0.1999,
+         "isActive": true,
+         "isModified": false
+      }
+   },
+   {
+      "country": {
+         "name": "Afghanistan",
+         "price": 0.3756,
+         "isActive": true,
+         "isModified": false
+      }
+   }
+]
