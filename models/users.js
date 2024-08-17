@@ -126,20 +126,28 @@ const userSchema = new Schema({
             unitType: {
                 type: String,
                 enum: {
-                    values: ['Cat1', 'Cat2', 'Cat2']
+                    values: ['unitCat1', 'unitCat2', 'unitCat3']
                 }
             },
-            details: {
-                bookingAmount: Number,
-                contractingAmount: Number,
-                grossAmount: Number,
-                cashAmount: Number,
-                installments: {
-                    count: Number,
-                    amount: Number,
-                    spanInMonths: Number
-                },
-            },
+            priceDetails: [
+                {
+                    unitType: {
+                        type: String,
+                        enum: {
+                            values: ['unitCat1', 'unitCat2', 'unitCat3']
+                        }
+                    },
+                    bookingAmount: Number,
+                    contractingAmount: Number,
+                    grossAmount: Number,
+                    cashAmount: Number,
+                    installments: {
+                        count: Number,
+                        amount: Number,
+                        spanInMonths: Number
+                    }
+                }
+            ],
             bookingDate: Date,
             contractingDate: Date,
             contractDate: Date,

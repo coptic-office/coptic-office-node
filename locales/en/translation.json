@@ -96,13 +96,13 @@
       "brief": "Showing the detected faces in the image labeled with their owners' names, if known",
       "description": "You can use this feature, along with the Face Recognition Request, to receive not only abstract data but also an image with outlines and printed data"
     },
-    "Cat1": {
+    "unitCat1": {
       "name": "Middle Unit"
     },
-    "Cat2": {
+    "unitCat2": {
       "name": "Edge Unit"
     },
-    "Cat3": {
+    "unitCat3": {
       "name": "Edge Unit to the Street"
     }
   },

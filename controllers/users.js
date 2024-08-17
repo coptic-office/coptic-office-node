@@ -119,7 +119,11 @@ const createUser = async (req, res) => {
                                             })
                                     })
 
-                                user = {...user._doc, _id: undefined, __v: undefined, password: undefined};
+                                user = {
+                                    ...user._doc, _id: undefined, __v: undefined, password: undefined,
+                                    currency: undefined, email: undefined, payments: undefined, units: undefined,
+                                    coupons: undefined, role: undefined, isActive: undefined
+                                };
                                 // user = clearEmpties(user);
 
                                 res.status(201)
@@ -228,7 +232,7 @@ const login = async (req, res) => {
             }
         }
         const query = userIdentifier === 'mobile' ? {'mobile.primary.number': mobileNumber} : {'email.primary': email};
-        const projection = {_id: 0, firstName: 1, lastName: 1, password: 1, mobile: 1, email: 1, payments:1, units:1}
+        const projection = {_id: 0, firstName: 1, lastName: 1, password: 1, mobile: 1}
         User.findOne(query, projection)
             .then((user) => {
                 if (!user) {
