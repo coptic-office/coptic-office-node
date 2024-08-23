@@ -57,11 +57,11 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 const options = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl', 'privkey.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl', 'cert.pem')),
+  key: fs.readFileSync('ssl/privkey.pem'),
+  cert: fs.readFileSync('ssl/cert.pem'),
   ca: [
-    fs.readFileSync(path.join(__dirname, 'ssl', 'chain.pem')),
-    fs.readFileSync(path.join(__dirname, 'ssl', 'fullchain.pem')),
+    fs.readFileSync('ssl/chain.pem'),
+    fs.readFileSync('ssl/fullchain.pem1'),
   ]
 };
 connectDB()
@@ -91,6 +91,7 @@ function normalizePort(val) {
 function onError(error) {
 
   if (error.syscall !== 'listen') {
+    console.error(error);
     throw error;
   }
 
@@ -109,6 +110,7 @@ function onError(error) {
       process.exit(1);
       break;
     default:
+      console.error(error);
       throw error;
   }
 }
