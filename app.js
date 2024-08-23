@@ -64,9 +64,9 @@ const options = {
     fs.readFileSync('ssl/fullchain.pem'),
   ]
 };
-console.log('Certificates loaded')
+
 connectDB()
-    .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
+    .then(() => https.createServer(options, app).listen(443, onListening).on('error', onError))
 
 // connectDB()
 //     .then(() => app.listen(port, onListening).on('error', onError))
