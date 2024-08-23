@@ -91,6 +91,7 @@ function normalizePort(val) {
 /** Event listener for HTTP server "error" event */
 function onError(error) {
 
+  console.error(error);
   if (error.syscall !== 'listen') {
     console.error(error);
     throw error;
