@@ -66,7 +66,7 @@ const options = {
 };
 
 connectDB()
-    .then(() => https.createServer(options, app).listen(8080, onListening).on('error', onError))
+    .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
 
 // connectDB()
 //     .then(() => app.listen(port, onListening).on('error', onError))
