@@ -61,7 +61,7 @@ const options = {
   cert: fs.readFileSync('ssl/cert.pem'),
   ca: [
     fs.readFileSync('ssl/chain.pem'),
-    fs.readFileSync('ssl/fullchain.pem1'),
+    fs.readFileSync('ssl/fullchain.pem'),
   ]
 };
 connectDB()
