@@ -11,8 +11,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require('fs');
 const https = require('https');
-const SegfaultHandler = require('segfault-handler');
-SegfaultHandler.registerHandler("crash.log");
 
 const {i18next, i18nextMiddleware} = require('./controllers/localization');
 const {authorize} = require('./middleware/auth');
