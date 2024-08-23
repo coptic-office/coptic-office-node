@@ -10,17 +10,14 @@ const unitSchema = new Schema({
     },
     bookingAmount: Number,
     contractingAmount: Number,
-    grossAmount: Number,
-    cashAmount: Number,
+    grossPrice: Number,
+    cashPrice: Number,
     installments: {
         count: Number,
         amount: Number,
         spanInMonths: Number
     },
-    media: {
-        images: [],
-        video: String
-    },
+    images: [],
     isActive: Boolean
 })
 

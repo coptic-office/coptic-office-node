@@ -9,6 +9,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const fs = require('fs');
+const https = require('https');
 
 const {i18next, i18nextMiddleware} = require('./controllers/localization');
 const {authorize} = require('./middleware/auth');
@@ -54,8 +56,19 @@ app.use(errorHandler);
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
+const options = {
+  key: fs.readFileSync(path.join(__dirname, 'ssl', 'privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'ssl', 'cert.pem')),
+  ca: [
+    fs.readFileSync(path.join(__dirname, 'ssl', 'chain.pem')),
+    fs.readFileSync(path.join(__dirname, 'ssl', 'fullchain.pem')),
+  ]
+};
 connectDB()
-    .then(() => app.listen(port, onListening).on('error', onError))
+    .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
+
+// connectDB()
+//     .then(() => app.listen(port, onListening).on('error', onError))
 
 /** Normalize a port into a number, string, or false */
 function normalizePort(val) {

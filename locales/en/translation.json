@@ -72,8 +72,8 @@
     "Booking": "Sum paid for a unit booking",
     "Contracting": "Sum paid for the unit contracting",
     "cat1Cash": "Sum paid for the cash payment of a middle unit",
-    "cat2Cash": "Sum paid for the cash payment of an edge unit",
-    "cat3Cash": "Sum paid for the cash payment of an edge Unit to the Street"
+    "cat2Cash": "Sum paid for the cash payment of an peripheral unit",
+    "cat3Cash": "Sum paid for the cash payment of an peripheral Unit to the Street"
   },
   "product": {
     "ANP": {
@@ -100,10 +100,10 @@
       "name": "Middle Unit"
     },
     "unitCat2": {
-      "name": "Edge Unit"
+      "name": "Peripheral Unit"
     },
     "unitCat3": {
-      "name": "Edge Unit to the Street"
+      "name": "Peripheral Unit to the Street"
     }
   },
   "subscription": {
@@ -200,7 +200,7 @@
   },
   "restriction": {
     "suspended": "Your account is suspended now. Please contact customer service for further details",
-    "locked": "Your account is temporarily locked due to several failed login trails, Please wait some time"
+    "locked": "Your account is temporarily locked due to several failed login attempts, Please wait some time"
   },
   "email": {
     "greeting": "Hello",

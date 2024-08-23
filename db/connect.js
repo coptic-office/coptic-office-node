@@ -4,9 +4,9 @@ const errorLog = debug('app-database:error');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const  dbName = 'Recognize_Me'
+const  dbName = 'Coptic_Cemeteries'
 const connectionString =
-    `mongodb+srv://${process.env.DB_USER_NAME}:${process.env.DB_PASSWORD}@cluster0.nfsfdjm.mongodb.net/${dbName}
+    `mongodb+srv://${process.env.DB_USER_NAME}:${process.env.DB_PASSWORD}@cluster0.klke5e3.mongodb.net/${dbName}
     ?retryWrites=true&w=majority`
 
 const connectDB = async () => {

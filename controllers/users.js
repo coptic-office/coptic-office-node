@@ -122,9 +122,9 @@ const createUser = async (req, res) => {
                                 user = {
                                     ...user._doc, _id: undefined, __v: undefined, password: undefined,
                                     currency: undefined, email: undefined, payments: undefined, units: undefined,
+                                    plan: undefined, balance: undefined, courtesy: undefined, subscription: undefined,
                                     coupons: undefined, role: undefined, isActive: undefined
                                 };
-                                // user = clearEmpties(user);
 
                                 res.status(201)
                                     .json({
@@ -192,21 +192,6 @@ const createUser = async (req, res) => {
     }
 }
 
-function clearEmpties(o) {
-    for (const k in o) {
-        if (!o[k] || typeof o[k] !== "object") {
-            continue // If null or not an object, skip to the next iteration
-        }
-
-        // The property is an object
-        clearEmpties(o[k]); // <-- Make a recursive call on the nested object
-        if (Object.keys(o[k]).length === 0) {
-            delete o[k]; // The object had no properties, so delete that property
-        }
-    }
-    return o;
-}
-
 const login = async (req, res) => {
     try {
         const {mobileNumber, email, password} = await req.body;
@@ -232,7 +217,7 @@ const login = async (req, res) => {
             }
         }
         const query = userIdentifier === 'mobile' ? {'mobile.primary.number': mobileNumber} : {'email.primary': email};
-        const projection = {_id: 0, firstName: 1, lastName: 1, password: 1, mobile: 1}
+        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, isActive: 1}
         User.findOne(query, projection)
             .then((user) => {
                 if (!user) {
@@ -295,8 +280,7 @@ const login = async (req, res) => {
                                     })
                             })
 
-                        user = {...user._doc, __v: undefined, password: undefined};
-                        // user = clearEmpties(user);
+                        user = {...user._doc,_id: undefined, __v: undefined, password: undefined, isActive: undefined};
 
                         res.status(200)
                             .json({
