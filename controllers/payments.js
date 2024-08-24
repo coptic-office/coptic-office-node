@@ -2,132 +2,122 @@ const debug = require('debug');
 const errorLog = debug('app-payment:error');
 const Payment = require('../models/payments');
 const {generateUUID} = require('../utils/codeGenerator');
-const {validateCoupon} = require('../controllers/coupons');
-const {getUserById, completeTopUp, completeSubscription} = require('../controllers/users');
+const axios = require('axios');
+const {isNumeric} = require('../utils/numberUtils');
+const {completeTopUp, completeSubscription} = require('../controllers/users');
 
+const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
     try {
-        const {user: {id: userID}, paymentType, price} = await req.body;
-        const {totalAmount, netAmount, coupon} = price !== undefined ? price : {};
-        if (paymentType === undefined || !['TOP UP', 'SUBSCRIPTION'].includes(paymentType.toString().toUpperCase())) {
+        const {user: {id: userID}, paymentType, amount} = await req.body;
+        const paymentTypeList = ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash'];
+        if (paymentType === undefined || !paymentTypeList.includes(paymentType.toString().toLowerCase())) {
             return res.status(400).json({
                 status: "failed",
                 error: req.i18n.t('payment.invalidType'),
                 message: {}
             })
         }
-        if (price === undefined || totalAmount === undefined || netAmount === undefined
-            || typeof totalAmount !== 'number' || typeof netAmount !== 'number' || netAmount > totalAmount) {
+        if (amount === undefined || !isNumeric(amount)) {
             return res.status(400).json({
                 status: "failed",
-                error: req.i18n.t('payment.invalidPrice'),
+                error: req.i18n.t('payment.invalidAmount'),
                 message: {}
             })
         }
-        if (netAmount < totalAmount && (coupon === undefined || coupon === '')) {
-            return res.status(400).json({
-                status: "failed",
-                error: req.i18n.t('payment.missingCoupon'),
-                message: {}
-            })
-        }
-        if (netAmount < totalAmount) {
-            const discountAmount = await validateCoupon(coupon, userID, totalAmount);
-            if (Number(totalAmount) !== Number(netAmount) + Number(discountAmount)) {
-                return res.status(400).json({
-                    status: "failed",
-                    error: req.i18n.t('coupon.incorrectDiscount'),
-                    message: {}
-                })
-            }
-        }
-        const paymentData = {};
-        paymentData.receiptDetails = {};
-        paymentData.paymentDetails = {};
-        paymentData.receiptDetails.price = {};
-        paymentData.receiptDetails.items = [];
-        paymentData.userID = userID;
-        paymentData.receiptDetails.transactionNumber = generateUUID();
-        paymentData.receiptDetails.price.totalAmount = totalAmount;
-        paymentData.receiptDetails.price.netAmount = netAmount;
-        paymentData.receiptDetails.price.coupon = coupon !== undefined ? coupon : '---';
-        paymentData.paymentDetails.paymentGateway = 'Amazon';
-        paymentData.paymentDetails.amount = netAmount;
-        paymentData.paymentDetails.date = new Date();
-        paymentData.paymentDetails.status = 'Pending';
-        if (paymentType.toString().toUpperCase() === 'TOP UP') {
-            paymentData.paymentType = 'Top up';
-            paymentData.receiptDetails.items[0] = {};
-            paymentData.receiptDetails.items[0].name = 'PAYG';
-            paymentData.receiptDetails.items[0].price = totalAmount;
-        }
-        if (paymentType.toString().toUpperCase() === 'SUBSCRIPTION') {
-            const payment = await Payment.find({userID, paymentType: 'Subscription'}).sort({'paymentDetails.date': -1}).limit(1);
-            if (payment.length !== 0 && payment[0].paymentDetails.status === 'Pending') {
-                return res.status(403).json({
-                    status: "failed",
-                    error: req.i18n.t('payment.pendingSubscription'),
-                    message: {}
-                })
-            }
-            let calculatedAmount = 0.0;
-            const {subscription: {savingPlan: {renewal}, services}} = await getUserById(userID, {subscription: 1});
-            paymentData.paymentType = 'Subscription';
-            let i = 0;
-            if (JSON.stringify(renewal) !== '{}' && renewal.action === 'Renew') {
-                paymentData.receiptDetails.items[i] = {};
-                paymentData.receiptDetails.items[i].name = renewal.nextSavingPlan;
-                paymentData.receiptDetails.items[i].price = renewal.price;
-                calculatedAmount += Number(renewal.price);
-                i++;
-            }
-            for (const service of services) {
-                if (service.renewal.action === 'Renew') {
-                    paymentData.receiptDetails.items[i] = {};
-                    paymentData.receiptDetails.items[i].name = service.name;
-                    paymentData.receiptDetails.items[i].price = service.price;
-                    calculatedAmount += Number(service.price);
-                    i++;
+        const uniqueId = generateUUID();
+        const itemDescription = req.i18n.t(`item.${paymentType.toString().toLowerCase()}`);
+
+        const username = process.env.PAYMENT_USER_NAME;
+        const password = process.env.PAYMENT_PASSWORD;
+        const basicAuth = 'Basic ' + btoa(username + ':' + password);
+        axios.post(BANQUE_MISR_URL, {
+            apiOperation: "INITIATE_CHECKOUT",
+            interaction: {
+                operation: "PURCHASE",
+                merchant: {
+                    name: "Coptic Office",
                 }
+            },
+            order: {
+                currency: "EGP",
+                amount,
+                id: uniqueId,
+                description: itemDescription
             }
-            if (totalAmount !== calculatedAmount) {
-                return res.status(400).json({
-                    status: "failed",
-                    error: req.i18n.t('payment.incorrectAmount'),
-                    message: {}
-                })
-            }
-        }
-        await Payment.create(paymentData)
-            .then(() => {
-                res.status(200).json({
-                    status: "success",
-                    error: "",
-                    message: {
-                        paymentData
-                    }
-                })
+        }, {headers: {Authorization: basicAuth}})
+            .then(async (msg) => {
+                if (msg.data.result === 'SUCCESS') {
+                    const paymentData = {};
+                    paymentData.userID = userID;
+                    paymentData.paymentType = paymentType.toString().toLowerCase();
+                    paymentData.receiptDetails = {};
+                    paymentData.receiptDetails.transactionNumber = uniqueId;
+                    paymentData.receiptDetails.items = [];
+                    paymentData.receiptDetails.items[0] = {};
+                    paymentData.receiptDetails.items[0].name = itemDescription;
+                    paymentData.receiptDetails.items[0].price = amount;
+                    paymentData.receiptDetails.amount = amount;
+                    paymentData.paymentDetails = {};
+                    paymentData.receiptDetails.amount = amount;
+                    paymentData.paymentDetails.paymentGateway = 'Banque Misr';
+                    paymentData.paymentDetails.amount = amount;
+                    paymentData.paymentDetails.date = new Date();
+                    paymentData.paymentDetails.status = 'Pending';
+                    paymentData.paymentDetails.bankSessionId = msg.data.session.id;
+
+                    await Payment.create(paymentData)
+                        .then(() => {
+                            res.status(200).json({
+                                status: "success",
+                                error: "",
+                                message: {
+                                    sessionId: msg.data.session.id
+                                }
+                            })
+                        })
+                        .catch((err) => {
+                            res.status(500)
+                                .json({
+                                    status: "failed",
+                                    error: req.i18n.t('payment.creationError'),
+                                    message: {
+                                        info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                    }
+                                })
+                        })
+                }
+                else {
+                    res.status(400)
+                        .json({
+                            status: "failed",
+                            error: req.i18n.t('payment.bankInitiationError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? msg.error.toString() : undefined
+                            }
+                        })
+                }
+            })
+            .catch((err) => {
+                res.status(400)
+                    .json({
+                        status: "failed",
+                        error: req.i18n.t('payment.bankConnectionError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
             })
     }
     catch (err) {
-        if (['invalidCoupon', 'usedCoupon'].includes(err)) {
-            res.status(400)
-                .json({
-                    status: "failed",
-                    error: req.i18n.t(`coupon.${err}`),
-                    message: {}
-                })
-        }
-        else {
-            res.status(500)
-                .json({
-                    status: "failed",
-                    error: req.i18n.t('general.internalError'),
-                    message: {
-                        info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                    }
-                })
-        }
+        res.status(500)
+            .json({
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
     }
 }
 

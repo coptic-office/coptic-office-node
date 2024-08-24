@@ -61,41 +61,15 @@
     "oneSenderName": "The sender name cannot be changed after being chosen and verified"
   },
   "item": {
-    "PAYG": "Pay as you go without getting restricted by a monthly plan",
-    "Recognize50": "A monthly saving plan fits small businesses",
-    "Recognize100": "A monthly saving plan fits small-to-medium businesses",
-    "Recognize200": "A monthly saving plan fits large businesses",
-    "SMS Controller Service": "A service to control the process of sending SMS and protect it from misuse",
-    "coupon": "Discount coupon",
     "totalAmount": "Total amount",
     "netAmount": "Net amount",
-    "Booking": "Sum paid for a unit booking",
-    "Contracting": "Sum paid for the unit contracting",
-    "cat1Cash": "Sum paid for the cash payment of a middle unit",
-    "cat2Cash": "Sum paid for the cash payment of an peripheral unit",
-    "cat3Cash": "Sum paid for the cash payment of an peripheral Unit to the Street"
+    "booking": "Sum paid for a unit booking",
+    "contracting": "Sum paid for the unit contracting",
+    "cat1cash": "Sum paid for the cash payment of a middle unit",
+    "cat2cash": "Sum paid for the cash payment of an peripheral unit",
+    "cat3cash": "Sum paid for the cash payment of an peripheral Unit to the Street"
   },
   "product": {
-    "ANP": {
-      "name": "Adding New Person",
-      "brief": "Adding a new person to you account",
-      "description": "You can add an unlimited number of persons to your account"
-    },
-    "FER": {
-      "name": "Face Encoding Request",
-      "brief": "Adding a new image of an existing person in your account",
-      "description": "You can add up to 10 images for each person in your account; each image must have a single, clear face of that person"
-    },
-    "FRR": {
-      "name": "Face Recognition Request",
-      "brief": "Sending an image with one or more faces to be recognized",
-      "description": "When you send an image with many faces, we will detect these faces' positions, recognize them as per the provided information, and then send you back all the related data"
-    },
-    "OIG": {
-      "name": "Output Image Generation",
-      "brief": "Showing the detected faces in the image labeled with their owners' names, if known",
-      "description": "You can use this feature, along with the Face Recognition Request, to receive not only abstract data but also an image with outlines and printed data"
-    },
     "unitCat1": {
       "name": "Middle Unit"
     },
@@ -120,12 +94,12 @@
   },
   "payment": {
     "invalidType": "Invalid payment type",
-    "invalidPrice": "Invalid price amount",
+    "invalidAmount": "Invalid amount",
     "incorrectAmount": "Incorrect total amount",
-    "missingCoupon": "The discount coupon is missing",
-    "invalidCoupon": "The discount coupon is invalid",
-    "pendingSubscription": "We cannot proceed with this request because there's a pending subscription payment",
     "invalidTransaction": "Invalid transaction number",
+    "bankConnectionError": "Error while connecting to the bank",
+    "bankInitiationError": "Error while initiating the transaction with the bank",
+    "creationError": "Error with creating the payment",
     "banks": {
       "ADCB": "Abu Dhabi Commercial Bank Egypt",
       "ABDI": "Abu Dhabi Islamic Bank - Egypt",
@@ -167,11 +141,6 @@
       "Rejected": "Rejected",
       "Cashed": "Cashed"
     }
-  },
-  "coupon": {
-    "invalidCoupon": "Invalid or expired coupon",
-    "usedCoupon": "This coupon has been used before",
-    "incorrectDiscount": "Incorrect coupon discount"
   },
   "admin": {
     "aggregatorRequired": "SMS aggregator name is required",

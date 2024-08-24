@@ -63,4 +63,8 @@ router.post('/validate-mobile', [authorize(accessToken, getUserByMobileRoles), v
 const updateSubscriptionRoles = ['User'];
 router.post('/update-subscription', authorize(accessToken, updateSubscriptionRoles), user.updateSubscription);
 
+/** Get the available payment options */
+const getPaymentOptionsRoles = ['User'];
+router.post('/get-payment-options', authorize(accessToken, getPaymentOptionsRoles), user.getPaymentOptions);
+
 module.exports = router;

@@ -6,20 +6,17 @@ const paymentSchema = new Schema({
     paymentType: {
         type: String,
         enum: {
-            values: ['Booking', 'Contracting', 'cat1Cash', 'cat2Cash', 'cat3Cash']
+            values: ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash']
         }
     },
     receiptDetails: {
         transactionNumber: String,
         items: [{
+            _id: false,
             name: String,
             price: mongoose.Decimal128
         }],
-        price: {
-            totalAmount: mongoose.Decimal128,
-            netAmount: mongoose.Decimal128,
-            coupon: String
-        }
+        amount: mongoose.Decimal128
     },
     paymentDetails: {
         paymentGateway: String,
@@ -32,7 +29,8 @@ const paymentSchema = new Schema({
                 values: ['Pending', 'Succeeded', 'Failed']
             }
         },
-        adviceDate: Date
+        adviceDate: Date,
+        bankSessionId: String
     }
 })
 

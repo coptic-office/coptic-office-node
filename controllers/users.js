@@ -14,6 +14,7 @@ const Payment = require('../models/payments')
 const {createSmsRecord} = require("./smsRecords");
 const crypto = require('../utils/crypto');
 const {getSellingPrice} = require("./plans");
+const Unit = require('../models/units');
 
 const createUser = async (req, res) => {
     try {
@@ -217,7 +218,7 @@ const login = async (req, res) => {
             }
         }
         const query = userIdentifier === 'mobile' ? {'mobile.primary.number': mobileNumber} : {'email.primary': email};
-        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, isActive: 1}
+        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, role: 1, isActive: 1}
         User.findOne(query, projection)
             .then((user) => {
                 if (!user) {
@@ -280,7 +281,7 @@ const login = async (req, res) => {
                                     })
                             })
 
-                        user = {...user._doc,_id: undefined, __v: undefined, password: undefined, isActive: undefined};
+                        user = {...user._doc,_id: undefined, __v: undefined, password: undefined, role: undefined, isActive: undefined};
 
                         res.status(200)
                             .json({
@@ -1879,6 +1880,42 @@ const checkFund = (userID, products) => {
     })
 }
 
+const getPaymentOptions = async (req, res) => {
+    try {
+        Unit.findOne({}, {bookingAmount: 1, contractingAmount: 1, _id: 0})
+            .then(({bookingAmount, contractingAmount}) => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        bookingAmount,
+                        contractingAmount
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 module.exports = {
     createUser,
     login,
@@ -1898,5 +1935,6 @@ module.exports = {
     completeTopUp,
     completeSubscription,
     checkFund,
+    getPaymentOptions
 }
 

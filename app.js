@@ -35,9 +35,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/system', sysRouter);
 app.use(checkAppLang);
+app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/plans', plansRouter);
 app.use('/payments', paymentsRouter);
@@ -56,19 +56,23 @@ app.use(errorHandler);
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-const options = {
-  key: fs.readFileSync('ssl/privkey.pem'),
-  cert: fs.readFileSync('ssl/cert.pem'),
-  ca: [
-    fs.readFileSync('ssl/chain.pem'),
-    fs.readFileSync('ssl/fullchain.pem'),
-  ]
-};
-connectDB()
-    .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
-
-// connectDB()
-//     .then(() => app.listen(port, onListening).on('error', onError))
+const sslInstalled = process.env.SECURITY_SSL_INSTALLED === 'True'
+if (sslInstalled) {
+  const options = {
+    key: fs.readFileSync('ssl/privkey.pem'),
+    cert: fs.readFileSync('ssl/cert.pem'),
+    ca: [
+      fs.readFileSync('ssl/chain.pem'),
+      fs.readFileSync('ssl/fullchain.pem'),
+    ]
+  };
+  connectDB()
+      .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
+}
+else {
+  connectDB()
+      .then(() => app.listen(port, onListening).on('error', onError))
+}
 
 /** Normalize a port into a number, string, or false */
 function normalizePort(val) {
