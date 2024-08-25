@@ -21,7 +21,6 @@ const paymentSchema = new Schema({
     paymentDetails: {
         paymentGateway: String,
         amount: mongoose.Decimal128,
-        referenceNumber: String,
         date: Date,
         status: {
             type: String,

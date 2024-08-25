@@ -1724,79 +1724,9 @@ const getCoupons = (coupons, userID) => {
     })
 }
 
-const completeTopUp = (userID, amount, bonus) => {
+const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-        User.findOneAndUpdate({_id: userID}, {$inc: {balance: amount, courtesy: bonus}})
-            .then(() => {
-                myResolve();
-            })
-            .catch((err) => {
-                myReject(err);
-            })
-    })
-}
 
-const completeSubscription = (userID, paymentDate) => {
-    return new Promise((myResolve, myReject) => {
-        User.findOne({_id: userID}, {plan: 1, subscription: 1})
-            .then((user) => {
-                let {plan, subscription} = user;
-                const currentRenewalDate = subscription.renewalDate;
-                let renewalDifference = 0;
-                let remainderPercent = 0.0;
-                let remainderCredit = 0.0;
-                if (currentRenewalDate.getTime() > paymentDate.getTime()) {
-                    renewalDifference = Math.floor((currentRenewalDate.getTime() - new Date(paymentDate).getTime()) / (24 * 60 * 60 * 1000));
-                    remainderPercent = renewalDifference / 30;
-                }
-                if (subscription.savingPlan.renewal.action === 'Renew') {
-                    if (subscription.savingPlan.isEffective) {
-                        remainderCredit += Number(subscription.savingPlan.price) * remainderPercent;
-                    }
-                    else {
-                        subscription.savingPlan.isEffective = true;
-                    }
-                    subscription.savingPlan.name = subscription.savingPlan.renewal.nextSavingPlan;
-                    subscription.savingPlan.price = subscription.savingPlan.renewal.price;
-                    subscription.savingPlan.credit = Number(subscription.savingPlan.credit) + Number(subscription.savingPlan.renewal.price);
-                    plan = subscription.savingPlan.renewal.nextSavingPlan;
-                }
-                else {
-                    subscription.savingPlan = {};
-                    plan = 'PAYG';
-                }
-                for (let i = 0; i < subscription.services.length; i++) {
-                    if (subscription.services[i].renewal.action === 'Renew') {
-                        if (subscription.services[i].isEffective) {
-                            remainderCredit += Number(subscription.services[i].price) * remainderPercent;
-                        }
-                        else {
-                            subscription.services[i].isEffective = true;
-                        }
-                    }
-                    else {
-                        subscription.services.splice(i, 1);
-                        i--;
-                    }
-                }
-                if (subscription.savingPlan.credit !== undefined) {
-                    subscription.savingPlan.credit = Number(subscription.savingPlan.credit) + Number(remainderCredit.toFixed(3));
-                }
-                const nextRenewalDate = paymentDate;
-                nextRenewalDate.setMonth(paymentDate.getMonth() + 1);
-                nextRenewalDate.setHours(0, 0, 0, 0);
-                subscription.renewalDate = nextRenewalDate;
-                User.findOneAndUpdate({_id: userID}, {plan, subscription})
-                    .then(() => {
-                        myResolve();
-                    })
-                    .catch((err) => {
-                        myReject(err);
-                    })
-            })
-            .catch((err) => {
-                myReject(err);
-            })
     })
 }
 
@@ -1932,8 +1862,7 @@ module.exports = {
     updateSuspension,
     updateSubscription,
     getCoupons,
-    completeTopUp,
-    completeSubscription,
+    completePayment,
     checkFund,
     getPaymentOptions
 }

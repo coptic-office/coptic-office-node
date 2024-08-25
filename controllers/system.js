@@ -1,19 +1,25 @@
 const debug = require('debug');
 const errorLog = debug('app-system:error');
+const Payment = require('../controllers/payments');
 
 const paymentCallback = async (req, res) => {
     try {
         const {resultIndicator, sessionVersion} = await req.query;
-        // res.redirect('https://copticoffice.com/')
-        res.status(200).json({
-            status: "success",
-            error: "",
-            message: {
-                resultIndicator,
-                sessionVersion
-            }
-        })
 
+        if (resultIndicator === undefined) {
+            res.redirect('https://tech-worx.ca/')
+        }
+        else {
+            Payment.findPayment(resultIndicator)
+                .then(() => {
+
+                    res.redirect('https://copticoffice.com/')
+                })
+                .catch((err) => {
+
+                    res.redirect('https://tech-worx.ca/index.php/about/')
+                });
+        }
     }
     catch (err) {
         console.log('Error while calling callback function')

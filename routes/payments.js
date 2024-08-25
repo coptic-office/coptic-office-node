@@ -9,7 +9,4 @@ const accessToken = 'Access';
 const createPaymentRoles = ['User'];
 router.post('/create-payment', authorize(accessToken, createPaymentRoles), payment.createPayment);
 
-/** Complete the payment (this is considered as the callback method for the payment) */
-router.post('/complete-payment', payment.completePayment)
-
 module.exports = router;

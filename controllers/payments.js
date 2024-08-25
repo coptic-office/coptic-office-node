@@ -4,7 +4,7 @@ const Payment = require('../models/payments');
 const {generateUUID} = require('../utils/codeGenerator');
 const axios = require('axios');
 const {isNumeric} = require('../utils/numberUtils');
-const {completeTopUp, completeSubscription} = require('../controllers/users');
+const {completePayment} = require('../controllers/users');
 
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
@@ -44,6 +44,11 @@ const createPayment = async (req, res) => {
                     shipping: 'HIDE'
                 },
                 locale: 'ar',
+                retryAttemptCount: 3,
+                redirectMerchantUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
+                timeout: 600,
+                timeoutUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
+                cancelUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
                 returnUrl: 'https://dev.copticoffice.com:3000/system/payment-callback'
             },
             order: {
@@ -129,48 +134,27 @@ const createPayment = async (req, res) => {
     }
 }
 
-const completePayment = async (req, res) => {
-    try {
-        const {transNumber, refNumber} = await req.body;
-        await Payment.findOneAndUpdate({'receiptDetails.transactionNumber': transNumber},
-            {'paymentDetails.referenceNumber': refNumber, 'paymentDetails.status': 'Succeeded', 'paymentDetails.adviceDate': new Date()},
-            {new: true})
-            .then(async (payment) => {
+const findPayment = (resultIndicator) => {
+    return new Promise((myResolve, myReject) => {
+        const query = {'paymentDetails.bankSuccessIndicator': resultIndicator};
+        const update = {'paymentDetails.status': 'Succeeded', 'paymentDetails.adviceDate': new Date()};
+        Payment.findOneAndUpdate(query, update, {new: true})
+            .then((payment) => {
                 if (!payment) {
-                    return res.status(400).json({
-                        status: "failed",
-                        error: req.i18n.t('payment.invalidTransaction'),
-                        message: {}
-                    })
+                    myReject('invalidIndicator');
                 }
-                if (payment.paymentType === 'Top up') {
-                    const {userID, receiptDetails: {price: {totalAmount, netAmount}}} = payment;
-                    await completeTopUp(userID, Number(netAmount), Number(totalAmount) - Number(netAmount))
-                        .catch((err) => {
-                            errorLog(`Couldn't update top up payment for user ${userID}. Error: ${err}`);
-                            return res.status(500).json({})
-                        })
+                else {
+                    // completePayment()
+                    //     .catch((err) => {
+                    //
+                    //     });
+                    myResolve();
                 }
-                if (payment.paymentType === 'Subscription') {
-                    const {userID, paymentDetails: {date: paymentDate}} = payment;
-                    await completeSubscription(userID, paymentDate)
-                        .catch((err) => {
-                            errorLog(`Couldn't update subscription payment for user ${userID}. Error: ${err}`);
-                            return res.status(500).json({})
-                        })
-                }
-                res.status(200).json({})
             })
-    }
-    catch (err) {
-        res.status(500)
-            .json({
-                status: "failed",
-                error: req.i18n.t('general.internalError'),
-                message: {
-                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                }
-            })    }
+            .catch((err) => {
+                myReject('internalError');
+            })
+    })
 }
 
-module.exports = {createPayment, completePayment}
+module.exports = {createPayment, findPayment}
