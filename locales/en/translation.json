@@ -67,7 +67,7 @@
     "contracting": "Sum paid for the unit contracting",
     "cat1cash": "Sum paid for the cash payment of a middle unit",
     "cat2cash": "Sum paid for the cash payment of an peripheral unit",
-    "cat3cash": "Sum paid for the cash payment of an peripheral Unit to the Street"
+    "cat3cash": "Sum paid for the cash payment of an peripheral unit to the street"
   },
   "product": {
     "unitCat1": {
@@ -93,6 +93,7 @@
     "subscriptionExpired": "Subscription expired! You need to renew your monthly subscription"
   },
   "payment": {
+    "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",
     "invalidAmount": "Invalid amount",
     "incorrectAmount": "Incorrect total amount",

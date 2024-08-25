@@ -36,8 +36,15 @@ const createPayment = async (req, res) => {
             interaction: {
                 operation: "PURCHASE",
                 merchant: {
-                    name: "Coptic Office",
-                }
+                    name: req.i18n.t(`payment.accountName`),
+                    logo: process.env.GENERAL_LOGO_LINK
+                },
+                displayControl: {
+                    billingAddress: 'HIDE',
+                    shipping: 'HIDE'
+                },
+                locale: 'ar',
+                returnUrl: 'https://copticoffice.com/'
             },
             order: {
                 currency: "EGP",
