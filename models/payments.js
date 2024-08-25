@@ -30,7 +30,8 @@ const paymentSchema = new Schema({
             }
         },
         adviceDate: Date,
-        bankSessionId: String
+        bankSessionId: String,
+        bankSuccessIndicator: String
     }
 })
 

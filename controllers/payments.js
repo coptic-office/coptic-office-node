@@ -72,6 +72,7 @@ const createPayment = async (req, res) => {
                     paymentData.paymentDetails.date = new Date();
                     paymentData.paymentDetails.status = 'Pending';
                     paymentData.paymentDetails.bankSessionId = msg.data.session.id;
+                    paymentData.paymentDetails.bankSuccessIndicator = msg.data.successIndicator;
 
                     await Payment.create(paymentData)
                         .then(() => {

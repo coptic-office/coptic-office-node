@@ -4,16 +4,24 @@ const errorLog = debug('app-system:error');
 const paymentCallback = async (req, res) => {
     try {
         const {resultIndicator, sessionVersion} = await req.query;
-
-        console.log(`resultIndicator: ${resultIndicator}`)
-        console.log(`sessionVersion: ${sessionVersion}`)
-
-        res.status(200).json({})
+        
+        res.status(200).json({
+            status: "success",
+            error: "",
+            message: {
+                resultIndicator,
+                sessionVersion
+            }
+        })
 
     }
     catch (err) {
         console.log('Error while calling callback function')
-        res.status(500).json({})
+        res.status(500).json({
+            status: "failed",
+            error: err.toString(),
+            message: {}
+        })
     }
 }
 
