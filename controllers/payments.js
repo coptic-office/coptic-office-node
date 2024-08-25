@@ -44,7 +44,7 @@ const createPayment = async (req, res) => {
                     shipping: 'HIDE'
                 },
                 locale: 'ar',
-                returnUrl: 'https://copticoffice.com/'
+                returnUrl: 'https://dev.copticoffice.com:3000/system/payment-callback'
             },
             order: {
                 currency: "EGP",
