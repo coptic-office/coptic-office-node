@@ -3,7 +3,7 @@ const errorLog = debug('app-system:error');
 
 const paymentCallback = async (req, res) => {
     try {
-        const {resultIndicator, sessionVersion} = await req.body;
+        const {resultIndicator, sessionVersion} = await req.query;
 
         console.log(`resultIndicator: ${resultIndicator}`)
         console.log(`sessionVersion: ${sessionVersion}`)
