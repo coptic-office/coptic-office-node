@@ -4,7 +4,7 @@ const errorLog = debug('app-system:error');
 const paymentCallback = async (req, res) => {
     try {
         const {resultIndicator, sessionVersion} = await req.query;
-        
+        res.redirect('https://copticoffice.com/')
         res.status(200).json({
             status: "success",
             error: "",
