@@ -23,6 +23,11 @@ const paymentCallback = async (req, res) => {
 
                         case 'completionError':
                             res.redirect(process.env.PAYMENT_INCOMPLETE_URL);
+                            break;
+
+                        default:
+                            errorLog(`Uncaught error in the Switch statement\nError: ${err}`)
+                            res.redirect('https://www.facebook.com/');
                     }
                 });
         }
