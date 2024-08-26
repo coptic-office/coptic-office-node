@@ -1726,7 +1726,7 @@ const getCoupons = (coupons, userID) => {
 
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-
+        myResolve();
     })
 }
 
