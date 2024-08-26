@@ -45,11 +45,11 @@ const createPayment = async (req, res) => {
                 },
                 locale: req.i18n.t(`payment.language`),
                 retryAttemptCount: 3,
-                redirectMerchantUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
+                redirectMerchantUrl: process.env.PAYMENT_FAILURE_URL,
                 timeout: 600,
-                timeoutUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
-                cancelUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
-                returnUrl: 'https://dev.copticoffice.com:3000/system/payment-callback'
+                timeoutUrl: process.env.PAYMENT_FAILURE_URL,
+                cancelUrl: process.env.PAYMENT_FAILURE_URL,
+                returnUrl: process.env.PAYMENT_SUCCESS_URL
             },
             order: {
                 currency: "EGP",
@@ -141,17 +141,22 @@ const findPayment = (resultIndicator) => {
         Payment.findOneAndUpdate(query, update, {new: true})
             .then((payment) => {
                 if (!payment) {
+                    errorLog(`Unmatched resultIndicator: ${resultIndicator}`)
                     myReject('invalidIndicator');
                 }
                 else {
-                    // completePayment()
-                    //     .catch((err) => {
-                    //
-                    //     });
-                    myResolve();
+                    completePayment()
+                        .then(() => {
+                            myResolve();
+                        })
+                        .catch((err) => {
+                            errorLog(`Error while completing payment for resultIndicator: ${resultIndicator}\nError: ${err}`);
+                            myReject('completionError');
+                        });
                 }
             })
             .catch((err) => {
+                errorLog(`Error while processing resultIndicator: ${resultIndicator}\nError: ${err}`);
                 myReject('internalError');
             })
     })

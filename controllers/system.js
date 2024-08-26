@@ -7,27 +7,29 @@ const paymentCallback = async (req, res) => {
         const {resultIndicator, sessionVersion} = await req.query;
 
         if (resultIndicator === undefined) {
-            res.redirect('https://tech-worx.ca/')
+            res.redirect(process.env.PAYMENT_FAILURE_URL);
         }
         else {
             Payment.findPayment(resultIndicator)
                 .then(() => {
-
-                    res.redirect('https://copticoffice.com/')
+                    res.redirect(process.env.PAYMENT_SUCCESS_URL);
                 })
                 .catch((err) => {
+                    switch (err.toString()) {
+                        case 'invalidIndicator':
+                        case 'internalError':
+                            res.redirect(process.env.PAYMENT_UNVERIFIED_URL);
+                            break;
 
-                    res.redirect('https://tech-worx.ca/index.php/about/')
+                        case 'completionError':
+                            res.redirect(process.env.PAYMENT_INCOMPLETE_URL);
+                    }
                 });
         }
     }
     catch (err) {
-        console.log('Error while calling callback function')
-        res.status(500).json({
-            status: "failed",
-            error: err.toString(),
-            message: {}
-        })
+        errorLog(`Error while calling payment callback\nError: ${err}`)
+        res.redirect(process.env.PAYMENT_UNVERIFIED_URL);
     }
 }
 
