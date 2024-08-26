@@ -94,6 +94,7 @@
     "subscriptionExpired": "أنتهت فترة الاشتراك! برجاء تجديد اشتراكك الشهري"
   },
   "payment": {
+    "language": "ar",
     "accountName": "بطريركية الأقباط الأرثوذكس",
     "invalidType": "نوعية عملية الدفع غير صالحة",
     "invalidAmount": "القيمة غير صالحة",

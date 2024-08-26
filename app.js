@@ -126,6 +126,6 @@ function onListening() {
   const bind = typeof port === 'string'
       ? 'pipe ' + port
       : 'port ' + port;
-  log(`Listening on ${bind}`);
+  errorLog(`Listening on ${bind}`);
 }
 

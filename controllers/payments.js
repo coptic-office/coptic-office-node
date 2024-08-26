@@ -43,7 +43,7 @@ const createPayment = async (req, res) => {
                     billingAddress: 'HIDE',
                     shipping: 'HIDE'
                 },
-                locale: 'ar',
+                locale: req.i18n.t(`payment.language`),
                 retryAttemptCount: 3,
                 redirectMerchantUrl: 'https://dev.copticoffice.com:3000/system/payment-callback',
                 timeout: 600,

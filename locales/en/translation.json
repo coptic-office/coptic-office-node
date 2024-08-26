@@ -93,6 +93,7 @@
     "subscriptionExpired": "Subscription expired! You need to renew your monthly subscription"
   },
   "payment": {
+    "language": "en",
     "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",
     "invalidAmount": "Invalid amount",
