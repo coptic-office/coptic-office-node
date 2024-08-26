@@ -49,7 +49,7 @@ const createPayment = async (req, res) => {
                 timeout: 600,
                 timeoutUrl: process.env.PAYMENT_FAILURE_URL,
                 cancelUrl: process.env.PAYMENT_FAILURE_URL,
-                returnUrl: process.env.PAYMENT_SUCCESS_URL
+                returnUrl: process.env.PAYMENT_RETURN_URL
             },
             order: {
                 currency: "EGP",
