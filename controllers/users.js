@@ -1732,12 +1732,19 @@ const completePayment = (paymentData) => {
                 const paymentMethod= 'creditCard';
                 const unitId = null;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
+                switch (paymentType) {
+                    case 'booking':
+                        const paymentSubset = user.payments.filter((item) => item.unitId === null);
+                        if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= 70000) {
+                            user.units.append({bookingDate: new Date()});
+                        }
+                }
                 await user.save()
                     .then(() => {
                         myResolve();
                     })
                     .catch((err) => {
-                        myReject(err.toString())
+                        myReject(err.toString());
                     })
             })
             .catch((err) => {
