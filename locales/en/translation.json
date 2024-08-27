@@ -93,6 +93,12 @@
     "subscriptionExpired": "Subscription expired! You need to renew your monthly subscription"
   },
   "payment": {
+    "method": {
+      "bankDeposit": "Bank Deposit",
+      "bankTransfer": "Bank Transfer",
+      "instaPay": "InstaPay",
+      "creditCard": "Credit Card"
+    },
     "language": "en",
     "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",

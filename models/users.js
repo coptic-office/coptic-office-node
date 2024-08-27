@@ -108,6 +108,12 @@ const userSchema = new Schema({
         {
             _id: false,
             id: String,
+            paymentMethod: {
+                type: String,
+                enum: {
+                    values: ['bankDeposit', 'bankTransfer', 'instaPay', 'creditCard']
+                }
+            },
             paymentType: {
                 type: String,
                 enum: {
