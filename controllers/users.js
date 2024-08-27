@@ -1729,7 +1729,9 @@ const completePayment = (paymentData) => {
         const {userID, id, paymentType, amount, adviceDate} = paymentData;
         User.findOne({_id: userID}, {payments: 1, units: 1})
             .then(async (user) => {
-                user.payments.push({id, paymentMethod: 'creditCard', paymentType, amount, adviceDate});
+                const paymentMethod= 'creditCard';
+                const unitId = null;
+                user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
                 await user.save()
                     .then(() => {
                         myResolve();
