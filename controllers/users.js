@@ -1736,7 +1736,7 @@ const completePayment = (paymentData) => {
                     case 'booking':
                         const paymentSubset = user.payments.filter((item) => item.unitId === null);
                         if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= 70000) {
-                            user.units.append({bookingDate: new Date()});
+                            user.units.push({bookingDate: new Date()});
                         }
                 }
                 await user.save()
