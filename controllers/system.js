@@ -33,7 +33,7 @@ const paymentCallback = async (req, res) => {
         }
     }
     catch (err) {
-        errorLog(`Error while calling payment callback\nError: ${err}`)
+        errorLog(`Failed while calling payment callback\nError: ${err}`)
         res.redirect(process.env.PAYMENT_UNVERIFIED_URL);
     }
 }

@@ -1726,7 +1726,21 @@ const getCoupons = (coupons, userID) => {
 
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-        myResolve();
+        const {userID, id, paymentType, amount, adviceDate} = paymentData;
+        User.findOne({_id: userID}, {payments: 1, units: 1})
+            .then(async (user) => {
+                user.payments.push(id, paymentType, amount, adviceDate);
+                await user.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err.toString())
+                    })
+            })
+            .catch((err) => {
+                myReject(err.toString())
+            })
     })
 }
 

@@ -145,18 +145,25 @@ const findPayment = (resultIndicator) => {
                     myReject('invalidIndicator');
                 }
                 else {
-                    completePayment()
+                    const paymentData = {
+                        userID: payment.userID,
+                        id: payment._id,
+                        paymentType: payment.paymentType,
+                        amount: payment.paymentDetails.amount,
+                        adviceDate: payment.paymentDetails.adviceDate
+                    }
+                    completePayment(paymentData)
                         .then(() => {
                             myResolve();
                         })
                         .catch((err) => {
-                            errorLog(`Error while completing payment for resultIndicator: ${resultIndicator}\nError: ${err}`);
+                            errorLog(`Failed while completing payment for resultIndicator: ${resultIndicator}\nError: ${err}`);
                             myReject('completionError');
                         });
                 }
             })
             .catch((err) => {
-                errorLog(`Error while processing resultIndicator: ${resultIndicator}\nError: ${err}`);
+                errorLog(`Failed while processing resultIndicator: ${resultIndicator}\nError: ${err}`);
                 myReject('internalError');
             })
     })

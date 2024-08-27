@@ -111,7 +111,7 @@ const userSchema = new Schema({
             paymentType: {
                 type: String,
                 enum: {
-                    values: ['Booking', 'Contracting', 'Cat1 Cash', 'Cat2 Cash', 'Cat3 Cash']
+                    values: ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash']
                 }
             },
             amount: mongoose.Decimal128,
