@@ -1741,7 +1741,14 @@ const completePayment = (paymentData) => {
                                 const paymentSubset = user.payments.filter((item) => item.unitId === null);
                                 if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
                                     console.log(units)
-                                    user.units.push({priceDetails: units, bookingDate: new Date()});
+                                    const myUnits = [{
+                                        category: 'unitCat1',
+                                        bookingAmount: 70000,
+                                        contractingAmount: 70000,
+                                        cashPrice: 350000,
+                                        grossPrice: 420000
+                                    }]
+                                    user.units.push({priceDetails: myUnits, bookingDate: new Date()});
                                 }
                             })
                             .catch((err) => {
