@@ -1728,7 +1728,7 @@ const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
         const {userID, id, paymentType, amount, adviceDate} = paymentData;
         User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
-            .then(async (user) => {
+            .then( (user) => {
                 const {'mobile.primary.number': mobileNumber} = user;
                 const paymentMethod= 'creditCard';
                 const unitId = null;
@@ -1736,32 +1736,24 @@ const completePayment = (paymentData) => {
                 switch (paymentType) {
                     case 'booking':
                         Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
-                            .then((units) => {
+                            .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
                                 const paymentSubset = user.payments.filter((item) => item.unitId === null);
                                 if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
-                                    console.log(units)
-                                    const myUnits = [{
-                                        // category: 'unitCat1',
-                                        bookingAmount: 70000,
-                                        // contractingAmount: 70000,
-                                        // cashPrice: 350000,
-                                        // grossPrice: 420000
-                                    }]
-                                    user.units.push({priceDetails: [{bookingAmount: 70000}, {bookingAmount: 80000}], bookingDate: new Date()});
+                                    user.units.push({priceDetails: units, bookingDate: new Date()});
+                                    await user.save()
+                                        .then(() => {
+                                            myResolve();
+                                        })
+                                        .catch((err) => {
+                                            myReject(err.toString());
+                                        })
                                 }
                             })
                             .catch((err) => {
                                 myReject(err.toString());
                             })
                 }
-                await user.save()
-                    .then(() => {
-                        myResolve();
-                    })
-                    .catch((err) => {
-                        myReject(err.toString());
-                    })
             })
             .catch((err) => {
                 myReject(err.toString())
