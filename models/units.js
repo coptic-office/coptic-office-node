@@ -10,8 +10,8 @@ const unitSchema = new Schema({
     },
     bookingAmount: Number,
     contractingAmount: Number,
-    grossPrice: Number,
-    cashPrice: Number,
+    grossAmount: Number,
+    cashAmount: Number,
     installments: {
         count: Number,
         amount: Number,

@@ -137,7 +137,7 @@ const userSchema = new Schema({
             },
             priceDetails: [
                 {
-                    unitType: {
+                    category: {
                         type: String,
                         enum: {
                             values: ['unitCat1', 'unitCat2', 'unitCat3']

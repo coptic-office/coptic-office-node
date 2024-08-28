@@ -1727,17 +1727,26 @@ const getCoupons = (coupons, userID) => {
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
         const {userID, id, paymentType, amount, adviceDate} = paymentData;
-        User.findOne({_id: userID}, {payments: 1, units: 1})
+        User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
             .then(async (user) => {
+                const {'mobile.primary.number': mobileNumber} = user;
                 const paymentMethod= 'creditCard';
                 const unitId = null;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
                 switch (paymentType) {
                     case 'booking':
-                        const paymentSubset = user.payments.filter((item) => item.unitId === null);
-                        if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= 70000) {
-                            user.units.push({bookingDate: new Date()});
-                        }
+                        Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
+                            .then((units) => {
+                                const bookingAmount = units[0].bookingAmount;
+                                const paymentSubset = user.payments.filter((item) => item.unitId === null);
+                                if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
+
+                                    user.units.push({priceDetails: units, bookingDate: new Date()});
+                                }
+                            })
+                            .catch((err) => {
+                                myReject(err.toString());
+                            })
                 }
                 await user.save()
                     .then(() => {
