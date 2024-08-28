@@ -1748,7 +1748,7 @@ const completePayment = (paymentData) => {
                                         // cashPrice: 350000,
                                         // grossPrice: 420000
                                     }]
-                                    user.units.push({priceDetails: myUnits, bookingDate: new Date()});
+                                    user.units.push({priceDetails: [{bookingAmount: 70000}, {bookingAmount: 80000}], bookingDate: new Date()});
                                 }
                             })
                             .catch((err) => {
