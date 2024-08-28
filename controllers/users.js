@@ -1740,7 +1740,7 @@ const completePayment = (paymentData) => {
                                 const bookingAmount = units[0].bookingAmount;
                                 const paymentSubset = user.payments.filter((item) => item.unitId === null);
                                 if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
-
+                                    console.log(ubits)
                                     user.units.push({priceDetails: units, bookingDate: new Date()});
                                 }
                             })
