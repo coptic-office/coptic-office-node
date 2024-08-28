@@ -128,8 +128,9 @@ const userSchema = new Schema({
     units: [
         {
             _id: false,
+            id: String,
             unitNumber: String,
-            unitType: {
+            category: {
                 type: String,
                 enum: {
                     values: ['unitCat1', 'unitCat2', 'unitCat3']

@@ -1731,16 +1731,18 @@ const completePayment = (paymentData) => {
             .then( (user) => {
                 const {'mobile.primary.number': mobileNumber} = user;
                 const paymentMethod= 'creditCard';
-                const unitId = null;
+                const unitId = '';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
                 switch (paymentType) {
                     case 'booking':
                         Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
                             .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
-                                const paymentSubset = user.payments.filter((item) => item.unitId === null);
+                                const paymentSubset = user.payments.filter((item) => item.unitId === '');
                                 if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
-                                    user.units.push({priceDetails: units, bookingDate: new Date()});
+                                    const unitId = `${mobileNumber}-${user.units.length + 1}`
+                                    user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
+                                    user.payments.map((item) => {if (item.unitId === '') item.unitId = unitId})
                                     await user.save()
                                         .then(() => {
                                             myResolve();
