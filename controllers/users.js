@@ -1739,7 +1739,7 @@ const completePayment = (paymentData) => {
                             .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
                                 const paymentSubset = user.payments.filter((item) => item.unitId === '');
-                                if (paymentSubset.reduce((sum, item) => sum + item.amount, 0) >= bookingAmount) {
+                                if (paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0) >= Number(bookingAmount)) {
                                     const unitId = `${mobileNumber}-${user.units.length + 1}`
                                     user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
                                     user.payments.map((item) => {if (item.unitId === '') item.unitId = unitId})
