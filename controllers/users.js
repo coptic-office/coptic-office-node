@@ -1730,7 +1730,6 @@ const completePayment = (paymentData) => {
         User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
             .then( (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
-                console.log(mobileNumber)
                 const paymentMethod= 'creditCard';
                 const unitId = '';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
@@ -1751,6 +1750,9 @@ const completePayment = (paymentData) => {
                                         .catch((err) => {
                                             myReject(err.toString());
                                         })
+                                }
+                                else {
+                                    myResolve();
                                 }
                             })
                             .catch((err) => {
