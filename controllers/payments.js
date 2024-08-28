@@ -65,6 +65,7 @@ const createPayment = async (req, res) => {
                 if (msg.data.result === 'SUCCESS') {
                     const paymentData = {};
                     paymentData.userID = userID;
+                    console.log(`unitId: ${unitId}`)
                     paymentData.unitId = unitId;
                     paymentData.paymentType = paymentType.toString().toLowerCase();
                     paymentData.receiptDetails = {};
