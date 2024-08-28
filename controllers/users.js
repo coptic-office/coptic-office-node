@@ -1752,7 +1752,13 @@ const completePayment = (paymentData) => {
                                         })
                                 }
                                 else {
-                                    myResolve();
+                                    await user.save()
+                                        .then(() => {
+                                            myResolve();
+                                        })
+                                        .catch((err) => {
+                                            myReject(err.toString());
+                                        })
                                 }
                             })
                             .catch((err) => {
