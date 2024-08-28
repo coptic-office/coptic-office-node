@@ -1726,12 +1726,11 @@ const getCoupons = (coupons, userID) => {
 
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-        const {userID, id, paymentType, amount, adviceDate} = paymentData;
+        const {userID, id, paymentType, amount, adviceDate, unitId} = paymentData;
         User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
             .then( (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 const paymentMethod= 'creditCard';
-                const unitId = '';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
                 switch (paymentType) {
                     case 'booking':
@@ -1765,6 +1764,10 @@ const completePayment = (paymentData) => {
                             .catch((err) => {
                                 myReject(err.toString());
                             })
+                        break;
+
+                    case 'contracting':
+
                 }
             })
             .catch((err) => {

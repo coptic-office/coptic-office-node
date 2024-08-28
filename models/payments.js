@@ -3,6 +3,7 @@ const {Schema, model} = mongoose;
 
 const paymentSchema = new Schema({
     userID: String,
+    unitId: String,
     paymentType: {
         type: String,
         enum: {

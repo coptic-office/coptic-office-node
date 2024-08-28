@@ -9,7 +9,7 @@ const {completePayment} = require('../controllers/users');
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
     try {
-        const {user: {id: userID}, paymentType, amount} = await req.body;
+        let {user: {id: userID}, paymentType, amount, unitId} = await req.body;
         const paymentTypeList = ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash'];
         if (paymentType === undefined || !paymentTypeList.includes(paymentType.toString().toLowerCase())) {
             return res.status(400).json({
@@ -24,6 +24,9 @@ const createPayment = async (req, res) => {
                 error: req.i18n.t('payment.invalidAmount'),
                 message: {}
             })
+        }
+        if (unitId === undefined) {
+            unitId = '';
         }
         const uniqueId = generateUUID();
         const itemDescription = req.i18n.t(`item.${paymentType.toString().toLowerCase()}`);
@@ -62,6 +65,7 @@ const createPayment = async (req, res) => {
                 if (msg.data.result === 'SUCCESS') {
                     const paymentData = {};
                     paymentData.userID = userID;
+                    paymentData.unitId = unitId;
                     paymentData.paymentType = paymentType.toString().toLowerCase();
                     paymentData.receiptDetails = {};
                     paymentData.receiptDetails.transactionNumber = uniqueId;
@@ -150,7 +154,8 @@ const findPayment = (resultIndicator) => {
                         id: payment._id,
                         paymentType: payment.paymentType,
                         amount: payment.paymentDetails.amount,
-                        adviceDate: payment.paymentDetails.adviceDate
+                        adviceDate: payment.paymentDetails.adviceDate,
+                        unitId: payment.unitId
                     }
                     completePayment(paymentData)
                         .then(() => {
