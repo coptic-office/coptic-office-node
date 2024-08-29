@@ -141,7 +141,7 @@ const checkUser = async (req, res) => {
                                                 await sendSMS(otp, mobileNumber, country)
                                                     .then(({aggregator, price}) => {
                                                         logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Check User');
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -168,7 +168,7 @@ const checkUser = async (req, res) => {
                                                     otp,
                                                 })
                                                     .then(() => {
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -224,7 +224,7 @@ const checkUser = async (req, res) => {
                                                         await sendSMS(otp, mobileNumber, country)
                                                             .then(({aggregator, price}) => {
                                                                 logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Check User');
-                                                                res.status(205)
+                                                                res.status(200)
                                                                     .json({
                                                                         status: "success",
                                                                         error: "",
@@ -251,7 +251,7 @@ const checkUser = async (req, res) => {
                                                             otp,
                                                         })
                                                             .then(() => {
-                                                                res.status(205)
+                                                                res.status(200)
                                                                     .json({
                                                                         status: "success",
                                                                         error: "",
@@ -365,7 +365,7 @@ const verifyOTP = async (req, res) => {
                             if (preUser.action === 'REGISTER' || preUser.action === 'PASSWORD') {
                                 const verificationCode = crypto.randomBytes(30).toString('hex');
                                 await PreUser.updateOne({'otpReceiver.recipient': receiver}, {verificationCode})
-                                res.status(205)
+                                res.status(200)
                                     .json({
                                         status: "success",
                                         error: "",
@@ -435,7 +435,7 @@ const resendOTP = async (req, res) => {
                                     await sendSMS(otp, mobileNumber, country)
                                         .then(({aggregator, price}) => {
                                             logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Resend OTP');
-                                            res.status(205)
+                                            res.status(200)
                                                 .json({
                                                     status: "success",
                                                     error: "",
@@ -461,7 +461,7 @@ const resendOTP = async (req, res) => {
                                         otp,
                                     })
                                         .then(() => {
-                                            res.status(205)
+                                            res.status(200)
                                                 .json({
                                                     status: "success",
                                                     error: "",
@@ -514,7 +514,7 @@ const resendOTP = async (req, res) => {
                                             await sendSMS(otp, mobileNumber, country)
                                                 .then(({aggregator, price}) => {
                                                     logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Resend OTP');
-                                                    res.status(205)
+                                                    res.status(200)
                                                         .json({
                                                             status: "success",
                                                             error: "",
@@ -541,7 +541,7 @@ const resendOTP = async (req, res) => {
                                                 otp,
                                             })
                                                 .then(() => {
-                                                    res.status(205)
+                                                    res.status(200)
                                                         .json({
                                                             status: "success",
                                                             error: "",
@@ -702,7 +702,7 @@ const forgotPassword = async (req, res) => {
                                                 await sendSMS(otp, mobileNumber, country)
                                                     .then(({aggregator, price}) => {
                                                         logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Forgot Password');
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -728,7 +728,7 @@ const forgotPassword = async (req, res) => {
                                                     otp,
                                                 })
                                                     .then(() => {
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -782,7 +782,7 @@ const forgotPassword = async (req, res) => {
                                                         await sendSMS(otp, mobileNumber, country)
                                                             .then(({aggregator, price}) => {
                                                                 logSMS(preUser._id, otp, mobileNumber, country, aggregator, price, 'Forgot Password');
-                                                                res.status(205)
+                                                                res.status(200)
                                                                     .json({
                                                                         status: "success",
                                                                         error: "",
@@ -808,7 +808,7 @@ const forgotPassword = async (req, res) => {
                                                             otp,
                                                         })
                                                             .then(() => {
-                                                                res.status(205)
+                                                                res.status(200)
                                                                     .json({
                                                                         status: "success",
                                                                         error: "",
