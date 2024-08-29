@@ -4,7 +4,7 @@ const Payment = require('../models/payments');
 const {generateUUID} = require('../utils/codeGenerator');
 const axios = require('axios');
 const {isNumeric} = require('../utils/numberUtils');
-const {completePayment} = require('../controllers/users');
+const {completePayment, checkUnitId} = require('../controllers/users');
 
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
@@ -24,6 +24,16 @@ const createPayment = async (req, res) => {
                 error: req.i18n.t('payment.invalidAmount'),
                 message: {}
             })
+        }
+        if (paymentType !== 'booking' && unitId === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidUnitId'),
+                message: {}
+            })
+        }
+        if (paymentType !== 'booking') {
+            const result = await checkUnitId(userID, unitId)
         }
         if (unitId === undefined) {
             unitId = '';
@@ -127,14 +137,24 @@ const createPayment = async (req, res) => {
             })
     }
     catch (err) {
-        res.status(500)
-            .json({
-                status: "failed",
-                error: req.i18n.t('general.internalError'),
-                message: {
-                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                }
-            })
+        if (err.toString() === 'invalidUnitId') {
+            res.status(400)
+                .json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidUnitId'),
+                    message: {}
+                })
+        }
+        else {
+            res.status(500)
+                .json({
+                    status: "failed",
+                    error: req.i18n.t('general.internalError'),
+                    message: {
+                        info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                    }
+                })
+        }
     }
 }
 

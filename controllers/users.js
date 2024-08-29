@@ -1699,27 +1699,25 @@ const updateSubscription = async (req, res) => {
     }
 }
 
-const getCoupons = (coupons, userID) => {
+const checkUnitId = (userID, UnitId) => {
     return new Promise(async (myResult, myReject) => {
-        User.findOne({_id: userID}, {coupons: 1})
+        User.findOne({_id: userID}, {units: 1, _id: 0})
             .then((user) => {
-                if (coupons.length === 0) {
-                    myResult(user.coupons);
+                if (user.units.length === 0) {
+                    myReject('invalidUnitId');
                 }
                 else {
-                    const resultCoupons = [];
-                    for (const coupon of coupons) {
-                        for (const userCoupon of user.coupons) {
-                            if (userCoupon.code === coupon) {
-                                resultCoupons.push(coupon);
-                            }
-                        }
+                    const foundItems = user.units.filter((item) => item.id === UnitId);
+                    if (foundItems.length > 0) {
+                        myResult();
                     }
-                    myResult(resultCoupons);
+                    else {
+                        myReject('invalidUnitId');
+                    }
                 }
             })
             .catch((err) => {
-                myReject(err);
+                myReject('invalidUnitId');
             })
     })
 }
@@ -1728,21 +1726,23 @@ const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
         const {userID, id, paymentType, amount, adviceDate, unitId} = paymentData;
         User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
-            .then( (user) => {
+            .then( async (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
-                const paymentMethod= 'creditCard';
+                const paymentMethod = 'creditCard';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
                 switch (paymentType) {
                     case 'booking':
                         Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
                             .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
-                                const paymentSubset = user.payments.filter((item) => item.unitId === '');
-                                const totalBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0)
+                                const paymentSubset = user.payments.filter((item) => item.unitId === unitId);
+                                const totalBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
                                 if (totalBooking >= Number(bookingAmount)) {
                                     const unitId = `${mobileNumber}-${user.units.length + 1}`
                                     user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
-                                    user.payments.map((item) => {if (item.unitId === '') item.unitId = unitId})
+                                    user.payments.map((item) => {
+                                        if (item.unitId === '') item.unitId = unitId
+                                    })
                                     await user.save()
                                         .then(() => {
                                             myResolve();
@@ -1750,8 +1750,7 @@ const completePayment = (paymentData) => {
                                         .catch((err) => {
                                             myReject(err.toString());
                                         })
-                                }
-                                else {
+                                } else {
                                     await user.save()
                                         .then(() => {
                                             myResolve();
@@ -1767,7 +1766,23 @@ const completePayment = (paymentData) => {
                         break;
 
                     case 'contracting':
-
+                        const contractingAmount = user.units.priceDetails[0].contractingAmount;
+                        const paymentSubset = user.payments.filter((item) => {
+                            return item.unitId === unitId && item.paymentType === 'contracting'
+                        });
+                        const totalBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                        if (totalBooking >= Number(contractingAmount)) {
+                            user.units.map((item) => {
+                                if (item.id === unitId) item.contractingDate = new Date();
+                            })
+                        }
+                        await user.save()
+                            .then(() => {
+                                myResolve();
+                            })
+                            .catch((err) => {
+                                myReject(err.toString());
+                            })
                 }
             })
             .catch((err) => {
@@ -1907,7 +1922,7 @@ module.exports = {
     updateBalances,
     updateSuspension,
     updateSubscription,
-    getCoupons,
+    checkUnitId,
     completePayment,
     checkFund,
     getPaymentOptions

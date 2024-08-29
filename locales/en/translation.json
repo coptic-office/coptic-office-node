@@ -102,6 +102,7 @@
     "language": "en",
     "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",
+    "invalidUnitId": "Invalid booking code",
     "invalidAmount": "Invalid amount",
     "incorrectAmount": "Incorrect total amount",
     "invalidTransaction": "Invalid transaction number",
