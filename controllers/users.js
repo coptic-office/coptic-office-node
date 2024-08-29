@@ -1766,10 +1766,8 @@ const completePayment = (paymentData) => {
                         break;
 
                     case 'contracting':
-                        console.log(user.units)
                         const unit = user.units.filter((item) => item.id === unitId);
-                        console.log(unit)
-                        const contractingAmount = unit.priceDetails[0].contractingAmount;
+                        const contractingAmount = unit[0].priceDetails[0].contractingAmount;
                         const paymentSubset = user.payments.filter((item) => {
                             return item.unitId === unitId && item.paymentType === 'contracting'
                         });
