@@ -1766,7 +1766,9 @@ const completePayment = (paymentData) => {
                         break;
 
                     case 'contracting':
+                        console.log(user.units)
                         const unit = user.units.filter((item) => item.id === unitId);
+                        console.log(unit)
                         const contractingAmount = unit.priceDetails[0].contractingAmount;
                         const paymentSubset = user.payments.filter((item) => {
                             return item.unitId === unitId && item.paymentType === 'contracting'
@@ -1787,7 +1789,6 @@ const completePayment = (paymentData) => {
                 }
             })
             .catch((err) => {
-                console.log(err)
                 myReject(err.toString())
             })
     })
