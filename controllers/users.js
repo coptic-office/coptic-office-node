@@ -495,7 +495,7 @@ const updateSuspension = async (req, res) => {
                 }
                 updateRestriction(user._id, {isSuspended})
                     .then(() => {
-                        res.status(200.json({
+                        res.status(200).json({
                             status: "success",
                             error: "",
                             message: {
