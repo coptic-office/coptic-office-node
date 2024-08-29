@@ -1787,6 +1787,7 @@ const completePayment = (paymentData) => {
                 }
             })
             .catch((err) => {
+                console.log(err)
                 myReject(err.toString())
             })
     })
