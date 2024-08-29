@@ -495,7 +495,7 @@ const updateSuspension = async (req, res) => {
                 }
                 updateRestriction(user._id, {isSuspended})
                     .then(() => {
-                        res.status(205).json({
+                        res.status(200.json({
                             status: "success",
                             error: "",
                             message: {
@@ -591,7 +591,7 @@ const updateEmail = async (req, res) => {
                                                     otp
                                                 })
                                                     .then(() => {
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -604,7 +604,7 @@ const updateEmail = async (req, res) => {
                                                             })
                                                     })
                                                     .catch((err) => {
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -654,7 +654,7 @@ const updateEmail = async (req, res) => {
                                                         otp
                                                     })
                                                         .then(() => {
-                                                            res.status(205)
+                                                            res.status(200)
                                                                 .json({
                                                                     status: "success",
                                                                     error: "",
@@ -667,7 +667,7 @@ const updateEmail = async (req, res) => {
                                                                 })
                                                         })
                                                         .catch((err) => {
-                                                            res.status(205)
+                                                            res.status(200)
                                                                 .json({
                                                                     status: "success",
                                                                     error: "",
@@ -740,7 +740,7 @@ const updateEmail = async (req, res) => {
                                                                 otp
                                                             })
                                                                 .then(() => {
-                                                                    res.status(205)
+                                                                    res.status(200)
                                                                         .json({
                                                                             status: "success",
                                                                             error: "",
@@ -753,7 +753,7 @@ const updateEmail = async (req, res) => {
                                                                         })
                                                                 })
                                                                 .catch((err) => {
-                                                                    res.status(205)
+                                                                    res.status(200)
                                                                         .json({
                                                                             status: "success",
                                                                             error: "",
@@ -859,7 +859,7 @@ const verifyEmailUpdate = async (req, res, id) => {
                     await User.updateOne({_id:id}, {'email.isVerified': true})
                         .then(async () => {
                             await PreUser.deleteOne({'otpReceiver.recipient': email})
-                            return res.status(205)
+                            return res.status(200)
                                 .json({
                                     status: "success",
                                     error: "",
@@ -878,7 +878,7 @@ const verifyEmailUpdate = async (req, res, id) => {
                     await User.updateOne({_id:id}, {'email.primary': email, $unset: {'email.alternate': 1}})
                         .then(async () => {
                             await PreUser.deleteOne({'otpReceiver.recipient': email})
-                            return res.status(205)
+                            return res.status(200)
                                 .json({
                                     status: "success",
                                     error: "",
@@ -944,7 +944,7 @@ const updateMobile = async (req, res) => {
                                                 await sendSMS(otp, mobileNumber, country)
                                                     .then(({aggregator, price}) => {
                                                         logSMS(user._id, otp, mobileNumber, country, aggregator, price, 'Update Mobile Number');
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -957,7 +957,7 @@ const updateMobile = async (req, res) => {
                                                             })
                                                     })
                                                     .catch((err) => {
-                                                        res.status(205)
+                                                        res.status(200)
                                                             .json({
                                                                 status: "success",
                                                                 error: "",
@@ -1003,7 +1003,7 @@ const updateMobile = async (req, res) => {
                                                     await sendSMS(otp, mobileNumber, country)
                                                         .then(({aggregator, price}) => {
                                                             logSMS(user._id, otp, mobileNumber, country, aggregator, price, 'Update Mobile Number');
-                                                            res.status(205)
+                                                            res.status(200)
                                                                 .json({
                                                                     status: "success",
                                                                     error: "",
@@ -1016,7 +1016,7 @@ const updateMobile = async (req, res) => {
                                                                 })
                                                         })
                                                         .catch((err) => {
-                                                            res.status(205)
+                                                            res.status(200)
                                                                 .json({
                                                                     status: "success",
                                                                     error: "",
@@ -1085,7 +1085,7 @@ const updateMobile = async (req, res) => {
                                                             await sendSMS(otp, mobileNumber, country)
                                                                 .then(({aggregator, price}) => {
                                                                     logSMS(user._id, otp, mobileNumber, country, aggregator, price, 'Update Mobile Number');
-                                                                    res.status(205)
+                                                                    res.status(200)
                                                                         .json({
                                                                             status: "success",
                                                                             error: "",
@@ -1098,7 +1098,7 @@ const updateMobile = async (req, res) => {
                                                                         })
                                                                 })
                                                                 .catch((err) => {
-                                                                    res.status(205)
+                                                                    res.status(200)
                                                                         .json({
                                                                             status: "success",
                                                                             error: "",
@@ -1205,7 +1205,7 @@ const verifyMobileUpdate = async (req, res, id) => {
                     await User.updateOne({_id:id}, {'mobile.isVerified': true})
                         .then(async () => {
                             await PreUser.deleteOne({'otpReceiver.recipient': mobileNumber})
-                            return res.status(205)
+                            return res.status(200)
                                 .json({
                                     status: "success",
                                     error: "",
@@ -1225,7 +1225,7 @@ const verifyMobileUpdate = async (req, res, id) => {
                     await User.updateOne({_id:id}, {'mobile.primary.number': mobileNumber, 'mobile.primary.country': country, $unset: {'mobile.alternate': 1}})
                         .then(async () => {
                             await PreUser.deleteOne({'otpReceiver.recipient': mobileNumber})
-                            return res.status(205)
+                            return res.status(200)
                                 .json({
                                     status: "success",
                                     error: "",
@@ -1320,7 +1320,7 @@ const changePassword = async (req, res) => {
                             user.password = newPassword;
                             await user.save()
                                 .then(() => {
-                                    return res.status(205)
+                                    return res.status(200)
                                         .json({
                                             status: "success",
                                             error: "",
@@ -1373,7 +1373,7 @@ const changePassword = async (req, res) => {
                                     await user.save()
                                         .then(async () => {
                                             await preUser.deleteOne()
-                                            return res.status(205)
+                                            return res.status(200)
                                                 .json({
                                                     status: "success",
                                                     error: "",
