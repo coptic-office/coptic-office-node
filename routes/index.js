@@ -3,7 +3,7 @@ const router = express.Router();
 const Unit = require('../models/units');
 
 /** Get a list of units details for the home page **/
-router.get('/', (req, res) => {
+router.get('/home', (req, res) => {
     try {
         Unit.find({isActive: true}, {_id: 0, isActive: 0})
             .then((units) => {
