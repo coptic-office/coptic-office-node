@@ -5,7 +5,7 @@ const unitSchema = new Schema({
     category: {
         type: String,
         enum: {
-            values: ['unitCat1', 'unitCat2', 'unitCat3']
+            values: ['category1', 'category2', 'category3']
         }
     },
     bookingAmount: Number,

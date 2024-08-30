@@ -7,7 +7,7 @@ const paymentSchema = new Schema({
     paymentType: {
         type: String,
         enum: {
-            values: ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash']
+            values: ['booking', 'contracting', 'cashing']
         }
     },
     receiptDetails: {

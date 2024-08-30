@@ -59,12 +59,12 @@ router.get('/', user.getUsers);
 const getUserByMobileRoles = ['User'];
 router.post('/validate-mobile', [authorize(accessToken, getUserByMobileRoles), validateMobile], user.getUserByMobile);
 
-/** Update user's subscription */
-const updateSubscriptionRoles = ['User'];
-router.post('/update-subscription', authorize(accessToken, updateSubscriptionRoles), user.updateSubscription);
-
 /** Get the available payment options */
 const getPaymentOptionsRoles = ['User'];
 router.post('/get-payment-options', authorize(accessToken, getPaymentOptionsRoles), user.getPaymentOptions);
+
+/** Get the available payment options */
+const selectUnitTypeRoles = ['User'];
+router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), user.selectUnitType);
 
 module.exports = router;

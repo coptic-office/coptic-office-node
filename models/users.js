@@ -47,63 +47,6 @@ const userSchema = new Schema({
             message: 'invalidPassword'
         }
     },
-    plan: {
-        type: String,
-        default: 'PAYG'
-    },
-    balance: mongoose.Decimal128,
-    courtesy: {
-        type: mongoose.Decimal128,
-        default: Number(process.env.GENERAL_COURTESY_AMOUNT)
-    },
-    subscription: {
-        savingPlan: {
-            name: String,
-            price: mongoose.Decimal128,
-            credit: mongoose.Decimal128,
-            isEffective: Boolean,
-            renewal: {
-                action: {
-                    type: String,
-                    enum: {
-                        values: ['Renew', 'Cancel']
-                    }
-                },
-                nextSavingPlan: String,
-                price: mongoose.Decimal128,
-                trigger: {
-                    type: String,
-                    enum: {
-                        values: ['Renewal Date', 'Low Credit'],
-                        message: 'invalidTrigger'
-                    }
-                },
-                creditTrigger: mongoose.Decimal128,
-                renewalStatus: {
-                    type: String,
-                    enum: {
-                        values: ['Waiting', 'In Progress']
-                    }
-                }
-            },
-        },
-        services: [{
-            name: String,
-            price: mongoose.Decimal128,
-            isEffective: Boolean,
-            renewal: {
-                action: {
-                    type: String,
-                    enum: {
-                        values: ['Renew', 'Cancel']
-                    }
-                }
-            },
-            settings: Object,
-            _id: false
-        }],
-        renewalDate: Date
-    },
     payments: [
         {
             _id: false,
@@ -117,7 +60,7 @@ const userSchema = new Schema({
             paymentType: {
                 type: String,
                 enum: {
-                    values: ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash']
+                    values: ['booking', 'contracting', 'cashing']
                 }
             },
             amount: mongoose.Decimal128,
@@ -133,15 +76,16 @@ const userSchema = new Schema({
             category: {
                 type: String,
                 enum: {
-                    values: ['unitCat1', 'unitCat2', 'unitCat3']
+                    values: ['category1', 'category2', 'category3']
                 }
             },
             priceDetails: [
                 {
+                    _id: false,
                     category: {
                         type: String,
                         enum: {
-                            values: ['unitCat1', 'unitCat2', 'unitCat3']
+                            values: ['category1', 'category2', 'category3']
                         }
                     },
                     bookingAmount: Number,
@@ -168,13 +112,6 @@ const userSchema = new Schema({
                     status: String
                 }
             ]
-        }
-    ],
-    coupons: [
-        {
-            code: String,
-            usedDate: Date,
-            discountAmount: mongoose.Decimal128
         }
     ],
     role: {

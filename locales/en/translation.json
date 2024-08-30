@@ -65,20 +65,21 @@
     "netAmount": "Net amount",
     "booking": "Sum paid for a unit booking",
     "contracting": "Sum paid for the unit contracting",
-    "cat1cash": "Sum paid for the cash payment of a middle unit",
-    "cat2cash": "Sum paid for the cash payment of an peripheral unit",
-    "cat3cash": "Sum paid for the cash payment of an peripheral unit to the street"
+    "cashing": "Sum paid for the cash payment of a unit"
   },
   "product": {
-    "unitCat1": {
+    "category1": {
       "name": "Middle Unit"
     },
-    "unitCat2": {
+    "category2": {
       "name": "Peripheral Unit"
     },
-    "unitCat3": {
+    "category3": {
       "name": "Peripheral Unit to the Street"
-    }
+    },
+    "contractDone": "Cannot change the unit type after completing the contracting procedures",
+    "invalidCategory": "Invalid unit category",
+    "invalidSelection": "Cannot downgrade your unit because your current payments are higher than its value"
   },
   "subscription": {
     "planRequired": "Plan name is required",

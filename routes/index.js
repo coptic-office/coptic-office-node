@@ -7,12 +7,16 @@ router.get('/', (req, res) => {
     try {
         Unit.find({isActive: true}, {_id: 0, isActive: 0})
             .then((units) => {
-                units.map((unit) => unit.category = req.i18n.t(`product.${unit.category}.name`))
+                const editedUnits = [];
+                units.forEach((unit) => {
+                    const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), ...unit._doc};
+                    editedUnits.push(editedUnit);
+                })
                 res.status(200).json({
                     status: "success",
                     error: "",
                     message: {
-                        units
+                        units: editedUnits
                     }
                 })
             })

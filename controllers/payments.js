@@ -10,7 +10,7 @@ const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/vers
 const createPayment = async (req, res) => {
     try {
         let {user: {id: userID}, paymentType, amount, unitId} = await req.body;
-        const paymentTypeList = ['booking', 'contracting', 'cat1cash', 'cat2cash', 'cat3cash'];
+        const paymentTypeList = ['booking', 'contracting', 'cashing'];
         if (paymentType === undefined || !paymentTypeList.includes(paymentType.toString().toLowerCase())) {
             return res.status(400).json({
                 status: "failed",
@@ -33,7 +33,7 @@ const createPayment = async (req, res) => {
             })
         }
         if (paymentType !== 'booking') {
-            const result = await checkUnitId(userID, unitId)
+            const result = await checkUnitId(userID, unitId);
         }
         if (unitId === undefined) {
             unitId = '';

@@ -8,12 +8,9 @@ const sendEmail = require("../utils/emailSender");
 const sendSMS = require("../utils/smsConnectors");
 const {getCountry} = require('../controllers/countries');
 const Token = require("../models/tokens");
-const {getPlanPrice} = require('../controllers/plans');
-const {getServiceData} = require('../controllers/services');
 const Payment = require('../models/payments')
 const {createSmsRecord} = require("./smsRecords");
 const crypto = require('../utils/crypto');
-const {getSellingPrice} = require("./plans");
 const Unit = require('../models/units');
 
 const createUser = async (req, res) => {
@@ -1547,158 +1544,6 @@ const getUserByMobile = async (req, res) => {
     }
 }
 
-const updateSubscription = async (req, res) => {
-    try {
-        const {user: {id: userID}, savingPlan, services} = await req.body;
-        const payment = await Payment.find({userID, paymentType: 'Subscription'}).sort({'paymentDetails.date': -1}).limit(1);
-        if (payment.length !== 0 && payment[0].paymentDetails.status === 'Pending') {
-            return res.status(403).json({
-                status: "failed",
-                error: req.i18n.t('payment.pendingSubscription'),
-                message: {}
-            })
-        }
-        const user = await User.findOne({_id: userID}, {subscription: 1});
-        const userSubscription = user.subscription;
-        const subscription = userSubscription.toJSON();
-        const yesterdayMidnight = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-        yesterdayMidnight.setHours(0, 0, 0, 0);
-
-        if (savingPlan !== undefined) {
-            const {planName, price, renewal: {trigger, creditTrigger}} = savingPlan;
-            if (planName === 'PAYG') {
-                if (subscription.savingPlan.renewal.action !== undefined) {
-                    subscription.savingPlan.renewal.action = 'Cancel';
-                }
-            }
-            else {
-                const {price: planPrice} = await getPlanPrice(planName);
-                if (price !== planPrice) {
-                    return res.status(404).json({
-                        status: "failed",
-                        error: req.i18n.t('subscription.incorrectPrice'),
-                        message: {}
-                    })
-                }
-                if (userSubscription.savingPlan.name === undefined || !userSubscription.savingPlan.isEffective) {
-                    if (subscription.renewalDate === undefined) {
-                        subscription.renewalDate = yesterdayMidnight;
-                    }
-                    subscription.savingPlan.name = planName;
-                    subscription.savingPlan.price = price;
-                    subscription.savingPlan.credit = 0;
-                    subscription.savingPlan.isEffective = false;
-                    subscription.savingPlan.renewal.action = 'Renew';
-                    subscription.savingPlan.renewal.price = price;
-                    subscription.savingPlan.renewal.nextSavingPlan = planName;
-                    subscription.savingPlan.renewal.trigger = trigger;
-                    subscription.savingPlan.renewal.creditTrigger = creditTrigger;
-                    subscription.savingPlan.renewal.renewalStatus = 'Waiting';
-                }
-                else {
-                    subscription.savingPlan.renewal.action = 'Renew';
-                    subscription.savingPlan.renewal.price = price;
-                    subscription.savingPlan.renewal.nextSavingPlan = planName;
-                    subscription.savingPlan.renewal.trigger = trigger;
-                    subscription.savingPlan.renewal.creditTrigger = creditTrigger;
-                }
-            }
-        }
-        if (services !== undefined) {
-            let i = subscription.services.length;
-            for (const service of services) {
-                const {serviceName, isAdding, price, settings} = service;
-                if (isAdding === undefined || typeof isAdding != 'boolean') {
-                    return res.status(400).json({
-                        status: "failed",
-                        error: req.i18n.t('subscription.invalidServiceStatus'),
-                        message: {}
-                    })
-                }
-                const serviceData = await getServiceData(serviceName);
-                if (isAdding) {
-                    let serviceFound = false;
-                    for (const element of subscription.services) {
-                        if (element.name === serviceName) {
-                            serviceFound = true;
-                            break;
-                        }
-                    }
-                    if (!serviceFound) {
-                        if (price !== serviceData.price) {
-                            return res.status(404).json({
-                                status: "failed",
-                                error: req.i18n.t('subscription.incorrectPrice'),
-                                message: {}
-                            })
-                        }
-                        if (Object.keys(serviceData.settings).sort().toString() !== Object.keys(settings).sort().toString()) {
-                            return res.status(404).json({
-                                status: "failed",
-                                error: req.i18n.t('subscription.invalidServiceSettings'),
-                                message: {}
-                            })
-                        }
-                        if (subscription.renewalDate === undefined) {
-                            subscription.renewalDate = yesterdayMidnight;
-                        }
-                        subscription.services[i] = {};
-                        subscription.services[i].renewal = {};
-                        subscription.services[i].name = serviceName;
-                        subscription.services[i].price = price;
-                        subscription.services[i].isEffective = false;
-                        subscription.services[i].settings = settings;
-                        subscription.services[i].renewal.action = 'Renew';
-                        i++;
-                    }
-                }
-                else {
-                    let j = 0;
-                    for (const element of subscription.services) {
-                        if (element.name === serviceName) {
-                            if (element.isEffective) {
-                                element.renewal.action = 'Cancel'
-                            }
-                            else {
-                                subscription.services.splice(j, 1);
-                                i--;
-                            }
-                            break;
-                        }
-                        j++;
-                    }
-                }
-            }
-        }
-        user.subscription = subscription;
-        await user.save()
-            .then(() => {
-                res.status(201).json({
-                    status: "success",
-                    error: "",
-                    message: {
-                        subscription
-                    }
-                })
-            })
-    }
-    catch (err) {
-        if (err.errors !== undefined && err.errors['subscription.savingPlan.renewal.trigger'] !== undefined) {
-            err = err.errors['subscription.savingPlan.renewal.trigger'].message;
-        }
-        if (['unavailableService', 'unavailablePlan', 'invalidTrigger'].includes(err.toString())) {
-            res.status(400).json({
-                status: "failed",
-                error: req.i18n.t(`subscription.${err}`),
-                message: {}
-            })
-        }
-        else {
-            internalError(req, res, err);
-        }
-    }
-}
-
 const checkUnitId = (userID, UnitId) => {
     return new Promise(async (myResult, myReject) => {
         User.findOne({_id: userID}, {units: 1, _id: 0})
@@ -1814,64 +1659,6 @@ const logSMS = (userID, message, mobileNumber, country, aggregator, price, comme
         })
 }
 
-const checkFund = (userID, products) => {
-    return new Promise(async (myResolve, myReject) => {
-        const options = {plan: 1, balance: 1, courtesy: 1, subscription: 1};
-        const user = await getUserById(userID, options);
-        let {plan, subscription, balance, courtesy} = user;
-        balance = Number(balance);
-        courtesy = Number(courtesy);
-        const nextRenewalDay = new Date(new Date(subscription.renewalDate).getTime() + (24 * 60 * 60 * 1000));
-        if (new Date() > nextRenewalDay && subscription.savingPlan.renewal.action === 'Cancel') {
-            plan = 'PAYG';
-            user.plan = 'PAYG';
-            user.subscription = {};
-            user.save();
-        }
-        let {savingPlan: {credit}} = subscription;
-        if (credit !== undefined) {
-            credit = Number(credit);
-        }
-        const sellingPrice = await getSellingPrice(credit === 0 ? 'PAYG' : plan, products);
-        let paidCourtesy = 0.00, paidBalance = 0.00, paidCredit = 0.00;
-        if (plan === 'PAYG') {
-            if (courtesy >= sellingPrice) {
-                paidCourtesy = sellingPrice;
-            }
-            else if ((courtesy + balance) >= sellingPrice) {
-                paidCourtesy = courtesy;
-                paidBalance = (sellingPrice - courtesy).toFixed(3);
-            }
-            else {
-                myReject('insufficientBalance');
-            }
-        }
-        else {
-            if (credit >= sellingPrice && new Date() < nextRenewalDay) {
-                paidCredit = sellingPrice * -1;
-            }
-            else if (credit < sellingPrice) {
-                if ((credit + courtesy) >= sellingPrice) {
-                    paidCredit = credit * -1;
-                    paidCourtesy = Number((sellingPrice - credit).toFixed(3)) * -1;
-                }
-                else if ((credit + courtesy + balance) >= sellingPrice) {
-                    paidCredit = credit * -1;
-                    paidCourtesy = courtesy * -1;
-                    paidBalance = Number((sellingPrice - credit - courtesy).toFixed(3)) * -1;
-                }
-                else {
-                    myReject('insufficientCredit');
-                }
-            }
-            else {
-                myReject('subscriptionExpired');
-            }
-        }
-        myResolve({paidCourtesy, paidBalance, paidCredit});
-    })
-}
-
 const getPaymentOptions = async (req, res) => {
     try {
         Unit.findOne({}, {bookingAmount: 1, contractingAmount: 1, _id: 0})
@@ -1908,6 +1695,108 @@ const getPaymentOptions = async (req, res) => {
     }
 }
 
+const selectUnitType = async (req, res) => {
+    try {
+        const {user: {id: userID}, unitId, category} = await req.body;
+
+        if (unitId === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidUnitId'),
+                message: {}
+            })
+        }
+
+        const categoryList = ['category1', 'category2', 'category3'];
+        if (category === undefined || !categoryList.includes(category.toString().toLowerCase())) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('product.invalidCategory'),
+                message: {}
+            })
+        }
+
+        User.findOne({_id: userID}, {units: 1, payments: 1})
+            .then(async (user) => {
+                const paymentSubset = user.payments.filter((item) => item.unitId === unitId);
+                if (paymentSubset.length === 0) {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t('payment.invalidUnitId'),
+                        message: {}
+                    })
+                }
+
+                const myUnit = user.units.filter((item) => item.id === unitId);
+                if (myUnit[0].contractDate !== undefined) {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t('product.contractDone'),
+                        message: {}
+                    })
+                }
+
+                const myCategory = myUnit[0].category;
+                if (myCategory !== undefined) {
+                    const targetPrices = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
+                    const targetCashAmount = targetPrices[0].cashAmount;
+                    const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                    if (paidAmount > targetCashAmount) {
+                        return res.status(400).json({
+                            status: "failed",
+                            error: req.i18n.t('product.invalidSelection'),
+                            message: {}
+                        })
+                    }
+                }
+
+                user.units.map((item) => {
+                    if (item.id === unitId) item.category = category.toString().toLowerCase()
+                });
+                await user.save()
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {
+                                category: category.toString().toLowerCase()
+                            }
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500)
+                            .json({
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
+            })
+            .catch((err) => {
+                res.status(500)
+                    .json({
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500)
+            .json({
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 module.exports = {
     createUser,
     login,
@@ -1922,10 +1811,9 @@ module.exports = {
     updateMobile,
     updateBalances,
     updateSuspension,
-    updateSubscription,
     checkUnitId,
     completePayment,
-    checkFund,
-    getPaymentOptions
+    getPaymentOptions,
+    selectUnitType
 }
 
