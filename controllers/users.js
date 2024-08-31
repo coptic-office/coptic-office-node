@@ -1634,11 +1634,9 @@ const completePayment = (paymentData) => {
                         const category = myUnit[0].category;
                         const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category);
                         const cashAmount = priceDetails[0].cashAmount;
-                        const cashingPayments = user.payments.filter((item) => {
-                            return item.unitId === unitId && item.paymentType === 'cashing'
-                        });
-                        const paidCashing = cashingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
-                        if (paidCashing >= Number(cashAmount)) {
+                        const totalPayments = user.payments.filter((item) => item.unitId === unitId);
+                        const paidTotal = totalPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                        if (paidTotal >= Number(cashAmount)) {
                             user.units.map((item) => {
                                 if (item.id === unitId) item.completionDate = new Date();
                             })
