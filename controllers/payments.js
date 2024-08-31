@@ -4,7 +4,7 @@ const Payment = require('../models/payments');
 const {generateUUID} = require('../utils/codeGenerator');
 const axios = require('axios');
 const {isNumeric} = require('../utils/numberUtils');
-const {completePayment, checkUnitId} = require('../controllers/users');
+const {completePayment, checkUnitId, checkCategory} = require('../controllers/users');
 
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
@@ -34,6 +34,9 @@ const createPayment = async (req, res) => {
         }
         if (paymentType !== 'booking') {
             const result = await checkUnitId(userID, unitId);
+        }
+        if (paymentType === 'cashing') {
+            const category = await checkCategory(userID, unitId);
         }
         if (unitId === undefined) {
             unitId = '';
@@ -142,6 +145,14 @@ const createPayment = async (req, res) => {
                 .json({
                     status: "failed",
                     error: req.i18n.t('payment.invalidUnitId'),
+                    message: {}
+                })
+        }
+        else if (err.toString() === 'invalidCategory') {
+            res.status(400)
+                .json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidCategory'),
                     message: {}
                 })
         }

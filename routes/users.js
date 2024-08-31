@@ -67,4 +67,8 @@ router.post('/get-payment-options', authorize(accessToken, getPaymentOptionsRole
 const selectUnitTypeRoles = ['User'];
 router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), user.selectUnitType);
 
+/** Get the units types, with the currently selected category */
+const getUnitTypesRoles = ['User'];
+router.post('/get-unit-types', authorize(accessToken, getUnitTypesRoles), user.getUnitTypes);
+
 module.exports = router;

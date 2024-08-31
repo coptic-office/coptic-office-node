@@ -8,9 +8,7 @@ const sendEmail = require("../utils/emailSender");
 const sendSMS = require("../utils/smsConnectors");
 const {getCountry} = require('../controllers/countries');
 const Token = require("../models/tokens");
-const Payment = require('../models/payments')
 const {createSmsRecord} = require("./smsRecords");
-const crypto = require('../utils/crypto');
 const Unit = require('../models/units');
 
 const createUser = async (req, res) => {
@@ -1246,25 +1244,6 @@ const verifyMobileUpdate = async (req, res, id) => {
     }
 }
 
-const updateBalances = async (userId, param) => {
-    return new Promise((myResolve, myReject) => {
-        const {paidCourtesy, paidBalance, paidCredit} = param;
-        const update = {'subscription.savingPlan.credit': paidCredit, courtesy: paidCourtesy, balance: paidBalance};
-        Object.keys(update).forEach(key => update[key] === undefined ? delete update[key] : {});
-        User.findOneAndUpdate({_id: userId}, {$inc: update},
-            {projection: {_id: 0, balance: 1, courtesy: 1, 'subscription.savingPlan.credit': 1}, new: true})
-            .then((user) => {
-                const balance = Number(user.balance);
-                const courtesy = Number(user.courtesy);
-                const credit = Number(user.subscription.savingPlan.credit);
-                myResolve({courtesy, balance, credit});
-            })
-            .catch((err) => {
-                myReject(err);
-            })
-    })
-}
-
 const internalError = (req, res, err) => {
     res.status(500)
         .json({
@@ -1544,17 +1523,17 @@ const getUserByMobile = async (req, res) => {
     }
 }
 
-const checkUnitId = (userID, UnitId) => {
-    return new Promise(async (myResult, myReject) => {
+const checkUnitId = (userID, unitId) => {
+    return new Promise(async (myResolve, myReject) => {
         User.findOne({_id: userID}, {units: 1, _id: 0})
             .then((user) => {
                 if (user.units.length === 0) {
                     myReject('invalidUnitId');
                 }
                 else {
-                    const foundItems = user.units.filter((item) => item.id === UnitId);
+                    const foundItems = user.units.filter((item) => item.id === unitId);
                     if (foundItems.length > 0) {
-                        myResult();
+                        myResolve();
                     }
                     else {
                         myReject('invalidUnitId');
@@ -1567,6 +1546,24 @@ const checkUnitId = (userID, UnitId) => {
     })
 }
 
+const checkCategory = (userID, unitId) => {
+    return new Promise(async (myResolve, myReject) => {
+        User.findOne({_id: userID}, {units: 1, _id: 0})
+            .then((user) => {
+                const myUnit = user.units.filter((item) => item.id === unitId)
+                if (myUnit[0].category === undefined) {
+                    myReject('invalidCategory');
+                }
+                else {
+                    myResolve();
+                }
+            })
+            .catch((err) => {
+                myReject('invalidCategory');
+            })
+    })
+}
+
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
         const {userID, id, paymentType, amount, adviceDate, unitId} = paymentData;
@@ -1575,14 +1572,15 @@ const completePayment = (paymentData) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 const paymentMethod = 'creditCard';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
+
                 switch (paymentType) {
                     case 'booking':
                         Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
                             .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
-                                const paymentSubset = user.payments.filter((item) => item.unitId === unitId);
-                                const totalBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
-                                if (totalBooking >= Number(bookingAmount)) {
+                                const bookingPayments = user.payments.filter((item) => item.unitId === unitId);
+                                const paidBooking = bookingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                                if (paidBooking >= Number(bookingAmount)) {
                                     const unitId = `${mobileNumber}-${user.units.length + 1}`
                                     user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
                                     user.payments.map((item) => {
@@ -1613,11 +1611,11 @@ const completePayment = (paymentData) => {
                     case 'contracting':
                         const unit = user.units.filter((item) => item.id === unitId);
                         const contractingAmount = unit[0].priceDetails[0].contractingAmount;
-                        const paymentSubset = user.payments.filter((item) => {
+                        const contractingPayments = user.payments.filter((item) => {
                             return item.unitId === unitId && item.paymentType === 'contracting'
                         });
-                        const totalBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
-                        if (totalBooking >= Number(contractingAmount)) {
+                        const paidContracting = contractingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                        if (paidContracting >= Number(contractingAmount)) {
                             user.units.map((item) => {
                                 if (item.id === unitId) item.contractingDate = new Date();
                             })
@@ -1629,6 +1627,30 @@ const completePayment = (paymentData) => {
                             .catch((err) => {
                                 myReject(err.toString());
                             })
+                        break;
+
+                    case 'cashing':
+                        const myUnit = user.units.filter((item) => item.id === unitId);
+                        const category = myUnit[0].category;
+                        const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category);
+                        const cashAmount = priceDetails[0].cashAmount;
+                        const cashingPayments = user.payments.filter((item) => {
+                            return item.unitId === unitId && item.paymentType === 'cashing'
+                        });
+                        const paidCashing = cashingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                        if (paidCashing >= Number(cashAmount)) {
+                            user.units.map((item) => {
+                                if (item.id === unitId) item.completionDate = new Date();
+                            })
+                        }
+                        await user.save()
+                            .then(() => {
+                                myResolve();
+                            })
+                            .catch((err) => {
+                                myReject(err.toString());
+                            })
+                        break;
                 }
             })
             .catch((err) => {
@@ -1695,6 +1717,82 @@ const getPaymentOptions = async (req, res) => {
     }
 }
 
+const getUnitTypes = async (req, res) => {
+    try {
+        const {user: {id: userID}, unitId} = await req.body;
+
+        if (unitId === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidUnitId'),
+                message: {}
+            })
+        }
+
+        Unit.find({isActive: true}, {_id: 0, isActive: 0})
+            .then((units) => {
+                const editedUnits = [];
+                units.forEach((unit) => {
+                    const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), ...unit._doc};
+                    editedUnits.push(editedUnit);
+                })
+
+                User.findOne({_id: userID}, {units: 1})
+                    .then((user) => {
+                        const myUnit = user.units.filter((item) => item.id === unitId);
+                        if (myUnit.length === 0) {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t('payment.invalidUnitId'),
+                                message: {}
+                            })
+                        }
+                        const currentCategory = myUnit[0].category;
+
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {
+                                units: editedUnits,
+                                currentCategory
+                            }
+                        })
+
+                    })
+                    .catch((err) => {
+                        res.status(500)
+                            .json({
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
+            })
+            .catch((err) => {
+                res.status(500)
+                    .json({
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const selectUnitType = async (req, res) => {
     try {
         const {user: {id: userID}, unitId, category} = await req.body;
@@ -1728,6 +1826,13 @@ const selectUnitType = async (req, res) => {
                 }
 
                 const myUnit = user.units.filter((item) => item.id === unitId);
+                if (myUnit[0].contractingDate === undefined) {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t('product.noContracting'),
+                        message: {}
+                    })
+                }
                 if (myUnit[0].contractDate !== undefined) {
                     return res.status(400).json({
                         status: "failed",
@@ -1809,9 +1914,10 @@ module.exports = {
     updateEmail,
     changePassword,
     updateMobile,
-    updateBalances,
     updateSuspension,
     checkUnitId,
+    checkCategory,
+    getUnitTypes,
     completePayment,
     getPaymentOptions,
     selectUnitType

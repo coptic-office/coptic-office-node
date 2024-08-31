@@ -102,6 +102,7 @@ const userSchema = new Schema({
             bookingDate: Date,
             contractingDate: Date,
             contractDate: Date,
+            completionDate: Date,
             checks: [
                 {
                     _id: false,
