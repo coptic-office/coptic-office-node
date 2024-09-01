@@ -152,6 +152,25 @@
       "Cleared": "Cleared",
       "Rejected": "Rejected",
       "Cashed": "Cashed"
+    },
+    "paymentOptions": {
+      "bookingAmount": "Booking amount",
+      "bookingAmountRest": "Rest of booking amount",
+      "contractingAmount": "Contracting Amount",
+      "contractingAmountRest": "Rest of contracting amount",
+      "cashingAmount": "Cash amount for the unit",
+      "cashingAmountRest": "Rest of cash amount for the unit",
+      "memo": {
+        "memo1": "This unit has been fully paid, please visit our headquarters to complete the contracting procedures...",
+        "memo2": "This unit has been fully paid.",
+        "memo3": "This unit has been contracted, no more payments can be made on it now through the application.",
+        "memo4": "This unit has completed both booking and contracting payments, please visit our headquarters to write checks and complete the contracting procedures.\nOr you can also pay the rest of the amount in cash and get a discount of 70 thousand pounds after choosing the unit type first..."
+      },
+      "action": {
+        "pay": "Go to Payment",
+        "go": "Reach Us",
+        "select": "Select Unit Type"
+      }
     }
   },
   "admin": {

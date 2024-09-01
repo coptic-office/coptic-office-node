@@ -1681,16 +1681,152 @@ const logSMS = (userID, message, mobileNumber, country, aggregator, price, comme
 
 const getPaymentOptions = async (req, res) => {
     try {
-        Unit.findOne({}, {bookingAmount: 1, contractingAmount: 1, _id: 0})
-            .then(({bookingAmount, contractingAmount}) => {
-                res.status(200).json({
-                    status: "success",
-                    error: "",
-                    message: {
-                        bookingAmount,
-                        contractingAmount
-                    }
-                })
+        const {user: {id: userID}} = await req.body;
+        const paymentOptions = [];
+
+        User.findOne({_id: userID}, {payments: 1, units: 1, _id: 0})
+            .then((user) => {
+                Unit.findOne({}, {bookingAmount: 1, contractingAmount: 1, _id: 0})
+                    .then(({bookingAmount, contractingAmount}) => {
+                        let paidBooking = 0;
+                        let option;
+                        if (user.payments.length > 0) {
+                            const unitIdList = user.payments.map((item) => item.unitId);
+                            const unitIdUniqueList = [... new Set(unitIdList)];
+                            unitIdUniqueList.forEach((unitId) => {
+                                const paymentSubset = user.payments.filter((item) => item.unitId === unitId);
+                                if (unitId === '') {
+                                    paidBooking = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                                }
+                                else {
+                                    const myUnit = user.units.filter((item) => item.id === unitId);
+                                    const contractingDate = myUnit[0].contractingDate;
+                                    const contractDate = myUnit[0].contractDate;
+                                    const completionDate = myUnit[0].completionDate;
+                                    const category = myUnit[0].category;
+
+                                    if (completionDate !== undefined) {
+                                        if (contractDate !== undefined) {
+                                            option = {
+                                                unitId,
+                                                value: 0,
+                                                text: "",
+                                                paymentType: "",
+                                                memo: req.i18n.t('payment.paymentOptions.memo.memo2'),
+                                                action: "",
+                                                actionText: ""
+                                            }
+                                        }
+                                        else {
+                                            option = {
+                                                unitId,
+                                                value: 0,
+                                                text: "",
+                                                paymentType: "",
+                                                memo: req.i18n.t('payment.paymentOptions.memo.memo1'),
+                                                action: "go",
+                                                actionText: req.i18n.t('payment.paymentOptions.action.go')
+                                            }
+                                        }
+                                    }
+                                    else if (contractDate !== undefined) {
+                                        option = {
+                                            unitId,
+                                            value: 0,
+                                            text: "",
+                                            paymentType: "",
+                                            memo: req.i18n.t('payment.paymentOptions.memo.memo3'),
+                                            action: "",
+                                            actionText: ""
+                                        }
+                                    }
+                                    else if (contractingDate !== undefined) {
+                                        if (category !== undefined) {
+                                            const myUnit = user.units.filter((item) => item.id === unitId);
+                                            const category = myUnit[0].category;
+                                            const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category);
+                                            const cashAmount = priceDetails[0].cashAmount;
+                                            const totalPayments = user.payments.filter((item) => item.unitId === unitId);
+                                            const paidTotal = totalPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                                            const cashingValue = cashAmount - paidTotal;
+                                            const cashingText = paidTotal > (bookingAmount + contractingAmount) ? req.i18n.t('payment.paymentOptions.cashingAmountRest')
+                                                : req.i18n.t('payment.paymentOptions.cashingAmount');
+                                            option = {
+                                                unitId,
+                                                value: cashingValue,
+                                                text: cashingText,
+                                                paymentType: "cashing",
+                                                memo: "",
+                                                action: "pay",
+                                                actionText: req.i18n.t('payment.paymentOptions.action.pay')
+                                            }
+                                        }
+                                        else {
+                                            option = {
+                                                unitId,
+                                                value: 0,
+                                                text: "",
+                                                paymentType: "",
+                                                memo: req.i18n.t('payment.paymentOptions.memo.memo4'),
+                                                action: "select",
+                                                actionText: req.i18n.t('payment.paymentOptions.action.select')
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        const contractingPayments = user.payments.filter((item) =>
+                                            item.unitId === unitId && item.paymentType === 'contracting'
+                                        );
+                                        const paidContracting = contractingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                                        const contractingValue = contractingAmount - paidContracting;
+                                        const contractingText = paidContracting > 0 ? req.i18n.t('payment.paymentOptions.contractingAmountRest')
+                                            : req.i18n.t('payment.paymentOptions.contractingAmount');
+                                        option = {
+                                            unitId,
+                                            value: contractingValue,
+                                            text: contractingText,
+                                            paymentType: "contracting",
+                                            memo: "",
+                                            action: "pay",
+                                            actionText: req.i18n.t('payment.paymentOptions.action.pay')
+                                        }
+                                    }
+                                    paymentOptions.push(option);
+                                }
+                            })
+                        }
+                        const bookingValue = bookingAmount - paidBooking;
+                        const bookingText = paidBooking > 0 ? req.i18n.t('payment.paymentOptions.bookingAmountRest')
+                            : req.i18n.t('payment.paymentOptions.bookingAmount');
+                        option = {
+                            unitId: "",
+                            value: bookingValue,
+                            text: bookingText,
+                            paymentType: "booking",
+                            memo: "",
+                            action: "pay",
+                            actionText: req.i18n.t('payment.paymentOptions.action.pay')
+                        }
+                        paymentOptions.push(option);
+
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {
+                                paymentOptions
+                            }
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
             })
             .catch((err) => {
                 res.status(500).json(
