@@ -39,7 +39,7 @@ app.use(cors());
 
 app.use('/system', sysRouter);
 app.use(checkAppLang);
-app.use('/', indexRouter);
+app.use('/home', indexRouter);
 app.use('/users', usersRouter);
 app.use('/plans', plansRouter);
 app.use('/payments', paymentsRouter);
