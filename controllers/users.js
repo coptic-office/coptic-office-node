@@ -1871,7 +1871,6 @@ const getMyPayments = async (req, res) => {
                         check._doc.unitId = unit.id;
                         bankChecks.push(check);
                     })
-                    // bankChecks.push(...unit.bankChecks);
                 });
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
@@ -1887,6 +1886,88 @@ const getMyPayments = async (req, res) => {
                     message: {
                         payments: user.payments,
                         bankChecks
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const getMyUnits = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        User.findOne({_id: userID}, {units: 1, payments: 1, _id: 0})
+            .then((user) => {
+                user.units.map((unit) => {
+                    if (unit.unitNumber === undefined) {
+                        unit.unitNumber = "---";
+                    }
+                    if (unit.category === undefined) {
+                        unit.category = req.i18n.t(`product.noCategory`);
+                        unit._doc.totalAmount = 0;
+                        unit._doc.totalCashAmount = 0;
+                        unit._doc.totalChecksAmount = 0;
+                    }
+                    else {
+                        const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
+                        const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                        const category = unit.category;
+                        const myCategory = unit.priceDetails.filter((item) => item.category === category);
+                        const grossAmount = myCategory[0].grossAmount;
+                        const cashAmount = myCategory[0].cashAmount;
+                        unit._doc.totalCashAmount = paidAmount;
+                        if (paidAmount >= cashAmount) {
+                            unit._doc.totalAmount = cashAmount;
+                            unit._doc.totalChecksAmount = 0;
+                        }
+                        else {
+                            unit._doc.totalAmount = grossAmount;
+                            if (unit.bankChecks.length > 0) {
+                                const checksAmount = unit.bankChecks.reduce((sum, item) => sum + Number(item.amount), 0);
+                                unit._doc.totalChecksAmount = checksAmount;
+                            }
+                            else {
+                                unit._doc.totalChecksAmount = 0;
+                            }
+                        }
+                        unit.category = req.i18n.t(`product.${unit.category}.name`);
+                    }
+                    if (unit.contractingDate === undefined) {
+                        unit.contractingDate = "";
+                    }
+                    if (unit.contractDate === undefined) {
+                        unit.contractDate = "";
+                    }
+                    unit.priceDetails = undefined;
+                    unit.completionDate = undefined;
+                    unit.bankChecks = undefined;
+                })
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        units: user.units
                     }
                 })
             })
@@ -2117,6 +2198,7 @@ module.exports = {
     completePayment,
     getPaymentOptions,
     getMyPayments,
+    getMyUnits,
     selectUnitType
 }
 

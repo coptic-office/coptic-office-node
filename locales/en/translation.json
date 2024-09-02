@@ -77,6 +77,7 @@
     "category3": {
       "name": "Peripheral Unit to the Street"
     },
+    "noCategory": "Unit type not selected yet",
     "noContracting": "Cannot select the unit type before completing the booking and contracting amounts",
     "contractDone": "Cannot change the unit type after completing the contracting procedures",
     "invalidCategory": "Invalid unit category",
