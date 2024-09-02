@@ -63,6 +63,10 @@ router.post('/validate-mobile', [authorize(accessToken, getUserByMobileRoles), v
 const getPaymentOptionsRoles = ['User'];
 router.post('/get-payment-options', authorize(accessToken, getPaymentOptionsRoles), user.getPaymentOptions);
 
+/** Get all the payments for a specific user even with bank checks */
+const getMyPaymentsRoles = ['User'];
+router.post('/get-my-payments', authorize(accessToken, getMyPaymentsRoles), user.getMyPayments);
+
 /** Get the available payment options */
 const selectUnitTypeRoles = ['User'];
 router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), user.selectUnitType);

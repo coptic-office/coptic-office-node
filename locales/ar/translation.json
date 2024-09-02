@@ -148,10 +148,10 @@
       "UBOE": "المصرف المتحد"
     },
     "checkStatus": {
-      "Outstanding": "في الانتظار",
-      "Cleared": "تم الصرف",
-      "Rejected": "تم الرفض",
-      "Cashed": "تم الاستبدال بالنقد"
+      "outstanding": "في الانتظار",
+      "cleared": "تم الصرف",
+      "rejected": "تم الرفض",
+      "cashed": "تم الاستبدال بالنقد"
     },
     "paymentOptions": {
       "bookingAmount": "دفعة الحجز",

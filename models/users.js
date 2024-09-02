@@ -103,14 +103,17 @@ const userSchema = new Schema({
             contractingDate: Date,
             contractDate: Date,
             completionDate: Date,
-            checks: [
+            bankChecks: [
                 {
                     _id: false,
                     number: String,
                     dueDate: Date,
                     amount: Number,
                     bankName: String,
-                    status: String
+                    status: String,
+                    image: String,
+                    userID: String,
+                    date: Date
                 }
             ]
         }

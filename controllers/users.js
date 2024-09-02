@@ -10,6 +10,7 @@ const {getCountry} = require('../controllers/countries');
 const Token = require("../models/tokens");
 const {createSmsRecord} = require("./smsRecords");
 const Unit = require('../models/units');
+const {integer} = require("twilio/lib/base/deserialize");
 
 const createUser = async (req, res) => {
     try {
@@ -1851,6 +1852,67 @@ const getPaymentOptions = async (req, res) => {
     }
 }
 
+const getMyPayments = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        User.findOne({_id: userID}, {payments: 1, units: 1, _id: 0})
+            .then((user) => {
+                user.payments.map((item) => {
+                    item.paymentType = undefined;
+                    item._doc.amount = Number(item.amount);
+                    item.paymentMethod = req.i18n.t(`payment.method.${item.paymentMethod}`);
+                });
+
+                const bankChecks = [];
+                user.units.forEach((unit) => {
+                    const checks = [...unit.bankChecks];
+                    checks.forEach((check) => {
+                        check._doc.unitId = unit.id;
+                        bankChecks.push(check);
+                    })
+                    // bankChecks.push(...unit.bankChecks);
+                });
+                bankChecks.map((check) => {
+                    check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
+                    check.status = req.i18n.t(`payment.checkStatus.${check.status}`);
+                    check.image = undefined;
+                    check.userID = undefined;
+                    check.date = undefined;
+                })
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        payments: user.payments,
+                        bankChecks
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const getUnitTypes = async (req, res) => {
     try {
         const {user: {id: userID}, unitId} = await req.body;
@@ -2054,6 +2116,7 @@ module.exports = {
     getUnitTypes,
     completePayment,
     getPaymentOptions,
+    getMyPayments,
     selectUnitType
 }
 

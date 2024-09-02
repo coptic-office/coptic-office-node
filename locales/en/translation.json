@@ -148,10 +148,10 @@
       "UBOE": "The United Bank"
     },
     "checkStatus": {
-      "Outstanding": "Outstanding",
-      "Cleared": "Cleared",
-      "Rejected": "Rejected",
-      "Cashed": "Cashed"
+      "outstanding": "Outstanding",
+      "cleared": "Cleared",
+      "rejected": "Rejected",
+      "cashed": "Cashed"
     },
     "paymentOptions": {
       "bookingAmount": "Booking amount",
