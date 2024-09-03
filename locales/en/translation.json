@@ -58,7 +58,11 @@
     "invalidDomain": "Invalid domain name",
     "unmatchedDomain": "This domain name doesn't match your sender name",
     "senderNotVerified": "The sender name cannot be verified",
-    "oneSenderName": "The sender name cannot be changed after being chosen and verified"
+    "oneSenderName": "The sender name cannot be changed after being chosen and verified",
+    "profilePhotoRequired": "One profile photo is required",
+    "idImagesRequired": "Two images are required, one for the ID front and another for the ID back",
+    "notImageFile": "Only image files are accepted",
+    "imageSavingError": "Failed while saving the image"
   },
   "item": {
     "totalAmount": "Total amount",

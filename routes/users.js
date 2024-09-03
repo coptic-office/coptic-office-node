@@ -5,6 +5,8 @@ const preUser = require('../controllers/preUsers');
 const validateMobile = require("../middleware/mobileValidation");
 const {listCountries} = require('../controllers/countries')
 const {authorize} = require('../middleware/auth');
+const multipartParser = require('../middleware/multipartParser');
+const Process = require("process");
 
 const accessToken = 'Access';
 const renewToken = 'Renew';
@@ -78,5 +80,11 @@ router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), us
 /** Get the units types, with the currently selected category */
 const getUnitTypesRoles = ['User'];
 router.post('/get-unit-types', authorize(accessToken, getUnitTypesRoles), user.getUnitTypes);
+
+/** Get the units types, with the currently selected category */
+const updatePhotoRoles = ['User'];
+const fileTypesList = Process.env.IMAGE_FILE_TYPE.split(',');
+const options = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
+router.post('/update-photo', [authorize(accessToken, updatePhotoRoles), multipartParser(options, 'image')], user.updatePhoto);
 
 module.exports = router;

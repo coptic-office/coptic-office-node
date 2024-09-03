@@ -10,7 +10,11 @@ const {getCountry} = require('../controllers/countries');
 const Token = require("../models/tokens");
 const {createSmsRecord} = require("./smsRecords");
 const Unit = require('../models/units');
-const {integer} = require("twilio/lib/base/deserialize");
+const Image = require('../utils/imageProcessing');
+const {Readable} = require('stream');
+const {S3Client} = require('@aws-sdk/client-s3');
+const {Upload} = require("@aws-sdk/lib-storage");
+const Process = require("process");
 
 const createUser = async (req, res) => {
     try {
@@ -1861,7 +1865,7 @@ const getMyPayments = async (req, res) => {
                 user.payments.map((item) => {
                     item.paymentType = undefined;
                     item._doc.amount = Number(item.amount);
-                    item.paymentMethod = req.i18n.t(`payment.method.${item.paymentMethod}`);
+                    item._doc.paymentMethodText = req.i18n.t(`payment.method.${item.paymentMethod}`);
                 });
 
                 const bankChecks = [];
@@ -1943,8 +1947,7 @@ const getMyUnits = async (req, res) => {
                         else {
                             unit._doc.totalAmount = grossAmount;
                             if (unit.bankChecks.length > 0) {
-                                const checksAmount = unit.bankChecks.reduce((sum, item) => sum + Number(item.amount), 0);
-                                unit._doc.totalChecksAmount = checksAmount;
+                                unit._doc.totalChecksAmount = unit.bankChecks.reduce((sum, item) => sum + Number(item.amount), 0);
                             }
                             else {
                                 unit._doc.totalChecksAmount = 0;
@@ -2179,6 +2182,84 @@ const selectUnitType = async (req, res) => {
     }
 }
 
+const updatePhoto = async (req, res) => {
+    try {
+        const region = process.env.S3_REGION;
+        const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+        const bucket = process.env.S3_BUCKET;
+        const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
+
+        const {user: {id: userId}} = await req.body;
+        const filesNumber = await req.files.length;
+        if (filesNumber !== 1) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t(`user.profilePhotoRequired`),
+                message: {}
+            })
+        }
+
+        const {fileTypeFromBuffer} = await import('file-type');
+        const file = req.files[0];
+        const type = await fileTypeFromBuffer(file.buffer);
+        const ext = type['ext'].toString().toLowerCase();
+        const imageTypes = Process.env.IMAGE_FILE_TYPE.split(',');
+        if (!imageTypes.includes(ext)) {
+            return res.status(400).json({
+                status: "Failed",
+                error: req.i18n.t(`user.notImageFile`),
+                message: {
+                    imageTypes
+                }
+            })
+        }
+        const width = Number(process.env.IMAGE_PERSON_MAX_WIDTH);
+        const {buffer} = await Image.compress(file.buffer, width);
+        const fileStream = Readable.from(buffer);
+        const fileKey = `users/${userId}/photo/person.jpg`;
+        const params = {Bucket: bucket, Key: fileKey, Body: fileStream,};
+        const upload = new Upload({
+            client,
+            params,
+            tags: [], // optional tags
+            queueSize: 4, // optional concurrency configuration
+            partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+            leavePartsOnError: false, // optional manually handle dropped parts
+        });
+        upload.done()
+            .then(() => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        photo: `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('user.imageSavingError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 module.exports = {
     createUser,
     login,
@@ -2199,6 +2280,7 @@ module.exports = {
     getPaymentOptions,
     getMyPayments,
     getMyUnits,
-    selectUnitType
+    selectUnitType,
+    updatePhoto
 }
 
