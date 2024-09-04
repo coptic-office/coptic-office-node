@@ -218,7 +218,7 @@ const login = async (req, res) => {
             }
         }
         const query = userIdentifier === 'mobile' ? {'mobile.primary.number': mobileNumber} : {'email.primary': email};
-        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, role: 1, isActive: 1}
+        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, profilePhoto: 1, role: 1, isActive: 1};
         User.findOne(query, projection)
             .then((user) => {
                 if (!user) {
@@ -2217,8 +2217,8 @@ const updatePhoto = async (req, res) => {
         const width = Number(process.env.IMAGE_PERSON_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `users/${userId}/photo/person.jpg`;
-        const params = {Bucket: bucket, Key: fileKey, Body: fileStream,};
+        const fileKey = `users/${userId}/photos/profile.jpg`;
+        const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
             params,

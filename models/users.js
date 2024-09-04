@@ -18,6 +18,10 @@ const userSchema = new Schema({
         isVerified: Boolean,
         alternate: {country: String, number: String},
     },
+    profilePhoto: {
+        type: String,
+        default: process.env.GENERAL_DEFAULT_PROFILE
+    },
     currency: {
         type: String,
         default: process.env.GENERAL_BASE_CURRENCY
