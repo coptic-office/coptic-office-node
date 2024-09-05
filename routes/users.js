@@ -81,10 +81,15 @@ router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), us
 const getUnitTypesRoles = ['User'];
 router.post('/get-unit-types', authorize(accessToken, getUnitTypesRoles), user.getUnitTypes);
 
-/** Get the units types, with the currently selected category */
-const updatePhotoRoles = ['User'];
 const fileTypesList = Process.env.IMAGE_FILE_TYPE.split(',');
-const options = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
-router.post('/update-photo', [authorize(accessToken, updatePhotoRoles), multipartParser(options, 'image')], user.updatePhoto);
+/** Update the user's profile photo */
+const updatePhotoRoles = ['User'];
+const options1 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
+router.post('/update-photo', [authorize(accessToken, updatePhotoRoles), multipartParser(options1, 'image')], user.updatePhoto);
+
+/** Update the user's national ID */
+const updateNationalIdRoles = ['User'];
+const options2 = {maxFileSize: 1, maxFilesCount: 2, fileTypesList};
+router.post('/update-national-id', [authorize(accessToken, updateNationalIdRoles), multipartParser(options2, 'images')], user.updateNationalId);
 
 module.exports = router;

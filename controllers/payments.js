@@ -88,13 +88,14 @@ const createPayment = async (req, res) => {
                     paymentData.receiptDetails.items[0].price = amount;
                     paymentData.receiptDetails.amount = amount;
                     paymentData.paymentDetails = {};
-                    paymentData.receiptDetails.amount = amount;
-                    paymentData.paymentDetails.paymentGateway = 'Banque Misr';
+                    paymentData.paymentDetails.paymentMethod = 'creditCard';
+                    // paymentData.paymentDetails.paymentGateway = 'Banque Misr';
                     paymentData.paymentDetails.amount = amount;
                     paymentData.paymentDetails.date = new Date();
                     paymentData.paymentDetails.status = 'Pending';
                     paymentData.paymentDetails.bankSessionId = msg.data.session.id;
                     paymentData.paymentDetails.bankSuccessIndicator = msg.data.successIndicator;
+                    paymentData.paymentDetails.comments = 'Payment Gateway: Banque Misr';
 
                     await Payment.create(paymentData)
                         .then(() => {
@@ -184,6 +185,7 @@ const findPayment = (resultIndicator) => {
                         userID: payment.userID,
                         id: payment._id,
                         paymentType: payment.paymentType,
+                        paymentMethod: payment.paymentDetails.paymentMethod,
                         amount: payment.paymentDetails.amount,
                         adviceDate: payment.paymentDetails.adviceDate,
                         unitId: payment.unitId

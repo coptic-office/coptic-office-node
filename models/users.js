@@ -22,6 +22,12 @@ const userSchema = new Schema({
         type: String,
         default: process.env.GENERAL_DEFAULT_PROFILE
     },
+    identification: {
+        nationalId: {
+            front: String,
+            back: String
+        }
+    },
     currency: {
         type: String,
         default: process.env.GENERAL_BASE_CURRENCY
@@ -116,7 +122,7 @@ const userSchema = new Schema({
                     bankName: String,
                     status: String,
                     image: String,
-                    userID: String,
+                    byUserID: String,
                     date: Date
                 }
             ]

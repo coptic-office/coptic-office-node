@@ -1571,11 +1571,10 @@ const checkCategory = (userID, unitId) => {
 
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-        const {userID, id, paymentType, amount, adviceDate, unitId} = paymentData;
+        const {userID, id, paymentType, paymentMethod, amount, adviceDate, unitId} = paymentData;
         User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
             .then( async (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
-                const paymentMethod = 'creditCard';
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
 
                 switch (paymentType) {
@@ -2190,7 +2189,7 @@ const updatePhoto = async (req, res) => {
         const bucket = process.env.S3_BUCKET;
         const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
 
-        const {user: {id: userId}} = await req.body;
+        const {user: {id: userID}} = await req.body;
         const filesNumber = await req.files.length;
         if (filesNumber !== 1) {
             return res.status(400).json({
@@ -2214,10 +2213,10 @@ const updatePhoto = async (req, res) => {
                 }
             })
         }
-        const width = Number(process.env.IMAGE_PERSON_MAX_WIDTH);
+        const width = Number(process.env.IMAGE_PROFILE_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `users/${userId}/photos/profile.jpg`;
+        const fileKey = `users/${userID}/photos/profile.jpg`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -2229,13 +2228,27 @@ const updatePhoto = async (req, res) => {
         });
         upload.done()
             .then(() => {
-                res.status(200).json({
-                    status: "success",
-                    error: "",
-                    message: {
-                        photo: `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`
-                    }
-                })
+                const profilePhoto = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
+                User.findOneAndUpdate({_id: userID}, {profilePhoto})
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {
+                                profilePhoto
+                            }
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('user.imageSavingError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    });
             })
             .catch((err) => {
                 res.status(500).json(
@@ -2247,6 +2260,126 @@ const updatePhoto = async (req, res) => {
                         }
                     })
             });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const updateNationalId = async (req, res) => {
+    try {
+        const region = process.env.S3_REGION;
+        const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+        const bucket = process.env.S3_BUCKET;
+        const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
+
+        const {user: {id: userID}} = await req.body;
+        const filesNumber = await req.files.length;
+        if (filesNumber !== 2) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t(`user.idImagesRequired`),
+                message: {}
+            })
+        }
+
+        const {fileTypeFromBuffer} = await import('file-type');
+        const IDs = [];
+
+        const uploadFile = (file, index) => {
+            return new Promise(async (myResolve, myReject) => {
+                const type = await fileTypeFromBuffer(file.buffer);
+                const ext = type['ext'].toString().toLowerCase();
+                const imageTypes = Process.env.IMAGE_FILE_TYPE.split(',');
+                if (!imageTypes.includes(ext)) {
+                    return res.status(400).json({
+                        status: "Failed",
+                        error: req.i18n.t(`user.notImageFile`),
+                        message: {
+                            imageTypes
+                        }
+                    })
+                }
+                const width = Number(process.env.IMAGE_ID_MAX_WIDTH);
+                const {buffer} = await Image.compress(file.buffer, width);
+                const fileStream = Readable.from(buffer);
+                const fileKey = `users/${userID}/identification/ID${index + 1}.jpg`;
+                const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
+                const upload = new Upload({
+                    client,
+                    params,
+                    tags: [], // optional tags
+                    queueSize: 4, // optional concurrency configuration
+                    partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+                    leavePartsOnError: false, // optional manually handle dropped parts
+                });
+                upload.done()
+                    .then(() => {
+                        IDs.push(`https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`);
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
+            })
+        }
+
+        uploadFile(req.files[0], 0)
+            .then(() => {
+                uploadFile(req.files[1], 1)
+                    .then(() => {
+                        const update = {'identification.nationalId.front': IDs[0], 'identification.nationalId.back': IDs[1]}
+                        User.findOneAndUpdate({_id: userID}, {update})
+                            .then(() => {
+                                res.status(200).json({
+                                    status: "success",
+                                    error: "",
+                                    message: {
+                                        frontId: IDs[0],
+                                        backId: IDs[1]
+                                    }
+                                })
+                            })
+                            .catch((err) => {
+                                res.status(500).json(
+                                    {
+                                        status: "failed",
+                                        error: req.i18n.t('user.imageSavingError'),
+                                        message: {
+                                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                        }
+                                    })
+                            });
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
     }
     catch (err) {
         res.status(500).json(
@@ -2281,6 +2414,7 @@ module.exports = {
     getMyPayments,
     getMyUnits,
     selectUnitType,
-    updatePhoto
+    updatePhoto,
+    updateNationalId
 }
 
