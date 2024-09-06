@@ -1585,7 +1585,7 @@ const completePayment = (paymentData) => {
                                 const bookingPayments = user.payments.filter((item) => item.unitId === unitId);
                                 const paidBooking = bookingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
                                 if (paidBooking >= Number(bookingAmount)) {
-                                    const unitId = `${mobileNumber}/${user.units.length + 1}`
+                                    const unitId = `${mobileNumber.replace('+', '')}/${user.units.length + 1}`
                                     user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
                                     user.payments.map((item) => {
                                         if (item.unitId === '') item.unitId = unitId
