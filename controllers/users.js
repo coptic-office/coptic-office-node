@@ -18,7 +18,7 @@ const Process = require("process");
 
 const createUser = async (req, res) => {
     try {
-        const bodyData = await req.body;
+        const bodyData = await {...req.body, role: 'USER'};
         const {mobile, mobileNumber, email} = bodyData;
         const userIdentifier = process.env.GENERAL_USER_IDENTIFIER;
         let identifier = 'None';
