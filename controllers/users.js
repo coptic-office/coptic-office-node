@@ -1617,8 +1617,8 @@ const completePayment = (paymentData) => {
                                         let args = [].slice.call(arguments, 1), i = 0;
                                         return str.replace(/%s/g, () => args[i++]);
                                     }
-                                    console.log(parse(arabicMessage), [unitId, contractingAmount, maxDate])
-                                    console.log(parse(englishMessage), [unitId, contractingAmount, maxDate])
+                                    console.log(parse(arabicMessage), unitId, contractingAmount, maxDate)
+                                    console.log(parse(englishMessage), unitId, contractingAmount, maxDate)
 
                                     await user.save()
                                         .then(() => {
