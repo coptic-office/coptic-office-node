@@ -1608,8 +1608,7 @@ const completePayment = (paymentData) => {
                                 }
                                 else {
 
-                                    const messages = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
-                                    console.log(messages)
+                                    const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
                                     const arabicMessage = messages.ar;
                                     const englishMessage = messages.en;
                                     console.log(arabicMessage)
