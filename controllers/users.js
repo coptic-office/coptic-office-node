@@ -1611,11 +1611,11 @@ const completePayment = (paymentData) => {
                                     const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
                                     let arabicMessage = messages.ar;
                                     let englishMessage = messages.en;
-                                    const contractingAmount = units[0].contractingAmount;
+                                    const contractingAmount = units[0].contractingAmount.toLocaleString();
                                     const maxDateArabic = new Date().toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
                                     const maxDateEnglish = new Date().toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
 
-                                    arabicMessage = arabicMessage.replace('{{unitId}}', '+201065509089-1');
+                                    arabicMessage = arabicMessage.replace('{{unitId}}', '(+201065509089-1)');
                                     arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
                                     arabicMessage = arabicMessage.replace('{{maxDate}}', maxDateArabic);
                                     englishMessage = englishMessage.replace('{{unitId}}', unitId);
