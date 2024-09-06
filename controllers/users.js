@@ -1614,8 +1614,8 @@ const completePayment = (paymentData) => {
                                     const contractingAmount = units[0].contractingAmount.toLocaleString();
                                     const maxDate = new Date();
                                     maxDate.setMonth(maxDate.getMonth() + 3);
-                                    const maxDateArabic = new Date().toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
-                                    const maxDateEnglish = new Date().toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
+                                    const maxDateArabic = maxDate.toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
+                                    const maxDateEnglish = maxDate.toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
 
                                     arabicMessage = arabicMessage.replace('{{unitId}}', '201065509089/1');
                                     arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
