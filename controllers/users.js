@@ -2008,46 +2008,33 @@ const getUnitTypes = async (req, res) => {
             })
         }
 
-        Unit.find({isActive: true}, {_id: 0, isActive: 0})
-            .then((units) => {
+        User.findOne({_id: userID}, {units: 1})
+            .then((user) => {
+                const myUnit = user.units.filter((item) => item.id === unitId);
+                if (myUnit.length === 0) {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t('payment.invalidUnitId'),
+                        message: {}
+                    })
+                }
+                const currentCategory = myUnit[0].category;
+
                 const editedUnits = [];
-                units.forEach((unit) => {
+                user.units[0].priceDetails.forEach((unit) => {
                     const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), ...unit._doc};
                     editedUnits.push(editedUnit);
                 })
 
-                User.findOne({_id: userID}, {units: 1})
-                    .then((user) => {
-                        const myUnit = user.units.filter((item) => item.id === unitId);
-                        if (myUnit.length === 0) {
-                            return res.status(400).json({
-                                status: "failed",
-                                error: req.i18n.t('payment.invalidUnitId'),
-                                message: {}
-                            })
-                        }
-                        const currentCategory = myUnit[0].category;
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        units: editedUnits,
+                        currentCategory
+                    }
+                })
 
-                        res.status(200).json({
-                            status: "success",
-                            error: "",
-                            message: {
-                                units: editedUnits,
-                                currentCategory
-                            }
-                        })
-
-                    })
-                    .catch((err) => {
-                        res.status(500)
-                            .json({
-                                status: "failed",
-                                error: req.i18n.t('general.internalError'),
-                                message: {
-                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                                }
-                            })
-                    })
             })
             .catch((err) => {
                 res.status(500)
@@ -2058,7 +2045,7 @@ const getUnitTypes = async (req, res) => {
                             info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                         }
                     })
-            });
+            })
     }
     catch (err) {
         res.status(500).json(

@@ -26,7 +26,6 @@ const paymentSchema = new Schema({
                 values: ['bankDeposit', 'bankTransfer', 'instaPay', 'creditCard']
             }
         },
-        // paymentGateway: String,
         amount: mongoose.Decimal128,
         date: Date,
         status: {
@@ -38,6 +37,7 @@ const paymentSchema = new Schema({
         adviceDate: Date,
         bankSessionId: String,
         bankSuccessIndicator: String,
+        referenceNumber: String,
         byUserID: String,
         comments: String
     }

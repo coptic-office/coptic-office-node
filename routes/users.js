@@ -61,7 +61,7 @@ router.get('/', user.getUsers);
 const getUserByMobileRoles = ['User'];
 router.post('/validate-mobile', [authorize(accessToken, getUserByMobileRoles), validateMobile], user.getUserByMobile);
 
-/** Get the available payment options */
+/** Get the appropriate payment options for a specific user for all his bookings */
 const getPaymentOptionsRoles = ['User'];
 router.post('/get-payment-options', authorize(accessToken, getPaymentOptionsRoles), user.getPaymentOptions);
 
@@ -73,11 +73,11 @@ router.post('/get-my-payments', authorize(accessToken, getMyPaymentsRoles), user
 const getMyUnitsRoles = ['User'];
 router.post('/get-my-units', authorize(accessToken, getMyUnitsRoles), user.getMyUnits);
 
-/** Get the available payment options */
+/** Allows the user to select a specific unit type */
 const selectUnitTypeRoles = ['User'];
 router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), user.selectUnitType);
 
-/** Get the units types, with the currently selected category */
+/** Get the units types, with the currently selected category for a specific user */
 const getUnitTypesRoles = ['User'];
 router.post('/get-unit-types', authorize(accessToken, getUnitTypesRoles), user.getUnitTypes);
 

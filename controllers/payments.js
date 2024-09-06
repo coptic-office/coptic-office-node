@@ -89,7 +89,6 @@ const createPayment = async (req, res) => {
                     paymentData.receiptDetails.amount = amount;
                     paymentData.paymentDetails = {};
                     paymentData.paymentDetails.paymentMethod = 'creditCard';
-                    // paymentData.paymentDetails.paymentGateway = 'Banque Misr';
                     paymentData.paymentDetails.amount = amount;
                     paymentData.paymentDetails.date = new Date();
                     paymentData.paymentDetails.status = 'Pending';
