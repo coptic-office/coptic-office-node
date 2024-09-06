@@ -1591,23 +1591,6 @@ const completePayment = (paymentData) => {
                                         if (item.unitId === '') item.unitId = unitId
                                     })
 
-                                    const messages = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
-                                    const arabicMessage = messages.ar;
-                                    const englishMessage = messages.en;
-                                    const contractingAmount = units[0].contractingAmount;
-                                    errorLog(arabicMessage)
-                                    errorLog(englishMessage)
-
-                                    await user.save()
-                                        .then(() => {
-                                            myResolve();
-                                        })
-                                        .catch((err) => {
-                                            myReject(err.toString());
-                                        })
-                                }
-                                else {
-
                                     const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
                                     let arabicMessage = messages.ar;
                                     let englishMessage = messages.en;
@@ -1620,11 +1603,24 @@ const completePayment = (paymentData) => {
                                     arabicMessage = arabicMessage.replace('{{unitId}}', '201065509089/1');
                                     arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
                                     arabicMessage = arabicMessage.replace('{{maxDate}}', maxDateArabic);
+
                                     englishMessage = englishMessage.replace('{{unitId}}', unitId);
                                     englishMessage = englishMessage.replace('{{contractingAmount}}', contractingAmount);
                                     englishMessage = englishMessage.replace('{{maxDate}}', maxDateEnglish);
-                                    console.log(arabicMessage);
-                                    console.log(englishMessage);
+
+                                    user.notifications.newCount += 1;
+                                    const message = {ar: arabicMessage, en: englishMessage, date: new Date(), isDelivered: false};
+                                    user.notifications.messages.push(message);
+
+                                    await user.save()
+                                        .then(() => {
+                                            myResolve();
+                                        })
+                                        .catch((err) => {
+                                            myReject(err.toString());
+                                        })
+                                }
+                                else {
 
                                     await user.save()
                                         .then(() => {
