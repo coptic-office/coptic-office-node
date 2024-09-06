@@ -1605,7 +1605,15 @@ const completePayment = (paymentData) => {
                                         .catch((err) => {
                                             myReject(err.toString());
                                         })
-                                } else {
+                                }
+                                else {
+
+                                    const messages = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
+                                    const arabicMessage = messages.ar;
+                                    const englishMessage = messages.en;
+                                    errorLog(arabicMessage)
+                                    errorLog(englishMessage)
+
                                     await user.save()
                                         .then(() => {
                                             myResolve();
