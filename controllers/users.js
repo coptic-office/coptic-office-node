@@ -1611,8 +1611,14 @@ const completePayment = (paymentData) => {
                                     const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
                                     const arabicMessage = messages.ar;
                                     const englishMessage = messages.en;
-                                    console.log(arabicMessage)
-                                    console.log(englishMessage)
+                                    const contractingAmount = units[0].contractingAmount;
+                                    const maxDate = new Date().toISOString();
+                                    const parse = (str) => {
+                                        let args = [].slice.call(arguments, 1), i = 0;
+                                        return str.replace(/%s/g, () => args[i++]);
+                                    }
+                                    console.log(parse(arabicMessage), unitId, contractingAmount, maxDate)
+                                    console.log(parse(englishMessage), unitId, contractingAmount, maxDate)
 
                                     await user.save()
                                         .then(() => {
