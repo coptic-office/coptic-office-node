@@ -241,8 +241,8 @@
   },
   "notifications": {
     "language": "en",
-    "booking": "`You have booked a new unit with a booking code: ${unitId}. Please complete the contracting payment of ${contractingAmount} EGP no later than ${maxDate}.`",
-    "contracting": "`Your contracting request has been registered for the reserved unit: ${unitId}. You will be contacted shortly to complete the contracting procedures.`"
+    "booking": "You have booked a new unit with a booking code: {{unitId}}. Please complete the contracting payment of {{contractingAmount}} EGP no later than {{maxDate}}.",
+    "contracting": "Your contracting request has been registered for the reserved unit: {{unitId}}. You will be contacted shortly to complete the contracting procedures."
   },
   "faceRecognition": {
     "invalidFile": "Only files with specific formats are accepted. One or more files are invalid",

@@ -1609,16 +1609,18 @@ const completePayment = (paymentData) => {
                                 else {
 
                                     const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
-                                    const arabicMessage = messages.ar;
-                                    const englishMessage = messages.en;
+                                    let arabicMessage = messages.ar;
+                                    let englishMessage = messages.en;
                                     const contractingAmount = units[0].contractingAmount;
                                     const maxDate = new Date().toISOString();
-                                    const parse = (str) => {
-                                        let args = [].slice.call(arguments, 1), i = 0;
-                                        return str.replace(/%s/g, () => args[i++]);
-                                    }
-                                    console.log(parse(arabicMessage), unitId, contractingAmount, maxDate)
-                                    console.log(parse(englishMessage), unitId, contractingAmount, maxDate)
+                                    arabicMessage = arabicMessage.replace('{{unitId}}', unitId);
+                                    arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
+                                    arabicMessage = arabicMessage.replace('{{maxDate}}', maxDate);
+                                    englishMessage = englishMessage.replace('{{unitId}}', unitId);
+                                    englishMessage = englishMessage.replace('{{contractingAmount}}', contractingAmount);
+                                    englishMessage = englishMessage.replace('{{maxDate}}', maxDate);
+                                    console.log(arabicMessage);
+                                    console.log(englishMessage);
 
                                     await user.save()
                                         .then(() => {
