@@ -1595,8 +1595,8 @@ const completePayment = (paymentData) => {
                                     const arabicMessage = messages.ar;
                                     const englishMessage = messages.en;
                                     const contractingAmount = units[0].contractingAmount;
-                                    console.log(arabicMessage)
-                                    console.log(englishMessage)
+                                    errorLog(arabicMessage)
+                                    errorLog(englishMessage)
 
                                     await user.save()
                                         .then(() => {
