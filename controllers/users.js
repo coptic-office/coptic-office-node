@@ -1612,13 +1612,15 @@ const completePayment = (paymentData) => {
                                     let arabicMessage = messages.ar;
                                     let englishMessage = messages.en;
                                     const contractingAmount = units[0].contractingAmount;
-                                    const maxDate = new Date().toISOString();
-                                    arabicMessage = arabicMessage.replace('{{unitId}}', unitId);
+                                    const maxDateArabic = new Date().toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
+                                    const maxDateEnglish = new Date().toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
+
+                                    arabicMessage = arabicMessage.replace('{{unitId}}', '+201065509089-1');
                                     arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
-                                    arabicMessage = arabicMessage.replace('{{maxDate}}', maxDate);
+                                    arabicMessage = arabicMessage.replace('{{maxDate}}', maxDateArabic);
                                     englishMessage = englishMessage.replace('{{unitId}}', unitId);
                                     englishMessage = englishMessage.replace('{{contractingAmount}}', contractingAmount);
-                                    englishMessage = englishMessage.replace('{{maxDate}}', maxDate);
+                                    englishMessage = englishMessage.replace('{{maxDate}}', maxDateEnglish);
                                     console.log(arabicMessage);
                                     console.log(englishMessage);
 
