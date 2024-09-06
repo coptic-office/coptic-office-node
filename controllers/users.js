@@ -15,6 +15,7 @@ const {Readable} = require('stream');
 const {S3Client} = require('@aws-sdk/client-s3');
 const {Upload} = require("@aws-sdk/lib-storage");
 const Process = require("process");
+const Notification = require('../models/notifications');
 
 const createUser = async (req, res) => {
     try {
@@ -123,8 +124,7 @@ const createUser = async (req, res) => {
                                 user = {
                                     ...user._doc, _id: undefined, __v: undefined, password: undefined,
                                     currency: undefined, email: undefined, payments: undefined, units: undefined,
-                                    plan: undefined, balance: undefined, courtesy: undefined, subscription: undefined,
-                                    coupons: undefined, role: undefined, isActive: undefined
+                                    identification: undefined, notifications: undefined, role: undefined, isActive: undefined
                                 };
 
                                 res.status(201)
@@ -1572,7 +1572,7 @@ const checkCategory = (userID, unitId) => {
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
         const {userID, id, paymentType, paymentMethod, amount, adviceDate, unitId} = paymentData;
-        User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1})
+        User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1, notifications: 1})
             .then( async (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
@@ -1590,6 +1590,14 @@ const completePayment = (paymentData) => {
                                     user.payments.map((item) => {
                                         if (item.unitId === '') item.unitId = unitId
                                     })
+
+                                    const messages = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
+                                    const arabicMessage = messages.ar;
+                                    const englishMessage = messages.en;
+                                    const contractingAmount = units[0].contractingAmount;
+                                    console.log(arabicMessage)
+                                    console.log(englishMessage)
+
                                     await user.save()
                                         .then(() => {
                                             myResolve();

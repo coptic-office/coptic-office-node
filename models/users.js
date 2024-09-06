@@ -128,6 +128,21 @@ const userSchema = new Schema({
             ]
         }
     ],
+    notifications: {
+        newCount: {
+            type: Number,
+            default: 0
+        },
+        messages: [
+            {
+                ar: String,
+                en: String,
+                date: Date,
+                isDelivered: Boolean,
+                byUserID: String
+            }
+        ]
+    },
     role: {
         type: String,
         required: [true, 'roleRequired'],
