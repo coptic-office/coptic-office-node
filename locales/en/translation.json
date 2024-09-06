@@ -239,11 +239,6 @@
     "trialsSuspended": "The OTP wasn't sent because there were too many failed trails. Please wait some time",
     "mobileRequired": "Mobile number is required"
   },
-  "notifications": {
-    "language": "en",
-    "booking": "You have booked a new unit with a booking code: {{unitId}}. Please complete the contracting payment of {{contractingAmount}} EGP no later than {{maxDate}}.",
-    "contracting": "Your contracting request has been registered for the reserved unit: {{unitId}}. You will be contacted shortly to complete the contracting procedures."
-  },
   "faceRecognition": {
     "invalidFile": "Only files with specific formats are accepted. One or more files are invalid",
     "maxFileSize": "One or more files exceeded the allowed size",
