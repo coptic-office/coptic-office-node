@@ -1,6 +1,7 @@
 {
   "general": {
-    "internalError": "خطأ داخلي بالنظام"
+    "internalError": "خطأ داخلي بالنظام",
+    "language": "ar"
   },
   "register": {
     "invalidUserId": "كود المستخدم غير سليم",
@@ -106,7 +107,6 @@
       "instaPay": "إنستاباي",
       "creditCard": "كارت إئتمان"
     },
-    "language": "ar",
     "accountName": "بطريركية الأقباط الأرثوذكس",
     "invalidType": "نوعية عملية الدفع غير سليم",
     "invalidUnitId": "كود الحجز غير سليم",

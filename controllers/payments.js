@@ -59,7 +59,7 @@ const createPayment = async (req, res) => {
                     billingAddress: 'HIDE',
                     shipping: 'HIDE'
                 },
-                locale: req.i18n.t(`payment.language`),
+                locale: req.i18n.t(`general.language`),
                 retryAttemptCount: 3,
                 redirectMerchantUrl: process.env.PAYMENT_FAILURE_URL,
                 timeout: 600,

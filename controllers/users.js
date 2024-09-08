@@ -16,6 +16,7 @@ const {S3Client} = require('@aws-sdk/client-s3');
 const {Upload} = require("@aws-sdk/lib-storage");
 const Process = require("process");
 const Notification = require('../models/notifications');
+const {timeAgo} = require('../utils/dateUtils');
 
 const createUser = async (req, res) => {
     try {
@@ -1600,7 +1601,7 @@ const completePayment = (paymentData) => {
                                     const maxDateArabic = maxDate.toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
                                     const maxDateEnglish = maxDate.toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
 
-                                    arabicMessage = arabicMessage.replace('{{unitId}}', '201065509089/1');
+                                    arabicMessage = arabicMessage.replace('{{unitId}}', unitId);
                                     arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
                                     arabicMessage = arabicMessage.replace('{{maxDate}}', maxDateArabic);
 
@@ -1609,7 +1610,7 @@ const completePayment = (paymentData) => {
                                     englishMessage = englishMessage.replace('{{maxDate}}', maxDateEnglish);
 
                                     user.notifications.newCount += 1;
-                                    const message = {ar: arabicMessage, en: englishMessage, date: new Date(), isDelivered: false};
+                                    const message = {ar: arabicMessage, en: englishMessage, date: new Date(), isRead: false};
                                     user.notifications.messages.push(message);
 
                                     await user.save()
@@ -2404,6 +2405,70 @@ const updateNationalId = async (req, res) => {
     }
 }
 
+const getNotifications = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        User.findOne({_id: userID}, {notifications: 1})
+            .then(async (user) => {
+                user.notifications.newCount = 0;
+
+                const notifications = [];
+                user.notifications.messages.forEach((message) => {
+
+                    const lang = [req.i18n.t(`general.language`)];
+                    const text = message[lang];
+                    const date = message.date;
+                    const isRead = message.isRead;
+                    notifications.push({text, date, isRead, timeAgo: timeAgo(date, lang)});
+
+                    message.isRead = true;
+                })
+
+                await user.save()
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {
+                                notifications
+                            }
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500)
+                            .json({
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
+            })
+            .catch((err) => {
+                res.status(500)
+                    .json({
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 module.exports = {
     createUser,
     login,
@@ -2426,6 +2491,7 @@ module.exports = {
     getMyUnits,
     selectUnitType,
     updatePhoto,
-    updateNationalId
+    updateNationalId,
+    getNotifications
 }
 

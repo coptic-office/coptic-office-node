@@ -135,10 +135,11 @@ const userSchema = new Schema({
         },
         messages: [
             {
+                _id: false,
                 ar: String,
                 en: String,
                 date: Date,
-                isDelivered: Boolean,
+                isRead: Boolean,
                 byUserID: String
             }
         ]

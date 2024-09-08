@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
                     status: "success",
                     error: "",
                     message: {
-                        units: editedUnits
+                        units: editedUnits,
                     }
                 })
             })

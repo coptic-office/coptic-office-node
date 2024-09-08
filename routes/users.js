@@ -81,6 +81,10 @@ router.post('/select-unit-type', authorize(accessToken, selectUnitTypeRoles), us
 const getUnitTypesRoles = ['User'];
 router.post('/get-unit-types', authorize(accessToken, getUnitTypesRoles), user.getUnitTypes);
 
+/** Get a list of all the new and old notifications for a specific user */
+const getNotificationRoles = ['User'];
+router.post('/get-notifications', authorize(accessToken, getNotificationRoles), user.getNotifications);
+
 const fileTypesList = Process.env.IMAGE_FILE_TYPE.split(',');
 /** Update the user's profile photo */
 const updatePhotoRoles = ['User'];

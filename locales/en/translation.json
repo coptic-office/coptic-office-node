@@ -1,6 +1,7 @@
 {
   "general": {
-    "internalError": "Internal server error"
+    "internalError": "Internal server error",
+    "language": "en"
   },
   "register": {
     "invalidUserId": "Invalid User ID",
@@ -106,7 +107,6 @@
       "instaPay": "InstaPay",
       "creditCard": "Credit Card"
     },
-    "language": "en",
     "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",
     "invalidUnitId": "Invalid booking code",
