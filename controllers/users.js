@@ -219,7 +219,7 @@ const login = async (req, res) => {
             }
         }
         const query = userIdentifier === 'mobile' ? {'mobile.primary.number': mobileNumber} : {'email.primary': email};
-        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, profilePhoto: 1, role: 1, isActive: 1};
+        const projection = {firstName: 1, lastName: 1, password: 1, mobile: 1, 'notifications.newCount': 1, profilePhoto: 1, role: 1, isActive: 1};
         User.findOne(query, projection)
             .then((user) => {
                 if (!user) {
