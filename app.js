@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require('fs');
 const https = require('https');
-const cors = require('cors')
+const cors = require('cors');
 
 const {i18next, i18nextMiddleware} = require('./controllers/localization');
 const {authorize} = require('./middleware/auth');

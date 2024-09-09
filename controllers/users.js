@@ -1886,17 +1886,21 @@ const getMyPayments = async (req, res) => {
 
         User.findOne({_id: userID}, {payments: 1, units: 1, _id: 0})
             .then((user) => {
+                let totalPayments = 0;
                 user.payments.map((item) => {
                     item.paymentType = undefined;
+                    totalPayments += Number(item.amount);
                     item._doc.amount = Number(item.amount);
                     item._doc.paymentMethodText = req.i18n.t(`payment.method.${item.paymentMethod}`);
                 });
 
                 const bankChecks = [];
+                let totalChecks = 0;
                 user.units.forEach((unit) => {
                     const checks = [...unit.bankChecks];
                     checks.forEach((check) => {
                         check._doc.unitId = unit.id;
+                        totalChecks += Number(check.amount);
                         bankChecks.push(check);
                     })
                 });
@@ -1913,7 +1917,9 @@ const getMyPayments = async (req, res) => {
                     error: "",
                     message: {
                         payments: user.payments,
-                        bankChecks
+                        totalPayments,
+                        bankChecks,
+                        totalChecks
                     }
                 })
             })
@@ -1947,23 +1953,22 @@ const getMyUnits = async (req, res) => {
         User.findOne({_id: userID}, {units: 1, payments: 1, _id: 0})
             .then((user) => {
                 user.units.map((unit) => {
+                    const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
+                    const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                    unit._doc.totalCashAmount = paidAmount;
                     if (unit.unitNumber === undefined) {
                         unit.unitNumber = "---";
                     }
                     if (unit.category === undefined) {
                         unit.category = req.i18n.t(`product.noCategory`);
                         unit._doc.totalAmount = 0;
-                        unit._doc.totalCashAmount = 0;
                         unit._doc.totalChecksAmount = 0;
                     }
                     else {
-                        const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
-                        const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
                         const category = unit.category;
                         const myCategory = unit.priceDetails.filter((item) => item.category === category);
                         const grossAmount = myCategory[0].grossAmount;
                         const cashAmount = myCategory[0].cashAmount;
-                        unit._doc.totalCashAmount = paidAmount;
                         if (paidAmount >= cashAmount) {
                             unit._doc.totalAmount = cashAmount;
                             unit._doc.totalChecksAmount = 0;
