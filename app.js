@@ -10,7 +10,9 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require('fs');
+const http = require('http');
 const https = require('https');
+const io = require("socket.io");
 const cors = require('cors');
 
 const {i18next, i18nextMiddleware} = require('./controllers/localization');
@@ -59,6 +61,7 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 const sslInstalled = process.env.SECURITY_SSL_INSTALLED === 'True'
+let socketIO;
 if (sslInstalled) {
   const options = {
     key: fs.readFileSync('ssl/privkey.pem'),
@@ -68,12 +71,18 @@ if (sslInstalled) {
       fs.readFileSync('ssl/fullchain.pem'),
     ]
   };
+  const httpsServer = https.createServer(options, app);
+  socketIO = io(httpsServer);
+  socketIO.on('connection', (socket) => console.log(`Connected socket: ${socket}`));
   connectDB()
-      .then(() => https.createServer(options, app).listen(port, onListening).on('error', onError))
+      .then(() => httpsServer.listen(port, onListening).on('error', onError))
 }
 else {
+  const httpServer = http.createServer(app);
+  socketIO = io(httpServer);
+  socketIO.on('connection', (socket) => console.log(`Connected socket: ${socket}`));
   connectDB()
-      .then(() => app.listen(port, onListening).on('error', onError))
+      .then(() => httpServer.listen(port, onListening).on('error', onError))
 }
 
 /** Normalize a port into a number, string, or false */
@@ -131,3 +140,4 @@ function onListening() {
   log(`Listening on ${bind}`);
 }
 
+module.exports = {socketIO};
