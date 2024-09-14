@@ -99,7 +99,8 @@ const createUser = async (req, res) => {
                                     return res.status(404)
                                         .json({
                                             status: "failed",
-                                            error: req.i18n.t('register.creationError')
+                                            error: req.i18n.t('register.creationError'),
+                                            message: {}
                                         })
                                 }
                                 await preUser.deleteOne()
@@ -140,18 +141,21 @@ const createUser = async (req, res) => {
                                     })
                             })
                             .catch((err) => {
-                                let resourceID = ''
-                                if (typeof err.errors.firstName != 'undefined') {
-                                    resourceID = err.errors.firstName.message;
-                                } else if (typeof err.errors.lastName != 'undefined') {
-                                    resourceID = err.errors.lastName.message;
-                                } else if (typeof err.errors['email.primary'] != 'undefined') {
-                                    resourceID = err.errors['email.primary'].message;
-                                } else if (typeof err.errors.password != 'undefined') {
-                                    resourceID = err.errors.password.message;
-                                } else if (typeof err.errors.role != 'undefined') {
-                                    resourceID = err.errors.role.message;
+                                let resourceID = 'creationError';
+                                if (err.errors !== undefined) {
+                                    if (typeof err.errors.firstName != 'undefined') {
+                                        resourceID = err.errors.firstName.message;
+                                    } else if (typeof err.errors.lastName != 'undefined') {
+                                        resourceID = err.errors.lastName.message;
+                                    } else if (typeof err.errors['email.primary'] != 'undefined') {
+                                        resourceID = err.errors['email.primary'].message;
+                                    } else if (typeof err.errors.password != 'undefined') {
+                                        resourceID = err.errors.password.message;
+                                    } else if (typeof err.errors.role != 'undefined') {
+                                        resourceID = err.errors.role.message;
+                                    }
                                 }
+
                                 res.status(400)
                                     .json({
                                         status: "failed",

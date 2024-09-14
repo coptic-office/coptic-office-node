@@ -22,7 +22,8 @@
     "senderRequired": "يجب إدخال اسم الراسل",
     "preCreationError": "لم نتمكن من البدء في إضافة هذا المستخدم. يرجى المحاولة مرة أخرى",
     "existedUser": "هذا المستخدم موجود بالفعل",
-    "creationError": "لم نتمكن من إضافة هذا المستخدم. يرجى المحاولة مرة أخرى"
+    "creationError": "لم نتمكن من إضافة هذا المستخدم. يرجى المحاولة مرة أخرى",
+    "missingData": "يوجد بعض البيانات المفقودة"
   },
   "login": {
     "userNotFound": "هذا المستخدم غير موجود",
@@ -68,6 +69,11 @@
   "item": {
     "totalAmount": "المبلغ الإجمالي",
     "netAmount": "المبلغ الصافي",
+    "booking": "Sum paid for a unit booking",
+    "contracting": "Sum paid for the unit contracting",
+    "cashing": "Sum paid for the cash payment of a unit"
+  },
+  "item2": {
     "booking": "المبلغ مدفوع لصالح حجز وحدة",
     "contracting": "المبلغ مدفوع لصالح التعاقد على الوحدة",
     "cashing": "المبلغ المدفوع لصالح الدفع النقدي لوحدة"
@@ -107,7 +113,7 @@
       "instaPay": "إنستاباي",
       "creditCard": "كارت إئتمان"
     },
-    "accountName": "بطريركية الأقباط الأرثوذكس",
+    "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "نوعية عملية الدفع غير سليم",
     "invalidUnitId": "كود الحجز غير سليم",
     "invalidCategory": "لا يمكن الاستمرار بالدفع النقدي بينما الوحدة ليس لها فئة بعد",
@@ -173,7 +179,7 @@
       },
       "action": {
         "pay": "إذهب إلى الدفع",
-        "go": "الأتصال بنا",
+        "go": "الوصول إلينا",
         "select": "اختر نوع الوحدة"
       }
     }
@@ -206,6 +212,7 @@
   },
   "restriction": {
     "suspended": "حسابك معلق الآن. يرجى الاتصال بخدمة العملاء لمزيد من التفاصيل",
+    "suspendedStaff": "حسابك معلق الآن. يرجى الاتصال بالمدير المسئول لمزيد من التفاصيل",
     "locked": "تم تعليق حسابك مؤقتًا بسبب عدة محاولات تسجيل دخول خاطئة ، يرجى الانتظار بعض الوقت"
   },
   "email": {

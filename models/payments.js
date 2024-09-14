@@ -38,7 +38,7 @@ const paymentSchema = new Schema({
         bankSessionId: String,
         bankSuccessIndicator: String,
         referenceNumber: String,
-        byUserID: String,
+        staffID: String,
         comments: String
     }
 })

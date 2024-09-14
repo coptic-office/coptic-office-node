@@ -28,7 +28,7 @@ router.post('/resend-otp/', authorize(accessToken, resendOTPRoles), preUser.rese
 /** Create new users */
 router.post('/create-user', user.createUser);
 
-/** Login */
+/** User ogin */
 router.post('/login', user.login);
 
 /** Renew the expired Access Token using the Renew Token */

@@ -122,7 +122,7 @@ const userSchema = new Schema({
                     bankName: String,
                     status: String,
                     image: String,
-                    byUserID: String,
+                    staffID: String,
                     date: Date
                 }
             ]
@@ -140,7 +140,7 @@ const userSchema = new Schema({
                 en: String,
                 date: Date,
                 isRead: Boolean,
-                byUserID: String
+                staffID: String
             }
         ]
     },

@@ -22,7 +22,8 @@
     "senderRequired": "Sender name is required",
     "preCreationError": "Unable to start creating this user. Please try again",
     "existedUser": "User already exists",
-    "creationError": "Unable to create this user. Please try again"
+    "creationError": "Unable to create this user. Please try again",
+    "missingData": "Some data are missing"
   },
   "login": {
     "userNotFound": "User not found",
@@ -205,6 +206,7 @@
   },
   "restriction": {
     "suspended": "Your account is suspended now. Please contact customer service for further details",
+    "suspendedStaff": "Your account is suspended now. Please contact the administrator for further details",
     "locked": "Your account is temporarily locked due to several failed login attempts, Please wait some time"
   },
   "email": {

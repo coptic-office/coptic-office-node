@@ -20,6 +20,7 @@ const {authorize} = require('./middleware/auth');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const staffRouter = require('./routes/staff');
 const plansRouter = require('./routes/plans')
 const paymentsRouter = require('./routes/payments');
 const adminRouter = require('./routes/admin');
@@ -42,7 +43,8 @@ app.use(cors());
 app.use('/system', sysRouter);
 app.use(checkAppLang);
 app.use('/home', indexRouter);
-app.use('/users', usersRouter);
+app.use('/users', usersRouter)
+app.use('/staff', staffRouter);
 app.use('/plans', plansRouter);
 app.use('/payments', paymentsRouter);
 app.use('/admin', authorize('Access', ['Admin']));
@@ -60,7 +62,7 @@ app.use(errorHandler);
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-const sslInstalled = process.env.SECURITY_SSL_INSTALLED === 'True'
+const sslInstalled = process.env.SECURITY_SSL_INSTALLED === 'True';
 let socketIO;
 if (sslInstalled) {
   const options = {
