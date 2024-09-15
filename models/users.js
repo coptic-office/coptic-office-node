@@ -129,7 +129,7 @@ const userSchema = new Schema({
             info: {
                 ar: String,
                 en: String,
-                value: Number
+                value: String
             }
         }
     ],
