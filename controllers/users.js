@@ -1598,15 +1598,18 @@ const completePayment = (paymentData) => {
 
                                     const notifications = await Notification.find({$or: [{name: 'booking'}, {name: 'bookingInfo'}]});
                                     let araMessage, engMessage, araMessageInfo, engMessageInfo;
-                                    console.log(notifications)
                                     notifications.forEach((item) => {
                                         if (item.name === 'booking') {
                                             araMessage = item.messages.ar;
+                                            console.log(`araMessage: ${araMessage}`)
                                             engMessage = item.messages.en;
+                                            console.log(`engMessage: ${engMessage}`)
                                         }
                                         if (item.name === 'bookingInfo') {
                                             araMessageInfo = item.messages.ar;
+                                            console.log(`araMessageInfo: ${araMessageInfo}`)
                                             engMessageInfo = item.messages.en;
+                                            console.log(`araMessageInfo: ${araMessageInfo}`)
                                         }
                                     });
                                     const contractingAmount = units[0].contractingAmount.toLocaleString();
