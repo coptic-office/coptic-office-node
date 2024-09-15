@@ -1646,7 +1646,6 @@ const completePayment = (paymentData) => {
                                         })
                                 }
                                 else {
-
                                     await user.save()
                                         .then(() => {
                                             myResolve();
@@ -1670,7 +1669,25 @@ const completePayment = (paymentData) => {
                         const paidContracting = contractingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
                         if (paidContracting >= Number(contractingAmount)) {
                             user.units.map((item) => {
-                                if (item.id === unitId) item.contractingDate = new Date();
+                                if (item.id === unitId) {
+                                    item.contractingDate = new Date();
+                                    item.info = {};
+                                }
+                            })
+                        }
+                        else {
+                            user.units.map((item) => {
+                                if (item.id === unitId) {
+                                    let araInfo = item.info.ar;
+                                    let engInfo = item.info.en;
+                                    const value = item.info.value;
+                                    const remainingAmount = (contractingAmount - paidContracting).toLocaleString();
+                                    araInfo = araInfo.replace(value, remainingAmount);
+                                    engInfo = engInfo.replace(value, remainingAmount);
+                                    item.info.ar = araInfo;
+                                    item.info.en = engInfo;
+                                    item.info.value = remainingAmount;
+                                }
                             })
                         }
 
@@ -1992,9 +2009,19 @@ const getMyUnits = async (req, res) => {
                     const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
                     const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
                     unit._doc.totalCashAmount = paidAmount;
+
                     if (unit.unitNumber === undefined) {
                         unit.unitNumber = "---";
                     }
+
+                    if (unit.info.ar === undefined) {
+                        unit.info = "";
+                    }
+                    else {
+                        const lang = [req.i18n.t(`general.language`)];
+                        unit._doc.info = unit.info[lang];
+                    }
+
                     if (unit.category === undefined) {
                         unit.category = req.i18n.t(`product.noCategory`);
                         unit._doc.totalAmount = 0;
@@ -2020,12 +2047,15 @@ const getMyUnits = async (req, res) => {
                         }
                         unit.category = req.i18n.t(`product.${unit.category}.name`);
                     }
+
                     if (unit.contractingDate === undefined) {
                         unit.contractingDate = "";
                     }
+
                     if (unit.contractDate === undefined) {
                         unit.contractDate = "";
                     }
+
                     unit.priceDetails = undefined;
                     unit.completionDate = undefined;
                     unit.bankChecks = undefined;
