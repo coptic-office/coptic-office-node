@@ -1597,7 +1597,8 @@ const completePayment = (paymentData) => {
                                     })
 
                                     const notifications = await Notification.find({$or: [{name: 'booking'}, {name: 'bookingInfo'}]});
-                                    let araMessage = '', engMessage = '', araMessageInfo = '', engMessageInfo = '';
+                                    let araMessage, engMessage, araMessageInfo, engMessageInfo;
+                                    console.log(notifications)
                                     notifications.forEach((item) => {
                                         if (item.name === 'booking') {
                                             araMessage = item.messages.ar;
