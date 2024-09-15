@@ -125,7 +125,12 @@ const userSchema = new Schema({
                     staffID: String,
                     date: Date
                 }
-            ]
+            ],
+            info: {
+                ar: String,
+                en: String,
+                value: Number
+            }
         }
     ],
     notifications: {

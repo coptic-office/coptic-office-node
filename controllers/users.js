@@ -1596,26 +1596,45 @@ const completePayment = (paymentData) => {
                                         if (item.unitId === '') item.unitId = unitId
                                     })
 
-                                    const {messages} = await Notification.findOne({name: 'booking'}, {_id: 0, messages: 1});
-                                    let arabicMessage = messages.ar;
-                                    let englishMessage = messages.en;
+                                    const notifications = await Notification.find({$or: [{name: 'booking'}, {name: 'bookingInfo'}]});
+                                    let araMessage, engMessage, araMessageInfo, engMessageInfo;
+                                    notifications.forEach((item) => {
+                                        if (item.name === 'booking') {
+                                            araMessage = item.messages.ar;
+                                            engMessage = item.messages.en;
+                                        }
+                                        if (item.name === 'bookingInfo') {
+                                            araMessageInfo = item.messages.ar;
+                                            engMessageInfo = item.messages.en;
+                                        }
+                                    });
                                     const contractingAmount = units[0].contractingAmount.toLocaleString();
                                     const maxDate = new Date();
                                     maxDate.setMonth(maxDate.getMonth() + 3);
                                     const maxDateArabic = maxDate.toLocaleDateString('ar', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
                                     const maxDateEnglish = maxDate.toLocaleDateString('en', {year: 'numeric', month: 'long', day: '2-digit', weekday: 'long'})
 
-                                    arabicMessage = arabicMessage.replace('{{unitId}}', unitId);
-                                    arabicMessage = arabicMessage.replace('{{contractingAmount}}', contractingAmount);
-                                    arabicMessage = arabicMessage.replace('{{maxDate}}', maxDateArabic);
+                                    araMessage = araMessage.replace('{{unitId}}', unitId);
+                                    araMessage = araMessage.replace('{{contractingAmount}}', contractingAmount);
+                                    araMessage = araMessage.replace('{{maxDate}}', maxDateArabic);
 
-                                    englishMessage = englishMessage.replace('{{unitId}}', unitId);
-                                    englishMessage = englishMessage.replace('{{contractingAmount}}', contractingAmount);
-                                    englishMessage = englishMessage.replace('{{maxDate}}', maxDateEnglish);
+                                    engMessage = engMessage.replace('{{unitId}}', unitId);
+                                    engMessage = engMessage.replace('{{contractingAmount}}', contractingAmount);
+                                    engMessage = engMessage.replace('{{maxDate}}', maxDateEnglish);
 
                                     user.notifications.newCount += 1;
-                                    const message = {ar: arabicMessage, en: englishMessage, date: new Date(), isRead: false};
+                                    const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
                                     user.notifications.messages.push(message);
+
+                                    araMessageInfo = araMessageInfo.replace('{{contractingAmount}}', contractingAmount);
+                                    araMessageInfo = araMessageInfo.replace('{{maxDate}}', maxDateArabic);
+
+                                    engMessageInfo = engMessageInfo.replace('{{contractingAmount}}', contractingAmount);
+                                    engMessageInfo = engMessageInfo.replace('{{maxDate}}', maxDateEnglish);
+
+                                    user.info.ar = araMessageInfo;
+                                    user.info.en = engMessageInfo;
+                                    user.info.value = contractingAmount;
 
                                     await user.save()
                                         .then(() => {
@@ -1653,6 +1672,18 @@ const completePayment = (paymentData) => {
                                 if (item.id === unitId) item.contractingDate = new Date();
                             })
                         }
+
+                        const {messages} = await Notification.findOne({name: 'contracting'}, {_id: 0, messages: 1});
+                        let araMessage = messages.ar;
+                        let engMessage = messages.en;
+
+                        araMessage = araMessage.replace('{{unitId}}', unitId);
+                        engMessage = engMessage.replace('{{unitId}}', unitId);
+
+                        user.notifications.newCount += 1;
+                        const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                        user.notifications.messages.push(message);
+
                         await user.save()
                             .then(() => {
                                 myResolve();
