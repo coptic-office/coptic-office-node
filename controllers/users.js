@@ -1591,7 +1591,6 @@ const completePayment = (paymentData) => {
                                 const paidBooking = bookingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
                                 if (paidBooking >= Number(bookingAmount)) {
                                     const unitId = `${mobileNumber.replace('+', '')}/${user.units.length + 1}`
-                                    user.units.push({id: unitId, priceDetails: units, bookingDate: new Date()});
                                     user.payments.map((item) => {
                                         if (item.unitId === '') item.unitId = unitId
                                     })
@@ -1601,15 +1600,11 @@ const completePayment = (paymentData) => {
                                     notifications.forEach((item) => {
                                         if (item.name === 'booking') {
                                             araMessage = item.messages.ar;
-                                            console.log(`araMessage: ${araMessage}`)
                                             engMessage = item.messages.en;
-                                            console.log(`engMessage: ${engMessage}`)
                                         }
                                         if (item.name === 'bookingInfo') {
                                             araMessageInfo = item.messages.ar;
-                                            console.log(`araMessageInfo: ${araMessageInfo}`)
                                             engMessageInfo = item.messages.en;
-                                            console.log(`araMessageInfo: ${araMessageInfo}`)
                                         }
                                     });
                                     const contractingAmount = units[0].contractingAmount.toLocaleString();
@@ -1636,10 +1631,12 @@ const completePayment = (paymentData) => {
                                     engMessageInfo = engMessageInfo.replace('{{contractingAmount}}', contractingAmount);
                                     engMessageInfo = engMessageInfo.replace('{{maxDate}}', maxDateEnglish);
 
-                                    user.info.ar = araMessageInfo;
-                                    user.info.en = engMessageInfo;
-                                    user.info.value = contractingAmount;
+                                    const info = {};
+                                    info.ar = araMessageInfo;
+                                    info.en = engMessageInfo;
+                                    info.value = contractingAmount;
 
+                                    user.units.push({id: unitId, priceDetails: units, bookingDate: new Date(), info});
                                     await user.save()
                                         .then(() => {
                                             myResolve();
