@@ -91,6 +91,10 @@ const updatePhotoRoles = ['User'];
 const options1 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
 router.post('/update-photo', [authorize(accessToken, updatePhotoRoles), multipartParser(options1, 'image')], user.updatePhoto);
 
+/** Delete the user's profile photo */
+const deletePhotoRoles = ['User'];
+router.post('/delete-photo', authorize(accessToken, deletePhotoRoles), user.deletePhoto);
+
 /** Update the user's national ID */
 const updateNationalIdRoles = ['User'];
 const options2 = {maxFileSize: 1, maxFilesCount: 2, fileTypesList};

@@ -25,4 +25,12 @@ const updatePhotoRoles = ['Admin', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 const options1 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
 router.post('/update-photo', [authorize('Access', updatePhotoRoles), multipartParser(options1, 'image')], staff.updatePhoto);
 
+/** Delete the staff profile photo */
+const deletePhotoRoles = ['Admin', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/delete-photo', authorize('Access', deletePhotoRoles), staff.deletePhoto);
+
+/** Show full user details of a specific user using his registered mobile number */
+const userDetailsRoles = ['Admin', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/get-user-details', [authorize('Access', userDetailsRoles), validateMobile], staff.getUserDetails);
+
 module.exports = router;

@@ -1674,6 +1674,17 @@ const completePayment = (paymentData) => {
                                     item.info = {};
                                 }
                             })
+
+                            const {messages} = await Notification.findOne({name: 'contracting'}, {_id: 0, messages: 1});
+                            let araMessage = messages.ar;
+                            let engMessage = messages.en;
+
+                            araMessage = araMessage.replace('{{unitId}}', unitId);
+                            engMessage = engMessage.replace('{{unitId}}', unitId);
+
+                            user.notifications.newCount += 1;
+                            const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                            user.notifications.messages.push(message);
                         }
                         else {
                             user.units.map((item) => {
@@ -1690,17 +1701,6 @@ const completePayment = (paymentData) => {
                                 }
                             })
                         }
-
-                        const {messages} = await Notification.findOne({name: 'contracting'}, {_id: 0, messages: 1});
-                        let araMessage = messages.ar;
-                        let engMessage = messages.en;
-
-                        araMessage = araMessage.replace('{{unitId}}', unitId);
-                        engMessage = engMessage.replace('{{unitId}}', unitId);
-
-                        user.notifications.newCount += 1;
-                        const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
-                        user.notifications.messages.push(message);
 
                         await user.save()
                             .then(() => {
@@ -2356,6 +2356,44 @@ const updatePhoto = async (req, res) => {
     }
 }
 
+const deletePhoto = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        const defaultPhoto = process.env.GENERAL_DEFAULT_PROFILE;
+        User.updateOne({_id: userID}, {profilePhoto: defaultPhoto})
+            .then(() => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        profilePhoto: defaultPhoto
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const updateNationalId = async (req, res) => {
     try {
         const region = process.env.S3_REGION;
@@ -2540,6 +2578,23 @@ const getNotifications = async (req, res) => {
     }
 }
 
+const getUserDetails = async (mobileNumber) => {
+    return new Promise((myResolve, myReject) => {
+        User.findOne({'mobile.primary.number': mobileNumber}, {_id: 0, profilePhoto: 0, currency: 0, password: 0, notifications: 0, role: 0})
+            .then((user) => {
+                if (!user) {
+                    myReject('userNotFound');
+                }
+                else {
+                    myResolve(user);
+                }
+            })
+            .catch((err) => {
+                myReject(err.toString());
+            })
+    })
+}
+
 module.exports = {
     createUser,
     login,
@@ -2562,7 +2617,9 @@ module.exports = {
     getMyUnits,
     selectUnitType,
     updatePhoto,
+    deletePhoto,
     updateNationalId,
-    getNotifications
+    getNotifications,
+    getUserDetails
 }
 

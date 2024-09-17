@@ -3,6 +3,7 @@ const errorLog = debug('app-staff:error');
 const Staff = require('../models/staff');
 const auth = require("../middleware/auth");
 const PreUser = require("../models/preUsers");
+const User = require('../controllers/users');
 const numbers = require("../utils/codeGenerator");
 const sendSMS = require("../utils/smsConnectors");
 const {createSmsRecord} = require("./smsRecords");
@@ -719,6 +720,184 @@ const updatePhoto = async (req, res) => {
     }
 }
 
+const deletePhoto = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        const defaultPhoto = process.env.GENERAL_DEFAULT_PROFILE;
+        Staff.updateOne({_id: userID}, {profilePhoto: defaultPhoto})
+            .then(() => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        profilePhoto: defaultPhoto
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const getUserDetails = async (req, res) => {
+    try {
+        const {mobile: {number: mobileNumber}} = await req.body;
+
+        User.getUserDetails(mobileNumber)
+            .then((user) => {
+                const info = {};
+                info.firstName = user.firstName;
+                info.lastName = user.lastName;
+                info.mobile = mobileNumber;
+                info.email = user.email === undefined ? '' : user.email.primary;
+                info.identification = user.identification === undefined ? {} : user.identification;
+                info.status = user.isActive;
+
+                let totalPayments = 0;
+                user.payments.map((item) => {
+                    item.paymentType = undefined;
+                    totalPayments += Number(item.amount);
+                    item._doc.amount = Number(item.amount);
+                    item._doc.paymentMethodText = req.i18n.t(`payment.method.${item.paymentMethod}`);
+                });
+
+                const bankChecks = [];
+                let totalChecks = 0;
+                user.units.forEach((unit) => {
+                    const checks = [...unit.bankChecks];
+                    checks.forEach((check) => {
+                        check._doc.unitId = unit.id;
+                        totalChecks += Number(check.amount);
+                        bankChecks.push(check);
+                    })
+                });
+                bankChecks.map((check) => {
+                    check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
+                    check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status}`);
+                    check.image = undefined;
+                    check.userID = undefined;
+                    check.date = undefined;
+                })
+
+                user.units.map((unit) => {
+                    const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
+                    const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                    unit._doc.totalCashAmount = paidAmount;
+
+                    if (unit.unitNumber === undefined) {
+                        unit.unitNumber = "---";
+                    }
+
+                    if (unit.info.ar === undefined) {
+                        unit.info = "";
+                    }
+                    else {
+                        const lang = [req.i18n.t(`general.language`)];
+                        unit._doc.info = unit.info[lang];
+                    }
+
+                    if (unit.category === undefined) {
+                        unit.category = req.i18n.t(`product.noCategory`);
+                        unit._doc.totalAmount = 0;
+                        unit._doc.totalChecksAmount = 0;
+                    }
+                    else {
+                        const category = unit.category;
+                        const myCategory = unit.priceDetails.filter((item) => item.category === category);
+                        const grossAmount = myCategory[0].grossAmount;
+                        const cashAmount = myCategory[0].cashAmount;
+                        if (paidAmount >= cashAmount) {
+                            unit._doc.totalAmount = cashAmount;
+                            unit._doc.totalChecksAmount = 0;
+                        }
+                        else {
+                            unit._doc.totalAmount = grossAmount;
+                            if (unit.bankChecks.length > 0) {
+                                unit._doc.totalChecksAmount = unit.bankChecks.reduce((sum, item) => sum + Number(item.amount), 0);
+                            }
+                            else {
+                                unit._doc.totalChecksAmount = 0;
+                            }
+                        }
+                        unit.category = req.i18n.t(`product.${unit.category}.name`);
+                    }
+
+                    if (unit.contractingDate === undefined) {
+                        unit.contractingDate = "";
+                    }
+
+                    if (unit.contractDate === undefined) {
+                        unit.contractDate = "";
+                    }
+
+                    unit.priceDetails = undefined;
+                    unit.completionDate = undefined;
+                    unit.bankChecks = undefined;
+                })
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        info,
+                        payments: user.payments,
+                        totalPayments,
+                        bankChecks,
+                        totalChecks,
+                        units: user.units
+                    }
+                })
+
+            })
+            .catch((err) => {
+                if (err === 'userNotFound') {
+                    res.status(404).json({
+                        status: "failed",
+                        error: req.i18n.t('login.userNotFound'),
+                        message: {}
+                    })
+                } else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            })
+    } catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -763,5 +942,7 @@ module.exports = {
     forgotPassword,
     verifyOTP,
     changePassword,
-    updatePhoto
+    updatePhoto,
+    deletePhoto,
+    getUserDetails
 }
