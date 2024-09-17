@@ -75,14 +75,14 @@ if (sslInstalled) {
   };
   const httpsServer = https.createServer(options, app);
   socketIO = io(httpsServer);
-  socketIO.on('connection', (socket) => console.log(`Connected socket: ${socket.toString()}`));
+  socketIO.on('connection', (socket) => console.log(`Connected socket: ${JSON.stringify(socket, null, 4)}`));
   connectDB()
       .then(() => httpsServer.listen(port, onListening).on('error', onError))
 }
 else {
   const httpServer = http.createServer(app);
   socketIO = io(httpServer);
-  socketIO.on('connection', (socket) => console.log(`Connected socket: ${socket.toString()}`));
+  socketIO.on('connection', (socket) => console.log(`Connected socket: ${JSON.stringify(socket, null, 4)}`));
   connectDB()
       .then(() => httpServer.listen(port, onListening).on('error', onError))
 }
