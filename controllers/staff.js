@@ -898,6 +898,26 @@ const getUserDetails = async (req, res) => {
     }
 }
 
+const addPayment = async (req, res) => {
+    try {
+        const {user: {id: userID}, mobileNumber, paymentType, paymentMethod, amount, adviceDate, referenceNumber, comments} = await req.body;
+
+
+
+
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -944,5 +964,6 @@ module.exports = {
     changePassword,
     updatePhoto,
     deletePhoto,
-    getUserDetails
+    getUserDetails,
+    addPayment
 }

@@ -75,14 +75,26 @@ if (sslInstalled) {
   };
   const httpsServer = https.createServer(options, app);
   socketIO = io(httpsServer);
-  socketIO.on('connection', (socket) => console.log(socket));
+  socketIO.on('connection', (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+      console.log(`Socket disconnected: ${socket.id}`);
+    })
+  });
   connectDB()
       .then(() => httpsServer.listen(port, onListening).on('error', onError))
 }
 else {
   const httpServer = http.createServer(app);
   socketIO = io(httpServer);
-  socketIO.on('connection', (socket) => console.log(socket));
+  socketIO.on('connection', (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+      console.log(`Socket disconnected: ${socket.id}`);
+    })
+  });
   connectDB()
       .then(() => httpServer.listen(port, onListening).on('error', onError))
 }

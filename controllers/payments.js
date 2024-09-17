@@ -206,4 +206,10 @@ const findPayment = (resultIndicator) => {
     })
 }
 
-module.exports = {createPayment, findPayment}
+const addPayment = async (paymentdata) => {
+    return new Promise((myResolve, myReject) => {
+
+    })
+}
+
+module.exports = {createPayment, findPayment, addPayment}
