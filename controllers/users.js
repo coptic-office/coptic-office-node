@@ -2520,7 +2520,7 @@ const getNotifications = async (req, res) => {
 
         User.findOne({_id: userID}, {notifications: 1})
             .then(async (user) => {
-                user.notifications.newCount = 0;
+                // user.notifications.newCount = 0;
 
                 const notifications = [];
                 user.notifications.messages.forEach((message) => {
@@ -2531,7 +2531,7 @@ const getNotifications = async (req, res) => {
                     const isRead = message.isRead;
                     notifications.push({text, date, isRead, timeAgo: timeAgo(date, lang)});
 
-                    message.isRead = true;
+                    // message.isRead = true;
                 })
 
                 await user.save()
