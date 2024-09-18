@@ -26,6 +26,10 @@ const paymentSchema = new Schema({
                 values: ['bankDeposit', 'bankTransfer', 'instaPay', 'creditCard']
             }
         },
+        locale: {
+            type: String,
+            values: ['ar', 'en']
+        },
         amount: mongoose.Decimal128,
         date: Date,
         status: {

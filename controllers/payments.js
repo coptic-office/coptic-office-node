@@ -46,6 +46,7 @@ const createPayment = async (req, res) => {
 
         const username = process.env.PAYMENT_USER_NAME;
         const password = process.env.PAYMENT_PASSWORD;
+        const failureUrl = process.env.PAYMENT_FAILURE_URL.replace('{{locale}}', req.i18n.t(`general.language`));
         const basicAuth = 'Basic ' + btoa(username + ':' + password);
         axios.post(BANQUE_MISR_URL, {
             apiOperation: "INITIATE_CHECKOUT",
@@ -61,10 +62,10 @@ const createPayment = async (req, res) => {
                 },
                 locale: req.i18n.t(`general.language`),
                 retryAttemptCount: 3,
-                redirectMerchantUrl: process.env.PAYMENT_FAILURE_URL,
+                redirectMerchantUrl: failureUrl,
                 timeout: 600,
-                timeoutUrl: process.env.PAYMENT_FAILURE_URL,
-                cancelUrl: process.env.PAYMENT_FAILURE_URL,
+                timeoutUrl: failureUrl,
+                cancelUrl: failureUrl,
                 returnUrl: process.env.PAYMENT_RETURN_URL
             },
             order: {
@@ -89,6 +90,7 @@ const createPayment = async (req, res) => {
                     paymentData.receiptDetails.amount = amount;
                     paymentData.paymentDetails = {};
                     paymentData.paymentDetails.paymentMethod = 'creditCard';
+                    paymentData.paymentDetails.locale = req.i18n.t(`general.language`);
                     paymentData.paymentDetails.amount = amount;
                     paymentData.paymentDetails.date = new Date();
                     paymentData.paymentDetails.status = 'Pending';
@@ -173,13 +175,15 @@ const findPayment = (resultIndicator) => {
     return new Promise((myResolve, myReject) => {
         const query = {'paymentDetails.bankSuccessIndicator': resultIndicator};
         const update = {'paymentDetails.status': 'Succeeded', 'paymentDetails.adviceDate': new Date()};
+        let locale = 'ar';
         Payment.findOneAndUpdate(query, update, {new: true})
             .then((payment) => {
                 if (!payment) {
                     errorLog(`Unmatched resultIndicator: ${resultIndicator}`)
-                    myReject('invalidIndicator');
+                    myReject({err: 'invalidIndicator', locale});
                 }
                 else {
+                    locale = payment.paymentDetails.locale;
                     const paymentData = {
                         userID: payment.userID,
                         id: payment._id,
@@ -191,17 +195,17 @@ const findPayment = (resultIndicator) => {
                     }
                     completePayment(paymentData)
                         .then(() => {
-                            myResolve();
+                            myResolve({locale});
                         })
                         .catch((err) => {
                             errorLog(`Failed while completing payment for resultIndicator: ${resultIndicator}\nError: ${err}`);
-                            myReject('completionError');
+                            myReject({err: 'completionError', locale});
                         });
                 }
             })
             .catch((err) => {
                 errorLog(`Failed while processing resultIndicator: ${resultIndicator}\nError: ${err}`);
-                myReject('internalError');
+                myReject({err: 'internalError', locale});
             })
     })
 }

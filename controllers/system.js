@@ -11,30 +11,33 @@ const paymentCallback = async (req, res) => {
         }
         else {
             Payment.findPayment(resultIndicator)
-                .then(() => {
-                    res.redirect(process.env.PAYMENT_SUCCESS_URL);
+                .then(({locale}) => {
+                    const successUrl = process.env.PAYMENT_SUCCESS_URL.replace('{{locale}}', locale);
+                    res.redirect(successUrl);
                 })
-                .catch((err) => {
+                .catch(({err, locale}) => {
+                    const unverifiedUrl = process.env.PAYMENT_UNVERIFIED_URL.replace('{{locale}}', locale);
+                    const incompleteUrl = process.env.PAYMENT_INCOMPLETE_URL.replace('{{locale}}', locale);
                     switch (err.toString()) {
                         case 'invalidIndicator':
                         case 'internalError':
-                            res.redirect(process.env.PAYMENT_UNVERIFIED_URL);
+                            res.redirect(unverifiedUrl);
                             break;
 
                         case 'completionError':
-                            res.redirect(process.env.PAYMENT_INCOMPLETE_URL);
+                            res.redirect(incompleteUrl);
                             break;
 
                         default:
                             errorLog(`Uncaught error in the Switch statement\nError: ${err}`)
-                            res.redirect('https://www.facebook.com/');
+                            res.redirect(unverifiedUrl);
                     }
                 });
         }
     }
     catch (err) {
         errorLog(`Failed while calling payment callback\nError: ${err}`)
-        res.redirect(process.env.PAYMENT_UNVERIFIED_URL);
+        res.redirect(process.env.PAYMENT_UNVERIFIED_URL.replace('{{locale}}', 'ar'));
     }
 }
 
