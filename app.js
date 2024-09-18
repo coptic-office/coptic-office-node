@@ -82,6 +82,7 @@ if (sslInstalled) {
   });
   socketIO.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+    socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);
@@ -100,6 +101,7 @@ else {
   });
   socketIO.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+    socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);
