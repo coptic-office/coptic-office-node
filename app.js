@@ -74,7 +74,12 @@ if (sslInstalled) {
     ]
   };
   const httpsServer = https.createServer(options, app);
-  socketIO = io(httpsServer);
+  socketIO = io(httpsServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
   socketIO.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
 
@@ -87,7 +92,12 @@ if (sslInstalled) {
 }
 else {
   const httpServer = http.createServer(app);
-  socketIO = io(httpServer);
+  socketIO = io(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
   socketIO.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
 
