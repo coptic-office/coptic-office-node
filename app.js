@@ -81,11 +81,12 @@ if (sslInstalled) {
     },
   });
   socketIO.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
+    console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
     socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      console.log(`Socket disconnected with ID: ${socket.id}`);
     })
   });
   connectDB()
@@ -100,11 +101,12 @@ else {
     },
   });
   socketIO.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
+    console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
     socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      console.log(`Socket disconnected with ID: ${socket.id}`);
     })
   });
   connectDB()
