@@ -1940,7 +1940,7 @@ const getMyPayments = async (req, res) => {
     try {
         const {user: {id: userID}} = await req.body;
 
-        User.findOne({_id: userID}, {payments: 1, units: 1, _id: 0})
+        User.findOne({_id: userID}, {payments: 1, units: 1, _id: 0, 'notifications.newCount': 1})
             .then((user) => {
                 let totalPayments = 0;
                 user.payments.map((item) => {
@@ -1975,7 +1975,8 @@ const getMyPayments = async (req, res) => {
                         payments: user.payments,
                         totalPayments,
                         bankChecks,
-                        totalChecks
+                        totalChecks,
+                        notifications: user.notifications
                     }
                 })
             })
