@@ -63,7 +63,7 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 const sslInstalled = process.env.SECURITY_SSL_INSTALLED === 'True';
-let socketIO;
+global.socketIO;
 if (sslInstalled) {
   const options = {
     key: fs.readFileSync('ssl/privkey.pem'),
@@ -83,7 +83,7 @@ if (sslInstalled) {
   socketIO.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
     console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
-    socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
+    // socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected with ID: ${socket.id}`);
@@ -103,7 +103,7 @@ else {
   socketIO.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
     console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
-    socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
+    // socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected with ID: ${socket.id}`);
@@ -167,5 +167,3 @@ function onListening() {
       : 'port ' + port;
   log(`Listening on ${bind}`);
 }
-
-module.exports = {socketIO};

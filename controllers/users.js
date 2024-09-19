@@ -1624,6 +1624,7 @@ const completePayment = (paymentData) => {
                                     user.notifications.newCount += 1;
                                     const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
                                     user.notifications.messages.push(message);
+                                    socketIO.emit(mobileNumber, {newCount: user.notifications.newCount});
 
                                     araMessageInfo = araMessageInfo.replace('{{contractingAmount}}', contractingAmount);
                                     araMessageInfo = araMessageInfo.replace('{{maxDate}}', maxDateArabic);
@@ -1685,6 +1686,8 @@ const completePayment = (paymentData) => {
                             user.notifications.newCount += 1;
                             const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
                             user.notifications.messages.push(message);
+                            socketIO.emit(mobileNumber, {newCount: user.notifications.newCount});
+
                         }
                         else {
                             user.units.map((item) => {
