@@ -2007,7 +2007,7 @@ const getMyUnits = async (req, res) => {
     try {
         const {user: {id: userID}} = await req.body;
 
-        User.findOne({_id: userID}, {units: 1, payments: 1, _id: 0})
+        User.findOne({_id: userID}, {units: 1, payments: 1, _id: 0, 'notifications.newCount': 1})
             .then((user) => {
                 user.units.map((unit) => {
                     const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
@@ -2069,7 +2069,8 @@ const getMyUnits = async (req, res) => {
                     status: "success",
                     error: "",
                     message: {
-                        units: user.units
+                        units: user.units,
+                        notifications: user.notifications
                     }
                 })
             })
@@ -2582,6 +2583,43 @@ const getNotifications = async (req, res) => {
     }
 }
 
+const getProfileInfo = async (req, res) => {
+    try {
+        const {user: {id: userID}} = await req.body;
+
+        User.findOne({_id: userID}, {_id: 0, firstName: 1, lastName: 1, mobile: 1, profilePhoto: 1, identification: 1, email: 1, 'notifications.newCount': 1})
+            .then((user) => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    Message: {
+                        user
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const getUserDetails = async (mobileNumber) => {
     return new Promise((myResolve, myReject) => {
         User.findOne({'mobile.primary.number': mobileNumber}, {_id: 0, profilePhoto: 0, currency: 0, password: 0, notifications: 0, role: 0})
@@ -2624,6 +2662,7 @@ module.exports = {
     deletePhoto,
     updateNationalId,
     getNotifications,
+    getProfileInfo,
     getUserDetails
 }
 
