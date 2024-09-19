@@ -578,7 +578,7 @@ const updateEmail = async (req, res) => {
                                     return res.status(400)
                                         .json({
                                             status: "failed",
-                                            error: req.i18n.t('user.sameEmail'),
+                                            error: "sameEmail",
                                             message: {}
                                         })
                                 }
@@ -937,7 +937,7 @@ const updateMobile = async (req, res) => {
                                     return res.status(400)
                                         .json({
                                             status: "failed",
-                                            error: req.i18n.t('user.sameMobile'),
+                                            error: "sameMobile",
                                             message: {}
                                         })
                                 }
