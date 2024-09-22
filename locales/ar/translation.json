@@ -69,14 +69,14 @@
   "item": {
     "totalAmount": "المبلغ الإجمالي",
     "netAmount": "المبلغ الصافي",
-    "booking": "Sum paid for a unit booking",
-    "contracting": "Sum paid for the unit contracting",
-    "cashing": "Sum paid for the cash payment of a unit"
-  },
-  "item2": {
     "booking": "المبلغ مدفوع لصالح حجز وحدة",
     "contracting": "المبلغ مدفوع لصالح التعاقد على الوحدة",
     "cashing": "المبلغ المدفوع لصالح الدفع النقدي لوحدة"
+  },
+  "bankItem": {
+    "booking": "Sum paid for a unit booking",
+    "contracting": "Sum paid for the unit contracting",
+    "cashing": "Sum paid for the cash payment of a unit"
   },
   "product": {
     "category1": {

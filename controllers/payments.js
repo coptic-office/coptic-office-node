@@ -42,7 +42,7 @@ const createPayment = async (req, res) => {
             unitId = '';
         }
         const uniqueId = generateUUID();
-        const itemDescription = req.i18n.t(`item.${paymentType.toString().toLowerCase()}`);
+        const itemDescription = req.i18n.t(`bankItem.${paymentType.toString().toLowerCase()}`);
 
         const username = process.env.PAYMENT_USER_NAME;
         const password = process.env.PAYMENT_PASSWORD;
@@ -210,9 +210,20 @@ const findPayment = (resultIndicator) => {
     })
 }
 
-const addPayment = async (paymentdata) => {
-    return new Promise((myResolve, myReject) => {
-
+const addPayment = (paymentData) => {
+    return new Promise(async (myResolve, myReject) => {
+        await Payment.create(paymentData)
+            .then((payment) => {
+                if (!payment) {
+                    myReject('creationFailed');
+                }
+                else {
+                    myResolve({paymentId: payment._id});
+                }
+            })
+            .catch((err) => {
+                myReject(err);
+            });
     })
 }
 

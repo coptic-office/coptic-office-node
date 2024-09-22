@@ -73,6 +73,11 @@
     "contracting": "Sum paid for the unit contracting",
     "cashing": "Sum paid for the cash payment of a unit"
   },
+  "bankItem": {
+    "booking": "Sum paid for a unit booking",
+    "contracting": "Sum paid for the unit contracting",
+    "cashing": "Sum paid for the cash payment of a unit"
+  },
   "product": {
     "category1": {
       "name": "Middle Unit"

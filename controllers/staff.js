@@ -13,6 +13,9 @@ const {Readable} = require('stream');
 const {S3Client} = require('@aws-sdk/client-s3');
 const {Upload} = require("@aws-sdk/lib-storage");
 const Process = require("process");
+const {generateUUID} = require('../utils/codeGenerator');
+const Payment = require('../controllers/payments');
+const Check = require('../controllers/bankChecks');
 
 const addStaff = async (req, res) => {
     try {
@@ -765,6 +768,7 @@ const getUserDetails = async (req, res) => {
         User.getUserDetails(mobileNumber)
             .then((user) => {
                 const info = {};
+                info.id = user._id;
                 info.firstName = user.firstName;
                 info.lastName = user.lastName;
                 info.mobile = mobileNumber;
@@ -900,11 +904,132 @@ const getUserDetails = async (req, res) => {
 
 const addPayment = async (req, res) => {
     try {
-        const {user: {id: userID}, mobileNumber, paymentType, paymentMethod, amount, adviceDate, referenceNumber, comments} = await req.body;
+        const {user: {id: userID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, referenceNumber, comments} = await req.body;
 
+        const uniqueId = generateUUID();
+        const itemDescription = req.i18n.t(`bankItem.${paymentType.toString().toLowerCase()}`);
 
+        const paymentData = {};
+        paymentData.userID = id;
+        paymentData.unitId = unitId;
+        paymentData.paymentType = paymentType.toString().toLowerCase();
+        paymentData.receiptDetails = {};
+        paymentData.receiptDetails.transactionNumber = uniqueId;
+        paymentData.receiptDetails.items = [];
+        paymentData.receiptDetails.items[0] = {};
+        paymentData.receiptDetails.items[0].name = itemDescription;
+        paymentData.receiptDetails.items[0].price = amount;
+        paymentData.receiptDetails.amount = amount;
+        paymentData.paymentDetails = {};
+        paymentData.paymentDetails.paymentMethod = paymentMethod.toString().toLowerCase();
+        paymentData.paymentDetails.amount = amount;
+        paymentData.paymentDetails.date = new Date();
+        paymentData.paymentDetails.adviceDate = new Date(adviceDate);
+        paymentData.paymentDetails.referenceNumber  =referenceNumber;
+        paymentData.paymentDetails.status = 'Succeeded';
+        paymentData.paymentDetails.comments = comments;
+        paymentData.paymentDetails.staffID = userID;
 
+        Payment.addPayment(paymentData)
+            .then(({paymentId}) => {
+                const paymentData = {
+                    userID: id,
+                    id: paymentId,
+                    paymentType: paymentType.toString().toLowerCase(),
+                    paymentMethod: paymentMethod.toString().toLowerCase(),
+                    amount: amount,
+                    adviceDate: new Date(adviceDate),
+                    unitId: unitId
+                }
+                User.completePayment(paymentData)
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {}
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    });
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
 
+const addBankCheck = async (req, res) => {
+    try {
+        const {user: {id: userID}, id, unitId, number, dueDate, amount, bankName, status} = await req.body;
+
+        const checkData = {};
+        checkData.userID = id;
+        checkData.unitId = unitId;
+        checkData.number = number;
+        checkData.dueDate = new Date(dueDate);
+        checkData.amount = amount;
+        checkData.bankName = bankName;
+        checkData.status = status;
+
+        checkData.staffID = userID;
+        checkData.date = new Date();
+
+        Check.addBankCheck(checkData)
+            .then(() => {
+                User.addBankCheck(checkData)
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {}
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
     }
     catch (err) {
         res.status(500).json(
@@ -965,5 +1090,6 @@ module.exports = {
     updatePhoto,
     deletePhoto,
     getUserDetails,
-    addPayment
+    addPayment,
+    addBankCheck
 }

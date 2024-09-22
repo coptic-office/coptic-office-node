@@ -2003,6 +2003,31 @@ const getMyPayments = async (req, res) => {
     }
 }
 
+const addBankCheck = (checkData) => {
+    return new Promise((myResolve, myReject) => {
+        User.findOne({_id: checkData.userID}, {units: 1})
+            .then(async (user) => {
+                user.units.filter((unit) => {
+                    if (unit.id === checkData.unitId) {
+                        checkData.userID = undefined;
+                        checkData.unitId = undefined;
+                        unit.bankChecks.push(checkData);
+                    }
+                });
+                await User.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 const getMyUnits = async (req, res) => {
     try {
         const {user: {id: userID}} = await req.body;
@@ -2304,7 +2329,7 @@ const updatePhoto = async (req, res) => {
         const width = Number(process.env.IMAGE_PROFILE_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `users/${userID}/photos/profile.jpg`;
+        const fileKey = `users/${userID}/photos/profile@${new Date().toISOString()}.jpg`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -2622,7 +2647,7 @@ const getProfileInfo = async (req, res) => {
 
 const getUserDetails = async (mobileNumber) => {
     return new Promise((myResolve, myReject) => {
-        User.findOne({'mobile.primary.number': mobileNumber}, {_id: 0, profilePhoto: 0, currency: 0, password: 0, notifications: 0, role: 0})
+        User.findOne({'mobile.primary.number': mobileNumber}, {profilePhoto: 0, currency: 0, password: 0, notifications: 0, role: 0})
             .then((user) => {
                 if (!user) {
                     myReject('userNotFound');
@@ -2656,6 +2681,7 @@ module.exports = {
     completePayment,
     getPaymentOptions,
     getMyPayments,
+    addBankCheck,
     getMyUnits,
     selectUnitType,
     updatePhoto,

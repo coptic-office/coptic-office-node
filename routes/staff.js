@@ -33,4 +33,13 @@ router.post('/delete-photo', authorize('Access', deletePhotoRoles), staff.delete
 const userDetailsRoles = ['Admin', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/get-user-details', [authorize('Access', userDetailsRoles), validateMobile], staff.getUserDetails);
 
+/** Add a payment for a booked unit of a specific user */
+const addPaymentRoles = ['EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/add-payment', authorize('Access', addPaymentRoles), staff.addPayment);
+
+/** Add a bank check for a booked unit of a specific user */
+const addCheckRoles = ['EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/add-bank-check', authorize('Access', addCheckRoles), staff.addBankCheck);
+
+
 module.exports = router;
