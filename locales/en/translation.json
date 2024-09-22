@@ -62,6 +62,7 @@
     "senderNotVerified": "The sender name cannot be verified",
     "oneSenderName": "The sender name cannot be changed after being chosen and verified",
     "profilePhotoRequired": "One profile photo is required",
+    "checkPhotoRequired": "One bank check is required",
     "idImagesRequired": "Two images are required, one for the ID front and another for the ID back",
     "notImageFile": "Only image files are accepted",
     "imageSavingError": "Failed while saving the image"

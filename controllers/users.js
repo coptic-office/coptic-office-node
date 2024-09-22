@@ -2005,7 +2005,7 @@ const getMyPayments = async (req, res) => {
 
 const addBankCheck = (checkData) => {
     return new Promise((myResolve, myReject) => {
-        User.findOne({_id: checkData.userID}, {units: 1})
+        User.findOne({_id: checkData.userID}, {firstName: 1, lastName: 1, mobile: 1, units: 1})
             .then(async (user) => {
                 user.units.filter((unit) => {
                     if (unit.id === checkData.unitId) {
@@ -2016,7 +2016,9 @@ const addBankCheck = (checkData) => {
                 });
                 await User.save()
                     .then(() => {
-                        myResolve();
+                        const userName = `${user.firstName} ${user.lastName}`;
+                        const mobile = user.mobile.primary;
+                        myResolve({userName, mobile});
                     })
                     .catch((err) => {
                         myReject(err);

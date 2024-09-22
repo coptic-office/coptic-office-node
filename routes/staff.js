@@ -39,7 +39,7 @@ router.post('/add-payment', authorize('Access', addPaymentRoles), staff.addPayme
 
 /** Add a bank check for a booked unit of a specific user */
 const addCheckRoles = ['EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
-router.post('/add-bank-check', authorize('Access', addCheckRoles), staff.addBankCheck);
-
+const options2 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
+router.post('/add-bank-check', [authorize('Access', addCheckRoles), multipartParser(options2, 'image')], staff.addBankCheck);
 
 module.exports = router;

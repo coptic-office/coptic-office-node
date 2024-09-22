@@ -985,31 +985,89 @@ const addPayment = async (req, res) => {
 
 const addBankCheck = async (req, res) => {
     try {
+        const region = process.env.S3_REGION;
+        const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+        const bucket = process.env.S3_BUCKET;
+        const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
+
         const {user: {id: userID}, id, unitId, number, dueDate, amount, bankName, status} = await req.body;
+        const filesNumber = await req.files.length;
+        if (filesNumber !== 1) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t(`user.checkPhotoRequired`),
+                message: {}
+            })
+        }
 
-        const checkData = {};
-        checkData.userID = id;
-        checkData.unitId = unitId;
-        checkData.number = number;
-        checkData.dueDate = new Date(dueDate);
-        checkData.amount = amount;
-        checkData.bankName = bankName;
-        checkData.status = status;
-
-        checkData.staffID = userID;
-        checkData.date = new Date();
-
-        Check.addBankCheck(checkData)
+        const {fileTypeFromBuffer} = await import('file-type');
+        const file = req.files[0];
+        const type = await fileTypeFromBuffer(file.buffer);
+        const ext = type['ext'].toString().toLowerCase();
+        const imageTypes = Process.env.IMAGE_FILE_TYPE.split(',');
+        if (!imageTypes.includes(ext)) {
+            return res.status(400).json({
+                status: "Failed",
+                error: req.i18n.t(`user.notImageFile`),
+                message: {
+                    imageTypes
+                }
+            })
+        }
+        const width = Number(process.env.IMAGE_CHECK_MAX_WIDTH);
+        const {buffer} = await Image.compress(file.buffer, width);
+        const fileStream = Readable.from(buffer);
+        const fileKey = `users/${userID}/checks/${bankName}-${number}.jpg`;
+        const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
+        const upload = new Upload({
+            client,
+            params,
+            tags: [], // optional tags
+            queueSize: 4, // optional concurrency configuration
+            partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+            leavePartsOnError: false, // optional manually handle dropped parts
+        });
+        upload.done()
             .then(() => {
+                const checkUrl = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
+                const checkData = {};
+                checkData.userID = id;
+                checkData.unitId = unitId;
+                checkData.number = number;
+                checkData.dueDate = new Date(dueDate);
+                checkData.amount = amount;
+                checkData.bankName = bankName;
+                checkData.status = status;
+                checkData.image  = checkUrl;
+                checkData.staffID = userID;
+                checkData.date = new Date();
+
                 User.addBankCheck(checkData)
-                    .then(() => {
-                        res.status(200).json({
-                            status: "success",
-                            error: "",
-                            message: {}
-                        })
+                    .then(({userName, mobile}) => {
+                        checkData.userName = userName;
+                        checkData.mobile = mobile;
+
+                        Check.addBankCheck(checkData)
+                            .then(() => {
+                                res.status(200).json({
+                                    status: "success",
+                                    error: "",
+                                    message: {}
+                                })
+                            })
+                            .catch((err) => {
+                                res.status(500).json(
+                                    {
+                                        status: "failed",
+                                        error: req.i18n.t('general.internalError'),
+                                        message: {
+                                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                        }
+                                    })
+                            });
                     })
-                    .catch((err) => {
+                    .catch((err) => [
                         res.status(500).json(
                             {
                                 status: "failed",
@@ -1018,7 +1076,7 @@ const addBankCheck = async (req, res) => {
                                     info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                                 }
                             })
-                    })
+                    ]);
             })
             .catch((err) => {
                 res.status(500).json(
@@ -1029,7 +1087,7 @@ const addBankCheck = async (req, res) => {
                             info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                         }
                     })
-            })
+            });
     }
     catch (err) {
         res.status(500).json(
