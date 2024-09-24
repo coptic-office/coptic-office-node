@@ -796,10 +796,9 @@ const getUserDetails = async (req, res) => {
                 });
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
-                    check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status}`);
+                    check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
+                    check.status = undefined;
                     check.image = undefined;
-                    check.userID = undefined;
-                    check.date = undefined;
                 })
 
                 user.units.map((unit) => {
@@ -1038,10 +1037,10 @@ const addBankCheck = async (req, res) => {
                 checkData.dueDate = new Date(dueDate);
                 checkData.amount = amount;
                 checkData.bankName = bankName;
-                checkData.status = status;
+                checkData.status = {};
+                checkData.status.current = status;
+                checkData.status.history.push({status, staffID: userID, date: new Date()});
                 checkData.image  = checkUrl;
-                checkData.staffID = userID;
-                checkData.date = new Date();
 
                 User.addBankCheck(checkData)
                     .then(({userName, mobile}) => {

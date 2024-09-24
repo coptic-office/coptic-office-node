@@ -4,6 +4,8 @@ const {Schema, model} = mongoose;
 const bankCheckSchema = new Schema({
     _id: false,
     userID: String,
+    userName: String,
+    mobile: {country: String, number: String},
     unitId: String,
     number: String,
     dueDate: Date,
