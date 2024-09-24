@@ -18,6 +18,7 @@ const multipartParser =  (options, inputField) => {
             const fileTypesRegex = new RegExp(fileTypes);
 
             if (!fileTypesRegex.test(ext)) {
+                console.log(req.i18n.t('faceRecognition.invalidFile'))
                 return res.status(400).json({
                     status: "failed",
                     error: req.i18n.t('faceRecognition.invalidFile'),
@@ -34,6 +35,7 @@ const multipartParser =  (options, inputField) => {
             if (err instanceof multer.MulterError) {
                 switch (err.code) {
                     case 'LIMIT_FILE_COUNT':
+                        console.log(req.i18n.t('faceRecognition.maxFileCount'))
                         return res.status(400).json({
                             status: "failed",
                             error: req.i18n.t('faceRecognition.maxFileCount'),
@@ -64,6 +66,7 @@ const multipartParser =  (options, inputField) => {
                 if (req.files !== undefined) {
                     for (const file of req.files) {
                         if (file.size > maxFileSize * 1024 * 1024) {
+                            console.log(`File size: ${file.size} exceeded 1MB`)
                             return res.status(400).json({
                                 status: "failed",
                                 error: req.i18n.t('faceRecognition.maxFileSize'),
