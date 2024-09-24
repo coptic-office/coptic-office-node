@@ -1962,10 +1962,9 @@ const getMyPayments = async (req, res) => {
                 });
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
-                    check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status}`);
+                    check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
+                    check.status = undefined;
                     check.image = undefined;
-                    check.userID = undefined;
-                    check.date = undefined;
                 })
 
                 res.status(200).json({

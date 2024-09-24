@@ -9,10 +9,17 @@ const bankCheckSchema = new Schema({
     dueDate: Date,
     amount: Number,
     bankName: String,
-    status: String,
+    status: {
+        current: String,
+        history: [
+            {
+                status: String,
+                staffID: String,
+                date: Date
+            }
+        ]
+    },
     image: String,
-    staffID: String,
-    date: Date
 })
 
 const bankCheckModel = model('bankCheck', bankCheckSchema);
