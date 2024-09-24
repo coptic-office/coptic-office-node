@@ -2306,6 +2306,7 @@ const updatePhoto = async (req, res) => {
         const {user: {id: userID}} = await req.body;
         const filesNumber = await req.files.length;
         if (filesNumber !== 1) {
+            console.log(req.i18n.t(`user.profilePhotoRequired`))
             return res.status(400).json({
                 status: "failed",
                 error: req.i18n.t(`user.profilePhotoRequired`),
@@ -2319,6 +2320,7 @@ const updatePhoto = async (req, res) => {
         const ext = type['ext'].toString().toLowerCase();
         const imageTypes = Process.env.IMAGE_FILE_TYPE.split(',');
         if (!imageTypes.includes(ext)) {
+            console.log(req.i18n.t(`user.notImageFile`))
             return res.status(400).json({
                 status: "Failed",
                 error: req.i18n.t(`user.notImageFile`),
