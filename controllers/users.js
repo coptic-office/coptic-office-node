@@ -1725,7 +1725,10 @@ const completePayment = (paymentData) => {
                         const remainingAmount = (cashAmount - paidTotal).toLocaleString();
                         if (paidTotal >= Number(cashAmount)) {
                             user.units.map((item) => {
-                                if (item.id === unitId) item.completionDate = new Date();
+                                if (item.id === unitId) {
+                                    item.completionDate = new Date();
+                                    item.discount = {};
+                                }
                             })
                         }
                         else {
