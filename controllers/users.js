@@ -1607,6 +1607,7 @@ const completePayment = (paymentData) => {
                                             engMessageInfo = item.messages.en;
                                         }
                                     });
+
                                     const contractingAmount = units[0].contractingAmount.toLocaleString();
                                     const maxDate = new Date();
                                     maxDate.setMonth(maxDate.getMonth() + 3);
@@ -2248,11 +2249,34 @@ const selectUnitType = async (req, res) => {
                     }
                 }
 
+                const notification = await Notification.findOne({name: 'discount'});
+
+                const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
+                const grossAmount = priceDetails[0].grossAmount;
+                const cashAmount = priceDetails[0].cashAmount;
+                const discountAmount = (grossAmount - cashAmount).toLocaleString();
+                const paidTotal = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                const remainingAmount = (cashAmount - paidTotal).toLocaleString();
+
+                let araDiscount = notification.messages.ar;
+                araDiscount = araDiscount.replace('{{discountAmount}}', discountAmount);
+                araDiscount = araDiscount.replace('{{remainingAmount}}', remainingAmount);
+
+                let engDiscount = notification.messages.en;
+                engDiscount = engDiscount.replace('{{discountAmount}}', discountAmount);
+                engDiscount = engDiscount.replace('{{remainingAmount}}', remainingAmount);
+
                 user.units.map((item) => {
-                    if (item.id === unitId) item.category = category.toString().toLowerCase()
+                    if (item.id === unitId) {
+                        item.category = category.toString().toLowerCase();
+                        item.discount.ar = araDiscount;
+                        item.discount.en = engDiscount;
+                        item.discount.value = remainingAmount;
+                    }
                 });
+
                 await user.save()
-                    .then(() => {
+                    .then(async () => {
                         res.status(200).json({
                             status: "success",
                             error: "",

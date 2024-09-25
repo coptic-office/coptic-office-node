@@ -18,7 +18,6 @@ const multipartParser =  (options, inputField) => {
             const fileTypesRegex = new RegExp(fileTypes);
 
             if (!fileTypesRegex.test(ext)) {
-                console.log(req.i18n.t('faceRecognition.invalidFile'))
                 return res.status(400).json({
                     status: "failed",
                     error: req.i18n.t('faceRecognition.invalidFile'),
@@ -35,7 +34,6 @@ const multipartParser =  (options, inputField) => {
             if (err instanceof multer.MulterError) {
                 switch (err.code) {
                     case 'LIMIT_FILE_COUNT':
-                        console.log(req.i18n.t('faceRecognition.maxFileCount'))
                         return res.status(400).json({
                             status: "failed",
                             error: req.i18n.t('faceRecognition.maxFileCount'),

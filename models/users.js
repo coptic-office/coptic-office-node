@@ -137,6 +137,11 @@ const userSchema = new Schema({
                 ar: String,
                 en: String,
                 value: String
+            },
+            discount: {
+                ar: String,
+                en: String,
+                value: String
             }
         }
     ],

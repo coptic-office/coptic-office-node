@@ -50,12 +50,12 @@ app.use('/payments', paymentsRouter);
 app.use('/admin', authorize('Access', ['Admin']));
 app.use('/admin', adminRouter);
 
-// catch 404 and forward to error handler
+/** catch 404 and forward to error handler */
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+/** error handler */
 app.use(errorHandler);
 
 /** Get port from environment and store in Express */
@@ -80,15 +80,14 @@ if (sslInstalled) {
       methods: ["GET", "POST"],
     },
   });
-  socketIO.on('connection', (socket) => {
-    const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
-    console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
-    // socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
-
-    socket.on('disconnect', () => {
-      console.log(`Socket disconnected with ID: ${socket.id}`);
-    })
-  });
+  // socketIO.on('connection', (socket) => {
+  //   const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
+  //   console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
+  //
+  //   socket.on('disconnect', () => {
+  //     console.log(`Socket disconnected with ID: ${socket.id}`);
+  //   })
+  // });
   connectDB()
       .then(() => httpsServer.listen(port, onListening).on('error', onError))
 }
@@ -100,15 +99,14 @@ else {
       methods: ["GET", "POST"],
     },
   });
-  socketIO.on('connection', (socket) => {
-    const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
-    console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
-    // socket.emit('notifications', {newCount: require('./utils/codeGenerator').generateNumber(2)});
-
-    socket.on('disconnect', () => {
-      console.log(`Socket disconnected with ID: ${socket.id}`);
-    })
-  });
+  // socketIO.on('connection', (socket) => {
+  //   const ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress.split(":")[3];
+  //   console.log(`Socket connected with ID: ${socket.id} from IP Address: ${ip}`);
+  //
+  //   socket.on('disconnect', () => {
+  //     console.log(`Socket disconnected with ID: ${socket.id}`);
+  //   })
+  // });
   connectDB()
       .then(() => httpServer.listen(port, onListening).on('error', onError))
 }
