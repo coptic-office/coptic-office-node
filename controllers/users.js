@@ -1722,10 +1722,26 @@ const completePayment = (paymentData) => {
                         const cashAmount = priceDetails[0].cashAmount;
                         const totalPayments = user.payments.filter((item) => item.unitId === unitId);
                         const paidTotal = totalPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+                        const remainingAmount = (cashAmount - paidTotal).toLocaleString();
                         if (paidTotal >= Number(cashAmount)) {
                             user.units.map((item) => {
                                 if (item.id === unitId) item.completionDate = new Date();
                             })
+                        }
+                        else {
+                            const value = myUnit[0].discount.value;
+                            let araDiscount = myUnit[0].discount.ar;
+                            let engDiscount = myUnit[0].discount.en;
+                            araDiscount = araDiscount.replace(value, remainingAmount);
+                            engDiscount = engDiscount.replace(value, remainingAmount);
+
+                            user.units.map((item) => {
+                                if (item.id === unitId) {
+                                    item.discount.ar = araDiscount;
+                                    item.discount.en = engDiscount;
+                                    item.discount.value = remainingAmount;
+                                }
+                            });
                         }
                         await user.save()
                             .then(() => {
