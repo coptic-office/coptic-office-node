@@ -2072,6 +2072,14 @@ const getMyUnits = async (req, res) => {
                         unit._doc.info = unit.info[lang];
                     }
 
+                    if (unit.discount.ar === undefined) {
+                        unit.discount = "";
+                    }
+                    else {
+                        const lang = [req.i18n.t(`general.language`)];
+                        unit._doc.discount = unit.discount[lang];
+                    }
+
                     if (unit.category === undefined) {
                         unit.category = req.i18n.t(`product.noCategory`);
                         unit._doc.totalAmount = 0;
