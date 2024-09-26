@@ -93,6 +93,14 @@ const createUser = async (req, res) => {
                             bodyData.email['isVerified'] = userIdentifier === 'email';
                         }
 
+                        const notifications = await Notification.find({name: 'emailAlert'});
+                        let araMessage = notifications.messages.ar;
+                        let engMessage = notifications.messages.en;
+
+                        bodyData.notifications.newCount = 1;
+                        const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                        bodyData.notifications.messages.push(message);
+
                         await User.create(bodyData)
                             .then(async (user) => {
                                 if (!user) {
@@ -121,12 +129,12 @@ const createUser = async (req, res) => {
                                                 error: req.i18n.t('security.signingError'),
                                                 message: {}
                                             })
-                                    })
+                                    });
 
                                 user = {
                                     ...user._doc, _id: undefined, __v: undefined, password: undefined,
                                     currency: undefined, email: undefined, payments: undefined, units: undefined,
-                                    identification: undefined, notifications: undefined, role: undefined, isActive: undefined
+                                    identification: undefined, notifications: {messages: undefined}, role: undefined, isActive: undefined
                                 };
 
                                 res.status(201)
