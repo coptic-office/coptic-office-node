@@ -97,8 +97,10 @@ const createUser = async (req, res) => {
                         let araMessage = notifications.messages.ar;
                         let engMessage = notifications.messages.en;
 
+                        bodyData.notifications = {};
                         bodyData.notifications.newCount = 1;
                         const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                        bodyData.notifications.messages = [];
                         bodyData.notifications.messages.push(message);
 
                         await User.create(bodyData)
@@ -137,6 +139,7 @@ const createUser = async (req, res) => {
                                     identification: undefined, notifications: {messages: undefined}, role: undefined, isActive: undefined
                                 };
 
+                                console.log(user)
                                 res.status(201)
                                     .json({
                                         status: "success",
