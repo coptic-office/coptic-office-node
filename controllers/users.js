@@ -139,7 +139,6 @@ const createUser = async (req, res) => {
                                     identification: undefined, notifications: {messages: undefined}, role: undefined, isActive: undefined
                                 };
 
-                                console.log(user)
                                 res.status(201)
                                     .json({
                                         status: "success",
