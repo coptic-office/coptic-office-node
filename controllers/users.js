@@ -93,7 +93,7 @@ const createUser = async (req, res) => {
                             bodyData.email['isVerified'] = userIdentifier === 'email';
                         }
 
-                        const notifications = await Notification.find({name: 'emailAlert'});
+                        const notifications = await Notification.findOne({name: 'emailAlert'});
                         let araMessage = notifications.messages.ar;
                         let engMessage = notifications.messages.en;
 
