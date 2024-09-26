@@ -1100,6 +1100,56 @@ const addBankCheck = async (req, res) => {
     }
 }
 
+const findBankCheck = async (req, res) => {
+    try {
+        const {bankName, number} = await req.body;
+
+        Check.findBankCheck({bankName, number})
+            .then((check) => {
+                check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
+                check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
+                check.status = undefined;
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        check
+                    }
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'checkNotFound') {
+                    res.status(404).json({
+                        status: "failed",
+                        error: req.i18n.t('payment.checkNotFound'),
+                        message: {}
+                    })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -1148,5 +1198,6 @@ module.exports = {
     deletePhoto,
     getUserDetails,
     addPayment,
-    addBankCheck
+    addBankCheck,
+    findBankCheck
 }

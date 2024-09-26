@@ -38,8 +38,12 @@ const addPaymentRoles = ['EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/add-payment', authorize('Access', addPaymentRoles), staff.addPayment);
 
 /** Add a bank check for a booked unit of a specific user */
-const addCheckRoles = ['EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+const addCheckRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 const options2 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};
 router.post('/add-bank-check', [authorize('Access', addCheckRoles), multipartParser(options2, 'image')], staff.addBankCheck);
+
+/** Find a bank check using bank name and check number */
+const findCheckRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/find-bank-check', authorize('Access', findCheckRoles), staff.findBankCheck);
 
 module.exports = router;

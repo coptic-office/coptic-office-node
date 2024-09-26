@@ -24,6 +24,6 @@ const bankCheckSchema = new Schema({
     image: String,
 })
 
-const bankCheckModel = model('bankCheck', bankCheckSchema);
+const bankCheckModel = model('bank_check', bankCheckSchema);
 
 module.exports = bankCheckModel;

@@ -2540,8 +2540,8 @@ const updateNationalId = async (req, res) => {
                 uploadFile(req.files[1], 1)
                     .then(() => {
                         const update = {'identification.nationalId.front': IDs[0], 'identification.nationalId.back': IDs[1]}
-                        User.findOneAndUpdate({_id: userID}, {update})
-                            .then(() => {
+                        User.findOneAndUpdate({_id: userID}, update, {new: true})
+                            .then((user) => {
                                 res.status(200).json({
                                     status: "success",
                                     error: "",

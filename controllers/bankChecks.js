@@ -17,4 +17,21 @@ const addBankCheck = (checkData) => {
     })
 }
 
-module.exports = {addBankCheck};
+const findBankCheck = ({bankName, number}) => {
+    return new Promise((myResolve, myReject) => {
+        Check.findOne({bankName, number}, {_id: 0})
+            .then((check) => {
+                if (!check) {
+                    myReject('checkNotFound');
+                }
+                else {
+                    myResolve(check);
+                }
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
+module.exports = {addBankCheck, findBankCheck};
