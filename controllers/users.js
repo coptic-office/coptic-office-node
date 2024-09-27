@@ -136,7 +136,7 @@ const createUser = async (req, res) => {
                                 user = {
                                     ...user._doc, _id: undefined, __v: undefined, password: undefined,
                                     currency: undefined, email: undefined, payments: undefined, units: undefined,
-                                    identification: undefined, notifications: {messages: undefined}, role: undefined, isActive: undefined
+                                    identification: undefined, role: undefined, isActive: undefined
                                 };
 
                                 res.status(201)
