@@ -17,6 +17,7 @@ const {Upload} = require("@aws-sdk/lib-storage");
 const Process = require("process");
 const Notification = require('../models/notifications');
 const {timeAgo} = require('../utils/dateUtils');
+const i18n = require('i18next');
 
 const createUser = async (req, res) => {
     try {
@@ -596,7 +597,7 @@ const updateEmail = async (req, res) => {
                                     .then(async (preUser) => {
                                         if (!preUser) {
                                             const updated = async (preUser) => {
-                                                await sendEmail(req, {
+                                                await sendEmail(req.headers["accept-language"], {
                                                     template: 'OTP',
                                                     receiver: email,
                                                     action: 'UPDATE',
@@ -660,7 +661,7 @@ const updateEmail = async (req, res) => {
                                             if (new Date() > preUser.otpRenewal) {
 
                                                 const updated = async () => {
-                                                    await sendEmail(req, {
+                                                    await sendEmail(req.headers["accept-language"], {
                                                         template: 'OTP',
                                                         receiver: email,
                                                         action: 'UPDATE',
@@ -748,7 +749,7 @@ const updateEmail = async (req, res) => {
                                                     if (new Date() > preUser.otpResend) {
 
                                                         const updated = async () => {
-                                                            await sendEmail(req, {
+                                                            await sendEmail(req.headers["accept-language"], {
                                                                 template: 'OTP',
                                                                 receiver: email,
                                                                 action: 'UPDATE',
@@ -1590,14 +1591,13 @@ const checkCategory = (userID, unitId) => {
 
 const completePayment = (paymentData) => {
     return new Promise((myResolve, myReject) => {
-        const {userID, id, paymentType, paymentMethod, amount, adviceDate, unitId} = paymentData;
-        User.findOne({_id: userID}, {'mobile.primary.number': 1, payments: 1, units: 1, notifications: 1})
+        const {userID, id, paymentType, paymentMethod, amount, adviceDate, unitId, locale} = paymentData;
+        User.findOne({_id: userID}, {firstName: 1, 'mobile.primary.number': 1, email: 1, payments: 1, units: 1, notifications: 1})
             .then( async (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
 
-                console.log(user._doc.email)
-                if (user._doc.email === undefined) {
+                if (user.email === undefined) {
                     const notifications = await Notification.findOne({name: 'emailAlert'});
                     let araMessage = notifications.messages.ar;
                     let engMessage = notifications.messages.en;
@@ -1616,7 +1616,18 @@ const completePayment = (paymentData) => {
                     user.notifications.messages.push(message);
                 }
                 else {
+                    const params = {};
+                    params.template = 'Payment Receipt';
+                    params.firstName = user.firstName;
+                    params.receiver = user.email.primary;
+                    params.paymentReference = id;
+                    params.items = [];
+                    const name = i18n.t(`payment.paymentOptions.${paymentType}Amount`, {lng: locale});
+                    const description = i18n.t(`item.${paymentType}`, {lng: locale});
+                    const item = {name, description, amount};
+                    params.items.push(item);
 
+                    sendEmail(locale, params);
                 }
 
                 switch (paymentType) {

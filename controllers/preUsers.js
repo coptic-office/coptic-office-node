@@ -88,7 +88,7 @@ const checkUser = async (req, res) => {
                                                 })
                                         }
                                         if (userIdentifier === 'email') {
-                                            await sendEmail(req, {
+                                            await sendEmail(req.headers["accept-language"], {
                                                 template: 'OTP',
                                                 receiver: email,
                                                 action: 'REGISTER',
@@ -159,7 +159,7 @@ const checkUser = async (req, res) => {
                                                     })
                                             }
                                             if (userIdentifier === 'email') {
-                                                await sendEmail(req, {
+                                                await sendEmail(req.headers["accept-language"], {
                                                     template: 'OTP',
                                                     receiver: email,
                                                     action: 'REGISTER',
@@ -242,7 +242,7 @@ const checkUser = async (req, res) => {
                                                             })
                                                     }
                                                     if (userIdentifier === 'email') {
-                                                        await sendEmail(req, {
+                                                        await sendEmail(req.headers["accept-language"], {
                                                             template: 'OTP',
                                                             receiver: email,
                                                             action: 'REGISTER',
@@ -452,7 +452,7 @@ const resendOTP = async (req, res) => {
                                         })
                                 }
                                 if (messageType === 'email') {
-                                    await sendEmail(req, {
+                                    await sendEmail(req.headers["accept-language"], {
                                         template: 'OTP',
                                         receiver: email,
                                         action: preUser.action,
@@ -532,7 +532,7 @@ const resendOTP = async (req, res) => {
                                                 })
                                         }
                                         if (messageType === 'email') {
-                                            await sendEmail(req, {
+                                            await sendEmail(req.headers["accept-language"], {
                                                 template: 'OTP',
                                                 receiver: email,
                                                 action: preUser.action,
@@ -650,7 +650,7 @@ const forgotPassword = async (req, res) => {
                                                 })
                                         }
                                         if (userIdentifier === 'email') {
-                                            await sendEmail(req, {
+                                            await sendEmail(req.headers["accept-language"], {
                                                 template: 'OTP',
                                                 receiver: email,
                                                 action: 'PASSWORD',
@@ -719,7 +719,7 @@ const forgotPassword = async (req, res) => {
                                                     })
                                             }
                                             if (userIdentifier === 'email') {
-                                                await sendEmail(req, {
+                                                await sendEmail(req.headers["accept-language"], {
                                                     template: 'OTP',
                                                     receiver: email,
                                                     action: 'PASSWORD',
@@ -799,7 +799,7 @@ const forgotPassword = async (req, res) => {
                                                             })
                                                     }
                                                     if (userIdentifier === 'email') {
-                                                        await sendEmail(req, {
+                                                        await sendEmail(req.headers["accept-language"], {
                                                             template: 'OTP',
                                                             receiver: email,
                                                             action: 'PASSWORD',

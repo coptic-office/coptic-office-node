@@ -189,6 +189,7 @@ const findPayment = (resultIndicator) => {
                         id: payment._id,
                         paymentType: payment.paymentType,
                         paymentMethod: payment.paymentDetails.paymentMethod,
+                        locale: payment.paymentDetails.locale,
                         amount: payment.paymentDetails.amount,
                         adviceDate: payment.paymentDetails.adviceDate,
                         unitId: payment.unitId
