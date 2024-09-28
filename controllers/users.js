@@ -1625,7 +1625,8 @@ const completePayment = (paymentData) => {
                     const name = i18n.t(`payment.paymentOptions.${paymentType}Amount`, {lng: locale});
                     const description = i18n.t(`item.${paymentType}`, {lng: locale});
                     const currency = locale === 'ar' ? 'جنيه' : 'EGP';
-                    const item = {name, description, amount: `${amount.toLocaleString()} ${currency}`};
+                    const localizedAmount = amount.toLocaleString();
+                    const item = {name, description, amount: `${localizedAmount} ${currency}`};
                     params.items.push(item);
 
                     sendEmail(locale, params);
