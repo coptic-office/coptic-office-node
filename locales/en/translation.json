@@ -236,7 +236,7 @@
       "intro": "Your payment has been processed successfully.",
       "actionInstructions": "You can review your payment details from here:",
       "actionText": "Go To My Payments",
-      "outro1": "Your payment reference number is: #{{paymentReference}}.",
+      "outro1": "Your payment reference number is: {{paymentReference}}.",
       "outro2": "You need to review your coming payment dates to avoid missing any payments."
     }
   },
