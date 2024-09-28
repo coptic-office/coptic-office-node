@@ -921,6 +921,7 @@ const addPayment = async (req, res) => {
         paymentData.receiptDetails.amount = amount;
         paymentData.paymentDetails = {};
         paymentData.paymentDetails.paymentMethod = paymentMethod.toString().toLowerCase();
+        paymentData.paymentDetails.locale = 'ar';
         paymentData.paymentDetails.amount = amount;
         paymentData.paymentDetails.date = new Date();
         paymentData.paymentDetails.adviceDate = new Date(adviceDate);
