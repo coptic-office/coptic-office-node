@@ -595,7 +595,6 @@ const updateEmail = async (req, res) => {
                                 PreUser.findOne({'otpReceiver.recipient': email})
                                     .then(async (preUser) => {
                                         if (!preUser) {
-
                                             const updated = async (preUser) => {
                                                 await sendEmail(req, {
                                                     template: 'OTP',
@@ -646,7 +645,8 @@ const updateEmail = async (req, res) => {
                                                         })
                                                             .then(updated(preUser))
                                                             .catch(notUpdated)
-                                                    } else {
+                                                    }
+                                                    else {
                                                         await User.updateOne({_id: id}, {'email.alternate': email})
                                                             .then(updated(preUser))
                                                             .catch(notUpdated)
@@ -732,7 +732,8 @@ const updateEmail = async (req, res) => {
                                                     .catch((err) => {
                                                         updateFailed(req, res, err);
                                                     })
-                                            } else {
+                                            }
+                                            else {
                                                 if (preUser.wrongTrials >= Number(process.env.OTP_MAX_WRONG_TRIALS)) {
                                                     res.status(403)
                                                         .json({
@@ -742,7 +743,8 @@ const updateEmail = async (req, res) => {
                                                                 otpResend: preUser.otpRenewal
                                                             }
                                                         })
-                                                } else {
+                                                }
+                                                else {
                                                     if (new Date() > preUser.otpResend) {
 
                                                         const updated = async () => {
@@ -815,7 +817,8 @@ const updateEmail = async (req, res) => {
                                                             .catch((err) => {
                                                                 updateFailed(req, res, err);
                                                             })
-                                                    } else {
+                                                    }
+                                                    else {
                                                         res.status(401)
                                                             .json({
                                                                 status: "failed",
@@ -837,7 +840,8 @@ const updateEmail = async (req, res) => {
                                 internalError(req, res, err);
                             })
 
-                    } else {
+                    }
+                    else {
                         return res.status(401)
                             .json({
                                 status: "failed",
@@ -1591,6 +1595,28 @@ const completePayment = (paymentData) => {
             .then( async (user) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
+
+                if (user.email === undefined) {
+                    const notifications = await Notification.findOne({name: 'emailAlert'});
+                    let araMessage = notifications.messages.ar;
+                    let engMessage = notifications.messages.en;
+
+                    user.notifications.newCount += 1;
+                    const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                    user.notifications.messages.push(message);
+                }
+                else if (!user.email.isVerified) {
+                    const notifications = await Notification.findOne({name: 'emailVerification'});
+                    let araMessage = notifications.messages.ar;
+                    let engMessage = notifications.messages.en;
+
+                    user.notifications.newCount += 1;
+                    const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
+                    user.notifications.messages.push(message);
+                }
+                else {
+
+                }
 
                 switch (paymentType) {
                     case 'booking':
@@ -2404,7 +2430,7 @@ const updatePhoto = async (req, res) => {
         upload.done()
             .then(() => {
                 const profilePhoto = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
-                User.findOneAndUpdate({_id: userID}, {profilePhoto})
+                User.updateOne({_id: userID}, {profilePhoto})
                     .then(() => {
                         res.status(200).json({
                             status: "success",
@@ -2550,7 +2576,7 @@ const updateNationalId = async (req, res) => {
                 uploadFile(req.files[1], 1)
                     .then(() => {
                         const update = {'identification.nationalId.front': IDs[0], 'identification.nationalId.back': IDs[1]}
-                        User.findOneAndUpdate({_id: userID}, update, {new: true})
+                        User.updateOne({_id: userID}, update)
                             .then((user) => {
                                 res.status(200).json({
                                     status: "success",
