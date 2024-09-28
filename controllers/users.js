@@ -1596,6 +1596,7 @@ const completePayment = (paymentData) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
 
+                console.log(user.email)
                 if (user.email === undefined) {
                     const notifications = await Notification.findOne({name: 'emailAlert'});
                     let araMessage = notifications.messages.ar;
