@@ -31,7 +31,7 @@ const sendOTP = (locale, params) => {
         product: {
             name: productName,
             link: process.env.GENERAL_PRODUCT_LINK,
-            logo: process.env.GENERAL_LOGO_LINK,
+            logo: process.env.GENERAL_LOGO_WHITE_LINK,
             copyright: i18n.t('email.copyright', {year, productName, lng: locale}),
         }
     });
@@ -93,7 +93,7 @@ const sendPaymentReceipt = (locale, params) => {
         product: {
             name: productName,
             link: process.env.GENERAL_PRODUCT_LINK,
-            logo: process.env.GENERAL_LOGO_LINK,
+            logo: process.env.GENERAL_LOGO_WHITE_LINK,
             copyright: i18n.t('email.copyright', {year, productName, lng: locale}),
         }
     });

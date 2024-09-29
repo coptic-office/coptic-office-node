@@ -54,7 +54,7 @@ const createPayment = async (req, res) => {
                 operation: "PURCHASE",
                 merchant: {
                     name: req.i18n.t(`payment.accountName`),
-                    logo: process.env.GENERAL_LOGO_LINK
+                    logo: process.env.GENERAL_LOGO_BLACK_LINK
                 },
                 displayControl: {
                     billingAddress: 'HIDE',
