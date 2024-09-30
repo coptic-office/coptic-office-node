@@ -15,6 +15,7 @@ const i18n = require('i18next');
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SMTP_SERVER,
     secure: true,
+    port: 465,
     auth: {
         user: process.env.EMAIL_USER_NAME,
         pass: process.env.EMAIL_PASSWORD
