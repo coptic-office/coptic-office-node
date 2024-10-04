@@ -3,6 +3,8 @@ const {Schema, model} = mongoose;
 
 const paymentSchema = new Schema({
     userID: String,
+    userName: String,
+    mobile: {country: String, number: String},
     unitId: String,
     paymentType: {
         type: String,
@@ -41,7 +43,7 @@ const paymentSchema = new Schema({
         adviceDate: Date,
         bankSessionId: String,
         bankSuccessIndicator: String,
-        referenceNumber: String,
+        transactionNumber: String,
         staffID: String,
         comments: String
     }

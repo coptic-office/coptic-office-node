@@ -9,7 +9,7 @@ const {completePayment, checkUnitId, checkCategory} = require('../controllers/us
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
 const createPayment = async (req, res) => {
     try {
-        let {user: {id: userID}, paymentType, amount, unitId} = await req.body;
+        let {user: {id: userID, firstName, lastName, mobile}, paymentType, amount, unitId} = await req.body;
         const paymentTypeList = ['booking', 'contracting', 'cashing'];
         if (paymentType === undefined || !paymentTypeList.includes(paymentType.toString().toLowerCase())) {
             return res.status(400).json({
@@ -79,6 +79,8 @@ const createPayment = async (req, res) => {
                 if (msg.data.result === 'SUCCESS') {
                     const paymentData = {};
                     paymentData.userID = userID;
+                    paymentData.userName = `${firstName} ${lastName}`;
+                    paymentData.mobile = mobile;
                     paymentData.unitId = unitId;
                     paymentData.paymentType = paymentType.toString().toLowerCase();
                     paymentData.receiptDetails = {};

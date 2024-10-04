@@ -903,7 +903,7 @@ const getUserDetails = async (req, res) => {
 
 const addPayment = async (req, res) => {
     try {
-        const {user: {id: userID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, referenceNumber, comments} = await req.body;
+        const {user: {id: userID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, transactionNumber, comments} = await req.body;
 
         const uniqueId = generateUUID();
         const itemDescription = req.i18n.t(`bankItem.${paymentType.toString().toLowerCase()}`);
@@ -925,7 +925,7 @@ const addPayment = async (req, res) => {
         paymentData.paymentDetails.amount = amount;
         paymentData.paymentDetails.date = new Date();
         paymentData.paymentDetails.adviceDate = new Date(adviceDate);
-        paymentData.paymentDetails.referenceNumber  =referenceNumber;
+        paymentData.paymentDetails.transactionNumber = transactionNumber;
         paymentData.paymentDetails.status = 'Succeeded';
         paymentData.paymentDetails.comments = comments;
         paymentData.paymentDetails.staffID = userID;

@@ -103,8 +103,8 @@ const authorize = (tokenType, roles = []) => {
 
 const issueAccessToken = (user) => {
     try {
-        const {_id: id, firstName, lastName, role} = user;
-        return jwt.sign({id, firstName, lastName, role, type: 'Access', iss: product},
+        const {_id: id, firstName, lastName, mobile: {primary: mobile}, role} = user;
+        return jwt.sign({id, firstName, lastName, mobile, role, type: 'Access', iss: product},
             secretKey,
             {expiresIn: accessTokenExpiry});
     }
@@ -116,8 +116,8 @@ const issueAccessToken = (user) => {
 const issueRenewToken = (user) => {
     return new Promise((myResolve, myReject) => {
         try {
-            const {_id: id, firstName, lastName, role} = user;
-            const payload = {id, firstName, lastName, role, type: 'Renew', iss: product};
+            const {_id: id, firstName, lastName, mobile: {primary: mobile}, role} = user;
+            const payload = {id, firstName, lastName, mobile, role, type: 'Renew', iss: product};
             const token = jwt.sign(payload, secretKey, {expiresIn: renewTokenExpiry});
             Token.createToken(id, token, 'Renew')
                 .then(() => {
