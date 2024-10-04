@@ -125,6 +125,8 @@
     "bankInitiationError": "Error while initiating the transaction with the bank",
     "creationError": "Error with creating the payment",
     "checkNotFound": "This check is not found",
+    "checkInvalidStatus": "Invalid check status",
+    "invalidAdviceDate": "Invalid advice date",
     "banks": {
       "ADCB": "Abu Dhabi Commercial Bank Egypt",
       "ABDI": "Abu Dhabi Islamic Bank - Egypt",

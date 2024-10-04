@@ -124,8 +124,10 @@ const userSchema = new Schema({
                         current: String,
                         history: [
                             {
+                                _id: false,
                                 status: String,
                                 staffID: String,
+                                adviceDate: Date,
                                 date: Date
                             }
                         ]
@@ -184,7 +186,10 @@ const userSchema = new Schema({
                 default: new Date()
             }
         },
-        message: String
+        message: {
+            type: String,
+            default: ""
+        }
     },
 });
 

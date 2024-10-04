@@ -46,4 +46,8 @@ router.post('/add-bank-check', [authorize('Access', addCheckRoles), multipartPar
 const findCheckRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/find-bank-check', authorize('Access', findCheckRoles), staff.findBankCheck);
 
+/** Update a bank check status using bank name, check number and the new status */
+const updateCheckRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/update-check-status', authorize('Access', updateCheckRoles), staff.updateCheckStatus);
+
 module.exports = router;

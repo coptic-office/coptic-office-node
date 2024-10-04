@@ -2032,7 +2032,6 @@ const getMyPayments = async (req, res) => {
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
                     check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
-                    check.status = undefined;
                     check.image = undefined;
                 })
 
@@ -2095,6 +2094,37 @@ const addBankCheck = (checkData) => {
             .catch((err) => {
                 myReject(err);
             });
+    })
+}
+
+const updateCheckStatus = (updateData) => {
+    return new Promise((myResolve, myReject) => {
+        const {staffID, bankName, number, newStatus, adviceDate, userID, unitId} = updateData;
+        User.findOne({_id: userID}, {units: 1})
+            .then(async (user) => {
+                user.units.map((unit) => {
+                    if (unit.id === unitId) {
+                        unit.bankChecks.map((check) => {
+                            if (check.bankName === bankName && check.number === number) {
+                                check.status.current = newStatus;
+                                const statusRecord = {status: newStatus, staffID, adviceDate: new Date(adviceDate), date: new Date()};
+                                check.status.history.push(statusRecord);
+                            }
+                        });
+                    }
+                })
+
+                await user.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
+            })
+            .catch((err) => {
+                myResolve(err);
+            })
     })
 }
 
@@ -2783,6 +2813,7 @@ module.exports = {
     getPaymentOptions,
     getMyPayments,
     addBankCheck,
+    updateCheckStatus,
     getMyUnits,
     selectUnitType,
     updatePhoto,

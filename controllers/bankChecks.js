@@ -34,4 +34,24 @@ const findBankCheck = ({bankName, number}) => {
     })
 }
 
-module.exports = {addBankCheck, findBankCheck};
+const updateCheckStatus = ({staffID, bankName, number, newStatus, adviceDate}) => {
+    return new Promise((myResolve, myReject) => {
+        const statusRecord = {status: newStatus, staffID, adviceDate: new Date(adviceDate), date: new Date()};
+        const projection = {userID: 1, unitId: 1};
+        const update = {'status.current': newStatus, $push: {'status.history': statusRecord}};
+        Check.findOneAndUpdate({bankName, number}, update, {projection, new: true})
+            .then((check) => {
+                if (!check) {
+                    myReject('checkNotFound')
+                }
+                else {
+                    myResolve({userID: check.userID, unitId: check.unitId});
+                }
+            })
+            .catch((err) => {
+                myReject(err);
+            })
+    })
+}
+
+module.exports = {addBankCheck, findBankCheck, updateCheckStatus};

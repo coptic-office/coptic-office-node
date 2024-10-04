@@ -16,6 +16,7 @@ const Process = require("process");
 const {generateUUID} = require('../utils/codeGenerator');
 const Payment = require('../controllers/payments');
 const Check = require('../controllers/bankChecks');
+const i18n = require('i18next');
 
 const addStaff = async (req, res) => {
     try {
@@ -639,7 +640,7 @@ const updatePhoto = async (req, res) => {
         const bucket = process.env.S3_BUCKET;
         const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
 
-        const {user: {id: userID}} = await req.body;
+        const {user: {id: staffID}} = await req.body;
         const filesNumber = await req.files.length;
         if (filesNumber !== 1) {
             return res.status(400).json({
@@ -666,7 +667,7 @@ const updatePhoto = async (req, res) => {
         const width = Number(process.env.IMAGE_PROFILE_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `staff/${userID}/photos/profile.jpg`;
+        const fileKey = `staff/${staffID}/photos/profile.jpg`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -679,7 +680,7 @@ const updatePhoto = async (req, res) => {
         upload.done()
             .then(() => {
                 const profilePhoto = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
-                Staff.findOneAndUpdate({_id: userID}, {profilePhoto})
+                Staff.findOneAndUpdate({_id: staffID}, {profilePhoto})
                     .then(() => {
                         res.status(200).json({
                             status: "success",
@@ -725,10 +726,10 @@ const updatePhoto = async (req, res) => {
 
 const deletePhoto = async (req, res) => {
     try {
-        const {user: {id: userID}} = await req.body;
+        const {user: {id: staffID}} = await req.body;
 
         const defaultPhoto = process.env.GENERAL_DEFAULT_PROFILE;
-        Staff.updateOne({_id: userID}, {profilePhoto: defaultPhoto})
+        Staff.updateOne({_id: staffID}, {profilePhoto: defaultPhoto})
             .then(() => {
                 res.status(200).json({
                     status: "success",
@@ -797,7 +798,6 @@ const getUserDetails = async (req, res) => {
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
                     check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
-                    check.status = undefined;
                     check.image = undefined;
                 })
 
@@ -903,7 +903,7 @@ const getUserDetails = async (req, res) => {
 
 const addPayment = async (req, res) => {
     try {
-        const {user: {id: userID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, transactionNumber, comments} = await req.body;
+        const {user: {id: staffID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, transactionNumber, comments} = await req.body;
 
         const uniqueId = generateUUID();
         const itemDescription = req.i18n.t(`bankItem.${paymentType.toString().toLowerCase()}`);
@@ -928,7 +928,7 @@ const addPayment = async (req, res) => {
         paymentData.paymentDetails.transactionNumber = transactionNumber;
         paymentData.paymentDetails.status = 'Succeeded';
         paymentData.paymentDetails.comments = comments;
-        paymentData.paymentDetails.staffID = userID;
+        paymentData.paymentDetails.staffID = staffID;
 
         Payment.addPayment(paymentData)
             .then(({paymentId}) => {
@@ -991,7 +991,7 @@ const addBankCheck = async (req, res) => {
         const bucket = process.env.S3_BUCKET;
         const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
 
-        const {user: {id: userID}, id, unitId, number, dueDate, amount, bankName, status} = await req.body;
+        const {user: {id: staffID}, id, unitId, number, dueDate, amount, bankName, status} = await req.body;
         const filesNumber = await req.files.length;
         if (filesNumber !== 1) {
             return res.status(400).json({
@@ -1015,10 +1015,11 @@ const addBankCheck = async (req, res) => {
                 }
             })
         }
+        const arabicBankName = i18n.t(`payment.banks.${bankName}`, {lng: 'ar'});
         const width = Number(process.env.IMAGE_CHECK_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `users/${userID}/checks/${bankName}-${number}.jpg`;
+        const fileKey = `users/${id}/checks/${arabicBankName}#${number}.jpg`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -1040,7 +1041,7 @@ const addBankCheck = async (req, res) => {
                 checkData.bankName = bankName;
                 checkData.status = {};
                 checkData.status.current = status;
-                checkData.status.history.push({status, staffID: userID, date: new Date()});
+                checkData.status.history.push({status, staffID, date: new Date()});
                 checkData.image  = checkUrl;
 
                 User.addBankCheck(checkData)
@@ -1109,7 +1110,6 @@ const findBankCheck = async (req, res) => {
             .then((check) => {
                 check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
                 check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
-                check.status = undefined;
 
                 res.status(200).json({
                     status: "success",
@@ -1118,6 +1118,82 @@ const findBankCheck = async (req, res) => {
                         check
                     }
                 })
+            })
+            .catch((err) => {
+                if (err.toString() === 'checkNotFound') {
+                    res.status(404).json({
+                        status: "failed",
+                        error: req.i18n.t('payment.checkNotFound'),
+                        message: {}
+                    })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const updateCheckStatus = async (req, res) => {
+    try {
+        const {user: {id: staffID}, bankName, number, newStatus, adviceDate} = await req.body;
+        const statusList = ['outstanding', 'cleared', 'rejected', 'cashed'];
+
+        if (adviceDate === undefined || new Date(adviceDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidAdviceDate'),
+                message: {}
+            })
+        }
+
+        if (newStatus === undefined || !statusList.includes(newStatus.toString().toLowerCase())) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.checkInvalidStatus'),
+                message: {}
+            })
+        }
+
+        Check.updateCheckStatus({staffID, bankName, number, newStatus, adviceDate})
+            .then(({userID, unitId}) => {
+                const updateData = {staffID, bankName, number, newStatus, adviceDate, userID, unitId};
+
+                User.updateCheckStatus(updateData)
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            error: "",
+                            message: {}
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(500).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('general.internalError'),
+                                message: {
+                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                }
+                            })
+                    })
             })
             .catch((err) => {
                 if (err.toString() === 'checkNotFound') {
@@ -1200,5 +1276,6 @@ module.exports = {
     getUserDetails,
     addPayment,
     addBankCheck,
-    findBankCheck
+    findBankCheck,
+    updateCheckStatus
 }
