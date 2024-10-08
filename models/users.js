@@ -112,6 +112,11 @@ const userSchema = new Schema({
             bookingDate: Date,
             contractingDate: Date,
             contractDate: Date,
+            contract: {
+                pdfUrl: String,
+                date: Date,
+                staffID: String
+            },
             completionDate: Date,
             bankChecks: [
                 {

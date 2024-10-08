@@ -65,7 +65,9 @@
     "checkPhotoRequired": "يجب تحميل صورة واحدة للشيك البنكي",
     "idImagesRequired": "يجب تحميل صورتين ، واحدة لوجه بطاقة التعريف والأخرى لظهرها",
     "notImageFile": "يتم قبول ملفات الصور فقط",
-    "imageSavingError": "حدث خطأ أثناء حفظ الصورة"
+    "notPdfFile": "يتم قبول ملفات PDF فقط",
+    "fileSavingError": "حدث خطأ أثناء حفظ الملف",
+    "contractFileRequired": "يجب تحميل ملف PDF واحد للعقد"
   },
   "item": {
     "totalAmount": "المبلغ الإجمالي",
@@ -115,10 +117,13 @@
       "creditCard": "كارت إئتمان"
     },
     "accountName": "Coptic Orthodox Patriarchate",
-    "invalidType": "نوعية عملية الدفع غير سليم",
+    "invalidType": "نوعية عملية الدفع غير سليمة",
+    "incorrectType": "نوعية عملية الدفع غير صحيحة",
+    "invalidMethod": "طريقة الدفع غير سليمة",
     "invalidUnitId": "كود الحجز غير سليم",
     "invalidCategory": "لا يمكن الاستمرار بالدفع النقدي بينما الوحدة ليس لها فئة بعد",
     "invalidAmount": "القيمة غير سليمة",
+    "incorrectUserID": "كود المستخدم غير صحيح",
     "incorrectAmount": "المبلغ الإجمالي غير سليم",
     "invalidTransaction": "رقم المعاملة غير سليم",
     "bankConnectionError": "حدث خطأ أثناء الاتصال بالبنك",
@@ -126,7 +131,7 @@
     "creationError": "حدث خطأ أثناء إنشاء عملية الدفع",
     "checkNotFound": "هذا الشيك غير موجود",
     "checkInvalidStatus": "حالة الشيك غير سليمة",
-    "invalidAdviceDate": "تاريخ الإشعار غير سليم",
+    "invalidDate": "التاريخ غير سليم",
     "banks": {
       "ADCB": "مصرف أبوظبي التجاري مصر",
       "ABDI": "مصرف أبوظبي الإسلامي - مصر",
@@ -186,8 +191,12 @@
         "go": "الوصول إلينا",
         "select": "اختر نوع الوحدة"
       }
-    }
-
+    },
+    "missingData": "بيانات الدفع غير كاملة",
+    "noPaymentFound": "لا يوجد عملية دفع مطابقة",
+    "paymentLinked": "عملية الدفع مربوطة بالفعل",
+    "missingContractData": "بيانات تسجيل العقد غير كاملة",
+    "noContract": "لا يمكن إضافة عقد لهذه الوحدة"
   },
   "admin": {
     "aggregatorRequired": "يجب إدخال اسم مقدم خدمة الرسائل النصية القصيرة",

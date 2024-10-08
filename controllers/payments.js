@@ -230,4 +230,44 @@ const addPayment = (paymentData) => {
     })
 }
 
-module.exports = {createPayment, findPayment, addPayment}
+const updatePayment = (paymentData) => {
+    return new Promise((myResolve, myReject) => {
+        const {transactionNumber, paymentMethod, userID, userName, mobile, unitId, paymentType, itemDescription, staffID} = paymentData;
+        const query = {'paymentDetails.transactionNumber' : transactionNumber, 'paymentDetails.paymentMethod': paymentMethod};
+        const projection = {_id: 1, userID: 1, 'receiptDetails.items': 1, 'paymentDetails.amount': 1, 'paymentDetails.adviceDate': 1};
+
+        Payment.findOne(query, projection)
+            .then(async (payment) => {
+                if (!payment) {
+                    return myReject('noPaymentFound');
+                }
+
+                if (payment.userID !== undefined) {
+                    return myReject('paymentLinked');
+                }
+
+                payment.userID = userID;
+                payment.userName = userName;
+                payment.mobile = mobile;
+                payment.unitId = unitId;
+                payment.paymentType = paymentType;
+                payment.receiptDetails.items[0].name = itemDescription;
+                payment.paymentDetails.linkDate = new Date();
+                payment.paymentDetails.linkStaffID = staffID;
+
+                await payment.save()
+                    .then(() => {
+                        myResolve({paymentId: payment._id, amount: payment.paymentDetails.amount, adviceDate: payment.paymentDetails.adviceDate});
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    })
+
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
+module.exports = {createPayment, findPayment, addPayment, updatePayment}

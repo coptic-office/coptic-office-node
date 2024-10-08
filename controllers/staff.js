@@ -17,6 +17,7 @@ const {generateUUID} = require('../utils/codeGenerator');
 const Payment = require('../controllers/payments');
 const Check = require('../controllers/bankChecks');
 const i18n = require('i18next');
+const {isFloat} = require('../utils/numberUtils');
 
 const addStaff = async (req, res) => {
     try {
@@ -664,6 +665,7 @@ const updatePhoto = async (req, res) => {
                 }
             })
         }
+
         const width = Number(process.env.IMAGE_PROFILE_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
@@ -680,7 +682,7 @@ const updatePhoto = async (req, res) => {
         upload.done()
             .then(() => {
                 const profilePhoto = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
-                Staff.findOneAndUpdate({_id: staffID}, {profilePhoto})
+                Staff.updateOne({_id: staffID}, {profilePhoto})
                     .then(() => {
                         res.status(200).json({
                             status: "success",
@@ -694,7 +696,7 @@ const updatePhoto = async (req, res) => {
                         res.status(500).json(
                             {
                                 status: "failed",
-                                error: req.i18n.t('user.imageSavingError'),
+                                error: req.i18n.t('user.fileSavingError'),
                                 message: {
                                     info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                                 }
@@ -705,7 +707,7 @@ const updatePhoto = async (req, res) => {
                 res.status(500).json(
                     {
                         status: "failed",
-                        error: req.i18n.t('user.imageSavingError'),
+                        error: req.i18n.t('user.fileSavingError'),
                         message: {
                             info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                         }
@@ -904,23 +906,145 @@ const getUserDetails = async (req, res) => {
 const addPayment = async (req, res) => {
     try {
         const {user: {id: staffID}, id, unitId, paymentType, paymentMethod, amount, adviceDate, transactionNumber, comments} = await req.body;
+        const paymentTypeList = ['booking', 'contracting', 'cashing'];
+        const paymentMethodList = ['bankDeposit', 'bankTransfer', 'instaPay', 'creditCard'];
 
+        if (paymentMethod === undefined || amount === undefined || adviceDate === undefined ||
+            transactionNumber === undefined || comments === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingData'),
+                message: {}
+            });
+        }
+
+        if (!paymentMethodList.includes(paymentMethod)) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidMethod'),
+                message: {}
+            });
+        }
+
+        if (new Date(adviceDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        if (!isFloat(amount)) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidAmount'),
+                message: {}
+            });
+        }
+
+        let isCompletePayment = false;
         const uniqueId = generateUUID();
-        const itemDescription = req.i18n.t(`bankItem.${paymentType.toString().toLowerCase()}`);
-
         const paymentData = {};
-        paymentData.userID = id;
-        paymentData.unitId = unitId;
-        paymentData.paymentType = paymentType.toString().toLowerCase();
         paymentData.receiptDetails = {};
-        paymentData.receiptDetails.transactionNumber = uniqueId;
         paymentData.receiptDetails.items = [];
         paymentData.receiptDetails.items[0] = {};
-        paymentData.receiptDetails.items[0].name = itemDescription;
+        paymentData.paymentDetails = {};
+
+        if (id !== undefined && unitId !== undefined && paymentType !== undefined) {
+            if (!paymentTypeList.includes(paymentType.toString().toLowerCase())) {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidType'),
+                    message: {}
+                });
+            }
+
+            if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+                return res.status(400).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.incorrectUserID'),
+                        message: {}
+                    })
+            }
+
+            const user = await User.getUserById(id, {firstName: 1, lastName: 1, 'mobile.primary': 1, units: 1});
+
+            if (!user) {
+                return res.status(400).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.incorrectUserID'),
+                        message: {}
+                    })
+            }
+
+            if (unitId !== '') {
+                const myUnit = user.units.filter((unit) => unit.id === unitId);
+
+                if (myUnit[0] === undefined) {
+                    return res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.invalidUnitId'),
+                            message: {}
+                        })
+                }
+
+                if (myUnit[0].contractingDate === undefined) {
+                    if (paymentType.toString().toLowerCase() !== 'contracting') {
+                        return res.status(400).json(
+                            {
+                                status: "failed",
+                                error: req.i18n.t('payment.incorrectType'),
+                                message: {}
+                            })
+                    }
+                }
+                else if (myUnit[0].contractDate !== undefined || myUnit[0].completionDate !== undefined) {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectType'),
+                            message: {}
+                        })
+                }
+                else if (paymentType.toString().toLowerCase() !== 'cashing') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectType'),
+                            message: {}
+                        })
+                }
+            }
+            else {
+                if (paymentType.toString().toLowerCase() !== 'booking') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectType'),
+                            message: {}
+                        })
+                }
+            }
+
+            paymentData.userName = `${user.firstName} ${user.lastName}`;
+            paymentData.mobile = user.mobile.primary;
+
+            const itemDescription = req.i18n.t(`item.${paymentType.toString().toLowerCase()}`);
+            isCompletePayment = true;
+
+            paymentData.userID = id;
+            paymentData.unitId = unitId;
+            paymentData.paymentType = paymentType.toString().toLowerCase();
+            paymentData.receiptDetails.items[0].name = itemDescription;
+        }
+
+        paymentData.receiptDetails.transactionNumber = uniqueId;
         paymentData.receiptDetails.items[0].price = amount;
         paymentData.receiptDetails.amount = amount;
-        paymentData.paymentDetails = {};
-        paymentData.paymentDetails.paymentMethod = paymentMethod.toString().toLowerCase();
+        paymentData.paymentDetails.paymentMethod = paymentMethod;
         paymentData.paymentDetails.locale = 'ar';
         paymentData.paymentDetails.amount = amount;
         paymentData.paymentDetails.date = new Date();
@@ -932,14 +1056,174 @@ const addPayment = async (req, res) => {
 
         Payment.addPayment(paymentData)
             .then(({paymentId}) => {
+                if (isCompletePayment) {
+                    const paymentData = {
+                        userID: id,
+                        id: paymentId,
+                        paymentType: paymentType.toString().toLowerCase(),
+                        paymentMethod: paymentMethod,
+                        amount,
+                        adviceDate: new Date(adviceDate),
+                        unitId
+                    }
+                    User.completePayment(paymentData)
+                        .then(() => {
+                            res.status(200).json({
+                                status: "success",
+                                error: "",
+                                message: {}
+                            })
+                        })
+                        .catch((err) => {
+                            res.status(500).json(
+                                {
+                                    status: "failed",
+                                    error: req.i18n.t('general.internalError'),
+                                    message: {
+                                        info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                    }
+                                })
+                        });
+                }
+                else {
+                    res.status(200).json({
+                        status: "success",
+                        error: "",
+                        message: {}
+                    })
+                }
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const linkPayment = async (req, res) => {
+    try {
+        const {user: {id: staffID}, id, unitId, paymentType, paymentMethod, transactionNumber} = await req.body;
+        const paymentTypeList = ['booking', 'contracting', 'cashing'];
+
+        if (paymentMethod === undefined || transactionNumber === undefined || id === undefined ||
+            unitId === undefined || paymentType === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingData'),
+                message: {}
+            });
+        }
+
+        if (!paymentTypeList.includes(paymentType.toString().toLowerCase())) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidType'),
+                message: {}
+            });
+        }
+
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                })
+        }
+
+        const user = await User.getUserById(id, {firstName: 1, lastName: 1, 'mobile.primary': 1, units: 1});
+
+        if (!user) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                })
+        }
+
+        if (unitId !== '') {
+            const myUnit = user.units.filter((unit) => unit.id === unitId);
+
+            if (myUnit[0] === undefined) {
+                return res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.invalidUnitId'),
+                        message: {}
+                    })
+            }
+
+            if (myUnit[0].contractingDate === undefined) {
+                if (paymentType.toString().toLowerCase() !== 'contracting') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectType'),
+                            message: {}
+                        })
+                }
+            }
+            else if (myUnit[0].contractDate !== undefined || myUnit[0].completionDate !== undefined) {
+                return res.status(400).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.incorrectType'),
+                        message: {}
+                    })
+            }
+            else if (paymentType.toString().toLowerCase() !== 'cashing') {
+                return res.status(400).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.incorrectType'),
+                        message: {}
+                    })
+            }
+        }
+        else {
+            if (paymentType.toString().toLowerCase() !== 'booking') {
+                return res.status(400).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('payment.incorrectType'),
+                        message: {}
+                    })
+            }
+        }
+
+        const userID = id;
+        const userName = `${user.firstName} ${user.lastName}`;
+        const mobile = user.mobile.primary;
+        const itemDescription = req.i18n.t(`item.${paymentType.toString().toLowerCase()}`);
+        const paymentData = {transactionNumber, paymentMethod, userID, userName, mobile, unitId, paymentType, itemDescription, staffID};
+
+        Payment.updatePayment(paymentData)
+            .then(({paymentId, amount, adviceDate}) => {
                 const paymentData = {
-                    userID: id,
+                    userID,
                     id: paymentId,
                     paymentType: paymentType.toString().toLowerCase(),
-                    paymentMethod: paymentMethod.toString().toLowerCase(),
-                    amount: amount,
-                    adviceDate: new Date(adviceDate),
-                    unitId: unitId
+                    paymentMethod,
+                    amount,
+                    adviceDate,
+                    unitId
                 }
                 User.completePayment(paymentData)
                     .then(() => {
@@ -961,14 +1245,32 @@ const addPayment = async (req, res) => {
                     });
             })
             .catch((err) => {
-                res.status(500).json(
-                    {
-                        status: "failed",
-                        error: req.i18n.t('general.internalError'),
-                        message: {
-                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                        }
-                    })
+                if (err.toString() === 'noPaymentFound') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.noPaymentFound'),
+                            message: {}
+                        })
+                }
+                else if (err.toString() === 'paymentLinked') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.paymentLinked'),
+                            message: {}
+                        })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
             });
     }
     catch (err) {
@@ -1227,6 +1529,131 @@ const updateCheckStatus = async (req, res) => {
     }
 }
 
+const addContract  =async (req, res) => {
+    try {
+        const region = process.env.S3_REGION;
+        const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+        const bucket = process.env.S3_BUCKET;
+        const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
+
+        const {user: {id: staffID}, id, unitId, unitNumber, contractDate} = await req.body;
+        const filesNumber = await req.files.length;
+        if (filesNumber !== 1) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t(`user.contractFileRequired`),
+                message: {}
+            })
+        }
+
+        if (id === undefined || unitId === undefined || unitNumber === undefined || contractDate === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingContractData'),
+                message: {}
+            });
+        }
+
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                })
+        }
+
+        if (new Date(contractDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        const {fileTypeFromBuffer} = await import('file-type');
+        const file = req.files[0];
+        const type = await fileTypeFromBuffer(file.buffer);
+        const ext = type['ext'].toString().toLowerCase();
+        if (ext !== 'pdf') {
+            return res.status(400).json({
+                status: "Failed",
+                error: req.i18n.t(`user.notPdfFile`),
+                message: {}
+            })
+        }
+
+        const fileStream = Readable.from(file.buffer);
+        const fileKey = `staff/${staffID}/contract/${unitNumber}.pdf`;
+        const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
+        const upload = new Upload({
+            client,
+            params,
+            tags: [], // optional tags
+            queueSize: 4, // optional concurrency configuration
+            partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+            leavePartsOnError: false, // optional manually handle dropped parts
+        });
+        upload.done()
+            .then(async () => {
+                const contractUrl = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
+                const contractData = {id, unitId, unitNumber, contractDate: new Date(contractDate), contractUrl, staffID};
+
+                await User.addContract(contractData);
+
+                return res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {}
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'incorrectUserID') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.incorrectUserID`),
+                        message: {}
+                    })
+                }
+                else if (err.toString() === 'invalidUnitId') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.invalidUnitId`),
+                        message: {}
+                    })
+                }
+                else if (err.toString() === 'noContract') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.noContract`),
+                        message: {}
+                    })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('user.fileSavingError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -1275,7 +1702,9 @@ module.exports = {
     deletePhoto,
     getUserDetails,
     addPayment,
+    linkPayment,
     addBankCheck,
     findBankCheck,
-    updateCheckStatus
+    updateCheckStatus,
+    addContract
 }

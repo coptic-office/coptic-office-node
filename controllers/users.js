@@ -935,7 +935,7 @@ const updateMobile = async (req, res) => {
         }
         else {
             const {number: mobileNumber, country} = mobile;
-            await User.findOne({$and: [{'mobile.primary': mobileNumber}, {'mobile.isVerified': true}]})
+            await User.findOne({$and: [{'mobile.primary.number': mobileNumber}, {'mobile.isVerified': true}]})
                 .then(async (result) => {
                     if (!result) {
                         await getUserById(id, {mobile: 1, isActive: 1})
@@ -2128,6 +2128,48 @@ const updateCheckStatus = (updateData) => {
     })
 }
 
+const addContract = (contractData) => {
+    return new Promise((myResolve, myReject) => {
+        const {id, unitId, unitNumber, contractDate, contractUrl, staffID} = contractData;
+
+        User.findOne({_id: id}, {units: 1})
+            .then(async (user) => {
+                if (!user) {
+                    return myReject('incorrectUserID');
+                }
+
+                const myUnit = user.units.filter((unit) => unit.id === unitId);
+                if (myUnit[0] === undefined) {
+                    return myReject('invalidUnitId');
+                }
+
+                if (myUnit[0].contractingDate === undefined || myUnit[0].category === undefined ||
+                    myUnit[0].contractDate !== undefined) {
+                    return myReject('noContract');
+                }
+
+                myUnit[0].unitNumber = unitNumber;
+                myUnit[0].contractDate = contractDate;
+                myUnit[0].contract = {};
+                myUnit[0].contract.pdfUrl = contractUrl;
+                myUnit[0].contract.date = new Date();
+                myUnit[0].contract.staffID = staffID;
+
+                await user.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
+
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 const getMyUnits = async (req, res) => {
     try {
         const {user: {id: userID}} = await req.body;
@@ -2487,7 +2529,7 @@ const updatePhoto = async (req, res) => {
                         res.status(500).json(
                             {
                                 status: "failed",
-                                error: req.i18n.t('user.imageSavingError'),
+                                error: req.i18n.t('user.fileSavingError'),
                                 message: {
                                     info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                                 }
@@ -2498,7 +2540,7 @@ const updatePhoto = async (req, res) => {
                 res.status(500).json(
                     {
                         status: "failed",
-                        error: req.i18n.t('user.imageSavingError'),
+                        error: req.i18n.t('user.fileSavingError'),
                         message: {
                             info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                         }
@@ -2634,7 +2676,7 @@ const updateNationalId = async (req, res) => {
                                 res.status(500).json(
                                     {
                                         status: "failed",
-                                        error: req.i18n.t('user.imageSavingError'),
+                                        error: req.i18n.t('user.fileSavingError'),
                                         message: {
                                             info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
                                         }
@@ -2814,6 +2856,7 @@ module.exports = {
     getMyPayments,
     addBankCheck,
     updateCheckStatus,
+    addContract,
     getMyUnits,
     selectUnitType,
     updatePhoto,

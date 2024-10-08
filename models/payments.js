@@ -45,6 +45,8 @@ const paymentSchema = new Schema({
         bankSuccessIndicator: String,
         transactionNumber: String,
         staffID: String,
+        linkDate: Date,
+        linkStaffID: String,
         comments: String
     }
 })

@@ -65,7 +65,9 @@
     "checkPhotoRequired": "One bank check is required",
     "idImagesRequired": "Two images are required, one for the ID front and another for the ID back",
     "notImageFile": "Only image files are accepted",
-    "imageSavingError": "Failed while saving the image"
+    "notPdfFile": "Only PDF files are accepted",
+    "fileSavingError": "Failed while saving the file",
+    "contractFileRequired": "One PDF file is required for the contract"
   },
   "item": {
     "totalAmount": "Total amount",
@@ -116,9 +118,12 @@
     },
     "accountName": "Coptic Orthodox Patriarchate",
     "invalidType": "Invalid payment type",
+    "incorrectType": "Incorrect Payment Type",
+    "invalidMethod": "Invalid payment method",
     "invalidUnitId": "Invalid booking code",
     "invalidCategory": "Cannot proceed with the cashing payment type while the unit has no category yet",
     "invalidAmount": "Invalid amount",
+    "incorrectUserID": "Incorrect User ID",
     "incorrectAmount": "Incorrect total amount",
     "invalidTransaction": "Invalid transaction number",
     "bankConnectionError": "Error while connecting to the bank",
@@ -126,7 +131,7 @@
     "creationError": "Error with creating the payment",
     "checkNotFound": "This check is not found",
     "checkInvalidStatus": "Invalid check status",
-    "invalidAdviceDate": "Invalid advice date",
+    "invalidDate": "Invalid date",
     "banks": {
       "ADCB": "Abu Dhabi Commercial Bank Egypt",
       "ABDI": "Abu Dhabi Islamic Bank - Egypt",
@@ -186,7 +191,12 @@
         "go": "Reach Us",
         "select": "Select Unit Type"
       }
-    }
+    },
+    "missingData": "Missing payment data",
+    "noPaymentFound": "No matching payment found",
+    "paymentLinked": "Payment already linked",
+    "missingContractData": "Missing contract data",
+    "noContract": "Cannot add a contract for this unit"
   },
   "admin": {
     "aggregatorRequired": "SMS aggregator name is required",
