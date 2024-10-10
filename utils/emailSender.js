@@ -77,6 +77,7 @@ const sendOTP = (locale, params) => {
                 myResolve(res);
             })
             .catch((err) => {
+                console.log(err)
                 errorLog(`A ${params.template} email failed to be sent to ${params.receiver}`);
                 myReject(err);
             })
