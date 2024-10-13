@@ -2298,7 +2298,7 @@ const getUnitTypes = async (req, res) => {
 
                 const editedUnits = [];
                 user.units[0].priceDetails.forEach((unit) => {
-                    const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), ...unit._doc};
+                    const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), isActive: true, ...unit._doc};
                     editedUnits.push(editedUnit);
                 })
 
