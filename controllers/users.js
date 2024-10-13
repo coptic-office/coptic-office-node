@@ -948,7 +948,7 @@ const updateMobile = async (req, res) => {
                                         message: {}
                                     })
                                 }
-                                if (user.mobile.primary.number === mobileNumber || user.mobile.alternate === mobileNumber) {
+                                if (user.mobile.primary.number === mobileNumber || user.mobile.alternate.number === mobileNumber) {
                                     return res.status(400)
                                         .json({
                                             status: "failed",
