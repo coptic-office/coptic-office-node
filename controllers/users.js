@@ -1633,7 +1633,7 @@ const completePayment = (paymentData) => {
 
                 switch (paymentType) {
                     case 'booking':
-                        Unit.find({isActive: true}, {_id: 0, images: 0, isActive: 0})
+                        Unit.find({}, {_id: 0, images: 0, isActive: 0})
                             .then(async (units) => {
                                 const bookingAmount = units[0].bookingAmount;
                                 const bookingPayments = user.payments.filter((item) => item.unitId === unitId);
@@ -2285,7 +2285,7 @@ const getUnitTypes = async (req, res) => {
         }
 
         User.findOne({_id: userID}, {units: 1})
-            .then((user) => {
+            .then(async (user) => {
                 const myUnit = user.units.filter((item) => item.id === unitId);
                 if (myUnit.length === 0) {
                     return res.status(400).json({
@@ -2296,9 +2296,14 @@ const getUnitTypes = async (req, res) => {
                 }
                 const currentCategory = myUnit[0].category;
 
+                const units = await Unit.find({}, {_id: 0, category:1, isActive: 1});
+
                 const editedUnits = [];
                 user.units[0].priceDetails.forEach((unit) => {
-                    const editedUnit = {categoryName: req.i18n.t(`product.${unit.category}.name`), isActive: true, ...unit._doc};
+                    const categoryName = req.i18n.t(`product.${unit.category}.name`);
+                    const thisUnit = units.filter((item) => item.category === unit.category);
+                    const isActive = thisUnit[0].isActive;
+                    const editedUnit = {categoryName, isActive, ...unit._doc};
                     editedUnits.push(editedUnit);
                 })
 

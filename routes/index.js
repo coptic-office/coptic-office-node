@@ -5,7 +5,7 @@ const Unit = require('../models/units');
 /** Get a list of units details for the home page **/
 router.get('/', (req, res) => {
     try {
-        Unit.find({isActive: true}, {_id: 0, isActive: 0})
+        Unit.find({}, {_id: 0})
             .then((units) => {
                 const editedUnits = [];
                 units.forEach((unit) => {
