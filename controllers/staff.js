@@ -854,8 +854,11 @@ const getUserDetails = async (req, res) => {
                         unit.contractDate = "";
                     }
 
+                    if (unit.completionDate === undefined) {
+                        unit.completionDate = "";
+                    }
+
                     unit.priceDetails = undefined;
-                    unit.completionDate = undefined;
                     unit.bankChecks = undefined;
                 })
 
