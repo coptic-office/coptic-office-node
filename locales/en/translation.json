@@ -123,6 +123,7 @@
     "invalidUnitId": "Invalid booking code",
     "invalidCategory": "Cannot proceed with the cashing payment type while the unit has no category yet",
     "invalidAmount": "Invalid amount",
+    "invalidNumber": "Invalid Number",
     "incorrectUserID": "Incorrect User ID",
     "incorrectAmount": "Incorrect total amount",
     "invalidTransaction": "Invalid transaction number",
@@ -196,7 +197,9 @@
     "noPaymentFound": "No matching payment found",
     "paymentLinked": "Payment already linked",
     "missingContractData": "Missing contract data",
-    "noContract": "Cannot add a contract for this unit"
+    "missingCheckData": "Missing check data",
+    "noContract": "Cannot add a contract for this unit",
+    "noBankCheck": "Cannot add a bank check before signing a contract and updating the user info"
   },
   "admin": {
     "aggregatorRequired": "SMS aggregator name is required",

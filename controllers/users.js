@@ -2074,14 +2074,26 @@ const addBankCheck = (checkData) => {
     return new Promise((myResolve, myReject) => {
         User.findOne({_id: checkData.userID}, {firstName: 1, lastName: 1, mobile: 1, units: 1})
             .then(async (user) => {
-                user.units.filter((unit) => {
+                if (!user) {
+                    return myReject('incorrectUserID');
+                }
+
+                const myUnit = user.units.filter((unit) => {
                     if (unit.id === checkData.unitId) {
+                        if (unit.contractDate === undefined) {
+                            return myReject('noBankCheck');
+                        }
                         checkData.userID = undefined;
                         checkData.unitId = undefined;
                         unit.bankChecks.push(checkData);
+                        return unit;
                     }
                 });
-                await User.save()
+                if (myUnit[0] === undefined) {
+                    return myReject('invalidUnitId');
+                }
+
+                await user.save()
                     .then(() => {
                         const userName = `${user.firstName} ${user.lastName}`;
                         const mobile = user.mobile.primary;

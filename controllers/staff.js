@@ -17,7 +17,7 @@ const {generateUUID} = require('../utils/codeGenerator');
 const Payment = require('../controllers/payments');
 const Check = require('../controllers/bankChecks');
 const i18n = require('i18next');
-const {isFloat} = require('../utils/numberUtils');
+const {isFloat, isNumeric} = require('../utils/numberUtils');
 
 const addStaff = async (req, res) => {
     try {
@@ -1296,14 +1296,57 @@ const addBankCheck = async (req, res) => {
         const bucket = process.env.S3_BUCKET;
         const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
 
-        const {user: {id: staffID}, id, unitId, number, dueDate, amount, bankName, status} = await req.body;
+        const {user: {id: staffID}, id, unitId, number, dueDate, amount, bankName} = await req.body;
         const filesNumber = await req.files.length;
+
         if (filesNumber !== 1) {
             return res.status(400).json({
                 status: "failed",
                 error: req.i18n.t(`user.checkPhotoRequired`),
                 message: {}
             })
+        }
+
+        if (id === undefined || unitId === undefined || number === undefined || dueDate === undefined ||
+            amount === undefined || bankName === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingCheckData'),
+                message: {}
+            });
+        }
+
+        if (new Date(dueDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        if (!isFloat(amount)) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidAmount'),
+                message: {}
+            });
+        }
+
+        if (!isNumeric(number)) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidNumber'),
+                message: {}
+            });
+        }
+
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                })
         }
 
         const {fileTypeFromBuffer} = await import('file-type');
@@ -1345,8 +1388,9 @@ const addBankCheck = async (req, res) => {
                 checkData.amount = amount;
                 checkData.bankName = bankName;
                 checkData.status = {};
-                checkData.status.current = status;
-                checkData.status.history.push({status, staffID, date: new Date()});
+                checkData.status.current = 'outstanding';
+                checkData.status.history = [];
+                checkData.status.history.push({status: 'outstanding', staffID, date: new Date()});
                 checkData.image  = checkUrl;
 
                 User.addBankCheck(checkData)
@@ -1373,16 +1417,39 @@ const addBankCheck = async (req, res) => {
                                     })
                             });
                     })
-                    .catch((err) => [
-                        res.status(500).json(
-                            {
+                    .catch((err) => {
+                        if (err.toString() === 'incorrectUserID') {
+                            return res.status(400).json({
                                 status: "failed",
-                                error: req.i18n.t('general.internalError'),
-                                message: {
-                                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                                }
+                                error: req.i18n.t(`payment.incorrectUserID`),
+                                message: {}
                             })
-                    ]);
+                        }
+                        else if (err.toString() === 'invalidUnitId') {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t(`payment.invalidUnitId`),
+                                message: {}
+                            })
+                        }
+                        else if (err.toString() === 'noBankCheck') {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t(`payment.noBankCheck`),
+                                message: {}
+                            })
+                        }
+                        else {
+                            res.status(500).json(
+                                {
+                                    status: "failed",
+                                    error: req.i18n.t('general.internalError'),
+                                    message: {
+                                        info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                                    }
+                                })
+                        }
+                    });
             })
             .catch((err) => {
                 res.status(500).json(

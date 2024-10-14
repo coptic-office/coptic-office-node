@@ -123,6 +123,7 @@
     "invalidUnitId": "كود الحجز غير سليم",
     "invalidCategory": "لا يمكن الاستمرار بالدفع النقدي بينما الوحدة ليس لها فئة بعد",
     "invalidAmount": "القيمة غير سليمة",
+    "invalidNumber": "الرقم غير سليم",
     "incorrectUserID": "كود المستخدم غير صحيح",
     "incorrectAmount": "المبلغ الإجمالي غير سليم",
     "invalidTransaction": "رقم المعاملة غير سليم",
@@ -196,7 +197,9 @@
     "noPaymentFound": "لا يوجد عملية دفع مطابقة",
     "paymentLinked": "عملية الدفع مربوطة بالفعل",
     "missingContractData": "بيانات تسجيل العقد غير كاملة",
-    "noContract": "لا يمكن إضافة عقد لهذه الوحدة"
+    "missingCheckData": "بيانات الشيك غير كاملة",
+    "noContract": "لا يمكن إضافة عقد لهذه الوحدة",
+    "noBankCheck": "لا يمكن إضافة شيك بنكي إلا بعد توقيع العقد وتحديث بيانات العميل بذلك"
   },
   "admin": {
     "aggregatorRequired": "يجب إدخال اسم مقدم خدمة الرسائل النصية القصيرة",

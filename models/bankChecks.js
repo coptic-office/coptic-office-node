@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const {Schema, model} = mongoose;
 
 const bankCheckSchema = new Schema({
-    _id: false,
     userID: String,
     userName: String,
     mobile: {country: String, number: String},
@@ -25,6 +24,8 @@ const bankCheckSchema = new Schema({
     },
     image: String,
 })
+
+bankCheckSchema.index({bankName: 1, number: 1}, {unique: true});
 
 const bankCheckModel = model('bank_check', bankCheckSchema);
 

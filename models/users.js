@@ -198,6 +198,8 @@ const userSchema = new Schema({
     },
 });
 
+userSchema.index({'units.bankChecks.bankName': 1, 'units.bankChecks.number': 1}, {unique: true});
+
 userSchema.pre('validate', function(next) {
     const user = this;
     if (!user.isModified('role')) return next();
