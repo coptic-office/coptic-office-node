@@ -1012,6 +1012,14 @@ const addPayment = async (req, res) => {
                             message: {}
                         })
                 }
+                else if (myUnit[0].category === undefined) {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectType'),
+                            message: {}
+                        })
+                }
                 else if (paymentType.toString().toLowerCase() !== 'cashing') {
                     return res.status(400).json(
                         {
