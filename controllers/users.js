@@ -640,7 +640,7 @@ const updateEmail = async (req, res) => {
                                             const otp = numbers.generateNumber(Number(process.env.OTP_DIGITS_NUMBER));
                                             await PreUser.create({'otpReceiver.recipient': email, otp, action: 'UPDATE', callback: verifyEmailUpdate})
                                                 .then(async (preUser) => {
-                                                    if (user.email === undefined || !user.email.isVerified) {
+                                                    if (user.email.primary === undefined || !user.email.isVerified) {
                                                         await User.updateOne({_id: id}, {
                                                             'email.primary': email,
                                                             'email.isVerified': false
@@ -717,7 +717,7 @@ const updateEmail = async (req, res) => {
                                                         action: 'UPDATE'
                                                     })
                                                     .then(async () => {
-                                                        if (user.email === undefined || !user.email.isVerified) {
+                                                        if (user.email.primary === undefined || !user.email.isVerified) {
                                                             await User.updateOne({_id: id}, {
                                                                 'email.primary': email,
                                                                 'email.isVerified': false
@@ -802,7 +802,7 @@ const updateEmail = async (req, res) => {
                                                                 action: 'UPDATE'
                                                             })
                                                             .then(async () => {
-                                                                if (user.email === undefined || !user.email.isVerified) {
+                                                                if (user.email.primary === undefined || !user.email.isVerified) {
                                                                     await User.updateOne({_id: id}, {
                                                                         'email.primary': email,
                                                                         'email.isVerified': false
@@ -1598,7 +1598,7 @@ const completePayment = (paymentData) => {
                 const {mobile: {primary: {number: mobileNumber}}} = user;
                 user.payments.push({id, paymentMethod, paymentType, amount, adviceDate, unitId});
 
-                if (user.email === undefined) {
+                if (user.email.primary === undefined) {
                     const notifications = await Notification.findOne({name: 'emailAlert'});
                     let araMessage = notifications.messages.ar;
                     let engMessage = notifications.messages.en;
