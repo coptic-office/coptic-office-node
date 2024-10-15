@@ -1067,7 +1067,8 @@ const addPayment = async (req, res) => {
                         paymentMethod: paymentMethod,
                         amount,
                         adviceDate: new Date(adviceDate),
-                        unitId
+                        unitId,
+                        locale: 'ar'
                     }
                     User.completePayment(paymentData)
                         .then(() => {
