@@ -2368,6 +2368,39 @@ const getUnitTypes = async (req, res) => {
     }
 }
 
+const findUnitTypes = (userID, unitId) => {
+    return new Promise((myResolve, myReject) => {
+        User.findOne({_id: userID}, {units: 1})
+            .then(async (user) => {
+                if (!user) {
+                    return myReject('incorrectUserID');
+                }
+
+                const myUnit = user.units.filter((item) => item.id === unitId);
+                if (myUnit.length === 0) {
+                    return myReject('invalidUnitId');
+                }
+                const currentCategory = myUnit[0].category;
+
+                const units = await Unit.find({}, {_id: 0, category:1, isActive: 1});
+
+                const editedUnits = [];
+                user.units[0].priceDetails.forEach((unit) => {
+                    const categoryName = req.i18n.t(`product.${unit.category}.name`);
+                    const thisUnit = units.filter((item) => item.category === unit.category);
+                    const isActive = thisUnit[0].isActive;
+                    const editedUnit = {categoryName, isActive, ...unit._doc};
+                    editedUnits.push(editedUnit);
+                })
+
+                myResolve({units: editedUnits, currentCategory});
+            })
+            .catch((err) => {
+                myReject(err);
+            })
+    })
+}
+
 const selectUnitType = async (req, res) => {
     try {
         const {user: {id: userID}, unitId, category} = await req.body;
@@ -2884,6 +2917,8 @@ module.exports = {
     checkUnitId,
     checkCategory,
     getUnitTypes,
+    findUnitTypes,
+    selectUnitType,
     completePayment,
     getPaymentOptions,
     getMyPayments,
@@ -2891,7 +2926,6 @@ module.exports = {
     updateCheckStatus,
     addContract,
     getMyUnits,
-    selectUnitType,
     updatePhoto,
     deletePhoto,
     updateNationalId,

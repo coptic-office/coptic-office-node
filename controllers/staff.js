@@ -1684,6 +1684,80 @@ const updateCheckStatus = async (req, res) => {
     }
 }
 
+const getUnitTypes = async (req, res) => {
+    try {
+        const {id, unitId} = await req.body;
+
+        if (id === undefined || unitId === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('register.missingData'),
+                message: {}
+            });
+        }
+
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                })
+        }
+
+        User.findUnitTypes(id, unitId)
+            .then(({units, currentCategory}) => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        units,
+                        currentCategory
+                    }
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'incorrectUserID') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.incorrectUserID'),
+                            message: {}
+                        })
+                }
+                else if (err.toString() === 'invalidUnitId') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.invalidUnitId'),
+                            message: {}
+                        })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const addContract  =async (req, res) => {
     try {
         const region = process.env.S3_REGION;
@@ -1862,5 +1936,6 @@ module.exports = {
     addBankCheck,
     findBankCheck,
     updateCheckStatus,
+    getUnitTypes,
     addContract
 }
