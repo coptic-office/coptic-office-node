@@ -2535,7 +2535,72 @@ const selectUnitType = async (req, res) => {
 
 const chooseUnitType = (userID, unitId, category) => {
     return new Promise((myResolve, myReject) => {
+        User.findOne({_id: userID}, {units: 1, payments: 1})
+            .then(async (user) => {
+                if (!user) {
+                    return myReject('incorrectUserID');
+                }
 
+                const paymentSubset = user.payments.filter((item) => item.unitId === unitId);
+                if (paymentSubset.length === 0) {
+                    return myReject('invalidUnitId');
+                }
+
+                const myUnit = user.units.filter((item) => item.id === unitId);
+                if (myUnit[0].contractingDate === undefined) {
+                    return myReject('noContracting');
+                }
+                if (myUnit[0].contractDate !== undefined) {
+                    return myReject('contractDone');
+                }
+
+                const myCategory = myUnit[0].category;
+                if (myCategory !== undefined) {
+                    const targetPrices = myUnit[0].priceDetails.filter((item) => item.category === category);
+                    const targetCashAmount = targetPrices[0].cashAmount;
+                    const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                    if (paidAmount > targetCashAmount) {
+                        return myReject('invalidSelection');
+                    }
+                }
+
+                const notification = await Notification.findOne({name: 'discount'});
+
+                const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category);
+                const grossAmount = priceDetails[0].grossAmount;
+                const cashAmount = priceDetails[0].cashAmount;
+                const discountAmount = (grossAmount - cashAmount).toLocaleString();
+                const paidTotal = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                const remainingAmount = (cashAmount - paidTotal).toLocaleString();
+
+                let araDiscount = notification.messages.ar;
+                araDiscount = araDiscount.replace('{{discountAmount}}', discountAmount);
+                araDiscount = araDiscount.replace('{{remainingAmount}}', remainingAmount);
+
+                let engDiscount = notification.messages.en;
+                engDiscount = engDiscount.replace('{{discountAmount}}', discountAmount);
+                engDiscount = engDiscount.replace('{{remainingAmount}}', remainingAmount);
+
+                user.units.map((item) => {
+                    if (item.id === unitId) {
+                        item.category = category;
+                        item.discount.ar = araDiscount;
+                        item.discount.en = engDiscount;
+                        item.discount.value = remainingAmount;
+                    }
+                });
+
+                await user.save()
+                    .then(async () => {
+                        myResolve(category);
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    })
+            })
+            .catch((err) => {
+                myReject(err);
+            })
     })
 }
 

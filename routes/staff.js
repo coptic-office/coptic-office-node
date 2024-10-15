@@ -62,6 +62,10 @@ router.post('/update-check-status', authorize('Access', updateCheckRoles), staff
 const getUnitTypesRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/get-unit-types', authorize('Access', getUnitTypesRoles), staff.getUnitTypes);
 
+/** Allows the user to select a specific unit type */
+const selectUnitTypeRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/select-unit-type', authorize('Access', selectUnitTypeRoles), staff.selectUnitType);
+
 /** Add the contract of a unit for a specific user */
 const addContractRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 const options3 = {maxFileSize: 2, maxFilesCount: 1, fileTypesList: ['pdf']};
