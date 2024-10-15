@@ -1606,6 +1606,7 @@ const completePayment = (paymentData) => {
                     user.notifications.newCount += 1;
                     const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
                     user.notifications.messages.push(message);
+                    socketIO.emit(mobileNumber, {newCount: user.notifications.newCount});
                 }
                 else if (!user.email.isVerified) {
                     const notifications = await Notification.findOne({name: 'emailVerification'});
@@ -1615,6 +1616,7 @@ const completePayment = (paymentData) => {
                     user.notifications.newCount += 1;
                     const message = {ar: araMessage, en: engMessage, date: new Date(), isRead: false};
                     user.notifications.messages.push(message);
+                    socketIO.emit(mobileNumber, {newCount: user.notifications.newCount});
                 }
                 else {
                     const params = {};
