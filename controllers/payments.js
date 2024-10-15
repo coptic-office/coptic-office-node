@@ -215,7 +215,7 @@ const findPayment = (resultIndicator) => {
 
 const findPaymentByRef = (referenceNumber) => {
     return new Promise((myResolve, myReject) => {
-        Payment.findOne({_id: referenceNumber}, {_id: 0, userID: 0, receiptDetails: 0})
+        Payment.findOne({_id: referenceNumber}, {_id: 0, userID: 0})
             .then((payment) => {
                 if (!payment) {
                     return myReject('noPaymentFound');

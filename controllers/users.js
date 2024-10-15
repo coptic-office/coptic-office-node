@@ -18,6 +18,7 @@ const Process = require("process");
 const Notification = require('../models/notifications');
 const {timeAgo} = require('../utils/dateUtils');
 const i18n = require('i18next');
+const Payment = require('../models/payments');
 
 const createUser = async (req, res) => {
     try {
@@ -1640,9 +1641,22 @@ const completePayment = (paymentData) => {
                                 const paidBooking = bookingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
                                 if (paidBooking >= Number(bookingAmount)) {
                                     const unitId = `${mobileNumber.replace('+', '')}/${user.units.length + 1}`
+                                    const transIdList = [];
                                     user.payments.map((item) => {
-                                        if (item.unitId === '') item.unitId = unitId
-                                    })
+                                        if (item.unitId === '') {
+                                            item.unitId = unitId;
+                                            transIdList.push(item.id);
+                                        }
+                                    });
+                                    const writeOperations = transIdList.map((transId) => {
+                                        return {
+                                            updateOne: {
+                                                filter: {_id: transId},
+                                                update: {unitId}
+                                            }
+                                        };
+                                    });
+                                    Payment.bulkWrite(writeOperations);
 
                                     const notifications = await Notification.find({$or: [{name: 'booking'}, {name: 'bookingInfo'}]});
                                     let araMessage, engMessage, araMessageInfo, engMessageInfo;

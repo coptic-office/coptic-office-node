@@ -1312,7 +1312,7 @@ const findPayment = async (req, res) => {
                 paymentData.status = i18n.t(`payment.paymentStatus.${payment.paymentDetails.status}`, {lng: 'ar'});
                 paymentData.date = payment.paymentDetails.adviceDate;
                 paymentData.transactionNumber = payment.paymentDetails.transactionNumber !== undefined ?
-                    payment.paymentDetails.transactionNumber : payment.paymentDetails.bankSessionId;
+                    payment.paymentDetails.transactionNumber : payment.receiptDetails.transactionNumber;
                 paymentData.comments = payment.paymentDetails.comments;
 
                 res.status(200).json({
