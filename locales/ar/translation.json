@@ -193,6 +193,11 @@
         "select": "اختر نوع الوحدة"
       }
     },
+    "paymentStatus": {
+      "Pending": "في الأنتظار",
+      "Succeeded": "نجحت المعاملة",
+      "Failed": "فشلت المعاملة"
+    },
     "missingData": "بيانات الدفع غير كاملة",
     "noPaymentFound": "لا يوجد عملية دفع مطابقة",
     "paymentLinked": "عملية الدفع مربوطة بالفعل",

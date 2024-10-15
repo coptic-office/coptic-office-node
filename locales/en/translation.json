@@ -193,6 +193,11 @@
         "select": "Select Unit Type"
       }
     },
+    "paymentStatus": {
+      "Pending": "Pending",
+      "Succeeded": "Succeeded",
+      "Failed": "Failed"
+    },
     "missingData": "Missing payment data",
     "noPaymentFound": "No matching payment found",
     "paymentLinked": "Payment already linked",

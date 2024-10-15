@@ -41,6 +41,10 @@ router.post('/add-payment', authorize('Access', addPaymentRoles), staff.addPayme
 const linkPaymentRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/link-payment', authorize('Access', linkPaymentRoles), staff.linkPayment);
 
+/** Find an existing payment with a Reference Number */
+const findPaymentRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/find-payment', authorize('Access', findPaymentRoles), staff.findPayment);
+
 /** Add a bank check for a booked unit of a specific user */
 const addCheckRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 const options2 = {maxFileSize: 1, maxFilesCount: 1, fileTypesList};

@@ -1288,6 +1288,74 @@ const linkPayment = async (req, res) => {
     }
 }
 
+const findPayment = async (req, res) => {
+    try {
+        const {referenceNumber} = await req.body;
+
+        if (referenceNumber === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingData'),
+                message: {}
+            });
+        }
+
+        Payment.findPaymentByRef(referenceNumber)
+            .then((payment) => {
+                const paymentData = {};
+                paymentData.userName = payment.userName;
+                paymentData.mobile = payment.mobile;
+                paymentData.unitId = payment.unitId;
+                paymentData.paymentType = i18n.t(`payment.paymentOptions.${payment.paymentType}Amount`, {lng: 'ar'});
+                paymentData.paymentMethod = i18n.t(`payment.method.${payment.paymentDetails.paymentMethod}`, {lng: 'ar'});
+                paymentData.amount = Number(payment.paymentDetails.amount);
+                paymentData.status = i18n.t(`payment.paymentStatus.${payment.paymentDetails.status}`, {lng: 'ar'});
+                paymentData.date = payment.paymentDetails.adviceDate;
+                paymentData.transactionNumber = payment.paymentDetails.transactionNumber !== undefined ?
+                    payment.paymentDetails.transactionNumber : payment.paymentDetails.bankSessionId;
+                paymentData.comments = payment.paymentDetails.comments;
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        paymentData
+                    }
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'noPaymentFound') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.noPaymentFound'),
+                            message: {}
+                        })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const addBankCheck = async (req, res) => {
     try {
         const region = process.env.S3_REGION;
@@ -1477,6 +1545,14 @@ const addBankCheck = async (req, res) => {
 const findBankCheck = async (req, res) => {
     try {
         const {bankName, number} = await req.body;
+
+        if (bankName === undefined || number === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingCheckData'),
+                message: {}
+            });
+        }
 
         Check.findBankCheck({bankName, number})
             .then((check) => {
@@ -1773,6 +1849,7 @@ module.exports = {
     getUserDetails,
     addPayment,
     linkPayment,
+    findPayment,
     addBankCheck,
     findBankCheck,
     updateCheckStatus,
