@@ -2386,7 +2386,7 @@ const findUnitTypes = (userID, unitId) => {
 
                 const editedUnits = [];
                 user.units[0].priceDetails.forEach((unit) => {
-                    const categoryName = req.i18n.t(`product.${unit.category}.name`);
+                    const categoryName = i18n.t(`product.${unit.category}.name`, {lng: 'ar'});
                     const thisUnit = units.filter((item) => item.category === unit.category);
                     const isActive = thisUnit[0].isActive;
                     const editedUnit = {categoryName, isActive, ...unit._doc};
@@ -2531,6 +2531,12 @@ const selectUnitType = async (req, res) => {
                 }
             })
     }
+}
+
+const chooseUnitType = (userID, unitId, category) => {
+    return new Promise((myResolve, myReject) => {
+
+    })
 }
 
 const updatePhoto = async (req, res) => {
@@ -2919,6 +2925,7 @@ module.exports = {
     getUnitTypes,
     findUnitTypes,
     selectUnitType,
+    chooseUnitType,
     completePayment,
     getPaymentOptions,
     getMyPayments,
