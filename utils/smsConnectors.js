@@ -145,7 +145,13 @@ const sendSMS = (message, number, country) => {
     return new Promise((myResolve, myReject) => {
         getCountry({name: country})
             .then((targetCountry) => {
-                const {senderID} = targetCountry;
+                let {senderID, altSenderID, key} = targetCountry;
+                if (altSenderID !== undefined) {
+                    const mobileNumber = number.replace(key, '');
+                    altSenderID.map((item) => {
+                        if (mobileNumber.startsWith(item.prefix)) senderID = item.senderID;
+                    })
+                }
                 getBestPrice(country)
                     .then((selectedAggregator) => {
                         const {aggregator, price} = selectedAggregator;

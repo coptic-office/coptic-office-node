@@ -8,6 +8,12 @@ const countrySchema = new Schema({
     pattern: String,
     currency: String,
     senderID: String,
+    altSenderID: [
+        {
+            prefix: String,
+            senderID: String,
+        }
+    ],
     isActive: Boolean
 })
 
