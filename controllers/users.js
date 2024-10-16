@@ -2176,8 +2176,14 @@ const addContract = (contractData) => {
                     return myReject('noContract');
                 }
 
+                const {messages} = await Notification.findOne({name: 'contracted'}, {_id: 0, messages: 1});
+
                 myUnit[0].unitNumber = unitNumber;
                 myUnit[0].contractDate = contractDate;
+                myUnit[0].discount = {};
+                myUnit[0].info = {};
+                myUnit[0].info.ar = messages.ar;
+                myUnit[0].info.en = messages.en;
                 myUnit[0].contract = {};
                 myUnit[0].contract.pdfUrl = contractUrl;
                 myUnit[0].contract.date = new Date();
@@ -2497,7 +2503,7 @@ const selectUnitType = async (req, res) => {
                     user.units.map((item) => {
                         if (item.id === unitId) {
                             item.category = category.toString().toLowerCase();
-                            item.discount = undefined;
+                            item.discount = {};
                             item.completionDate = new Date();
                         }
                     });
