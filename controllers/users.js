@@ -2449,11 +2449,12 @@ const selectUnitType = async (req, res) => {
                     })
                 }
 
+                const targetPrices = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
+                const targetCashAmount = targetPrices[0].cashAmount;
+                const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+
                 const myCategory = myUnit[0].category;
                 if (myCategory !== undefined) {
-                    const targetPrices = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
-                    const targetCashAmount = targetPrices[0].cashAmount;
-                    const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
                     if (paidAmount > targetCashAmount) {
                         return res.status(400).json({
                             status: "failed",
@@ -2463,31 +2464,44 @@ const selectUnitType = async (req, res) => {
                     }
                 }
 
-                const notification = await Notification.findOne({name: 'discount'});
+                if (paidAmount < targetCashAmount) {
+                    const notification = await Notification.findOne({name: 'discount'});
 
-                const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
-                const grossAmount = priceDetails[0].grossAmount;
-                const cashAmount = priceDetails[0].cashAmount;
-                const discountAmount = (grossAmount - cashAmount).toLocaleString();
-                const paidTotal = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
-                const remainingAmount = (cashAmount - paidTotal).toLocaleString();
+                    const priceDetails = myUnit[0].priceDetails.filter((item) => item.category === category.toString().toLowerCase());
+                    const grossAmount = priceDetails[0].grossAmount;
+                    const cashAmount = priceDetails[0].cashAmount;
+                    const discountAmount = (grossAmount - cashAmount).toLocaleString();
+                    const paidTotal = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+                    const remainingAmount = (cashAmount - paidTotal).toLocaleString();
 
-                let araDiscount = notification.messages.ar;
-                araDiscount = araDiscount.replace('{{discountAmount}}', discountAmount);
-                araDiscount = araDiscount.replace('{{remainingAmount}}', remainingAmount);
+                    let araDiscount = notification.messages.ar;
+                    araDiscount = araDiscount.replace('{{discountAmount}}', discountAmount);
+                    araDiscount = araDiscount.replace('{{remainingAmount}}', remainingAmount);
 
-                let engDiscount = notification.messages.en;
-                engDiscount = engDiscount.replace('{{discountAmount}}', discountAmount);
-                engDiscount = engDiscount.replace('{{remainingAmount}}', remainingAmount);
+                    let engDiscount = notification.messages.en;
+                    engDiscount = engDiscount.replace('{{discountAmount}}', discountAmount);
+                    engDiscount = engDiscount.replace('{{remainingAmount}}', remainingAmount);
 
-                user.units.map((item) => {
-                    if (item.id === unitId) {
-                        item.category = category.toString().toLowerCase();
-                        item.discount.ar = araDiscount;
-                        item.discount.en = engDiscount;
-                        item.discount.value = remainingAmount;
-                    }
-                });
+                    user.units.map((item) => {
+                        if (item.id === unitId) {
+                            item.category = category.toString().toLowerCase();
+                            item.discount.ar = araDiscount;
+                            item.discount.en = engDiscount;
+                            item.discount.value = remainingAmount;
+                            item.completionDate = undefined;
+                        }
+                    });
+                }
+
+                if (paidAmount === targetCashAmount) {
+                    user.units.map((item) => {
+                        if (item.id === unitId) {
+                            item.category = category.toString().toLowerCase();
+                            item.discount = undefined;
+                            item.completionDate = new Date();
+                        }
+                    });
+                }
 
                 await user.save()
                     .then(async () => {
