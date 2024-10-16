@@ -1475,7 +1475,7 @@ const addBankCheck = async (req, res) => {
                         checkData.userName = userName;
                         checkData.mobile = mobile;
                         checkData.unitId = unitId;
-
+                        checkData.userID = id;
 
                         Check.addBankCheck(checkData)
                             .then(() => {
