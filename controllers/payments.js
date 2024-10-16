@@ -6,7 +6,7 @@ const axios = require('axios');
 const {isNumeric} = require('../utils/numberUtils');
 const {completePayment, checkUnitId, checkCategory} = require('../controllers/users');
 
-const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/TESTCOPTIC/session';
+const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/COPTIC/session';
 const createPayment = async (req, res) => {
     try {
         let {user: {id: userID, firstName, lastName, mobile}, paymentType, amount, unitId} = await req.body;
