@@ -1518,6 +1518,27 @@ const addBankCheck = async (req, res) => {
                                 message: {}
                             })
                         }
+                        else if (err.toString() === 'repeatedCheck') {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t(`payment.repeatedCheck`),
+                                message: {}
+                            })
+                        }
+                        else if (err.toString() === 'noChecksNeeded') {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t(`payment.noChecksNeeded`),
+                                message: {}
+                            })
+                        }
+                        else if (err.toString() === 'noMoreChecks') {
+                            return res.status(400).json({
+                                status: "failed",
+                                error: req.i18n.t(`payment.noMoreChecks`),
+                                message: {}
+                            })
+                        }
                         else {
                             res.status(500).json(
                                 {

@@ -2088,7 +2088,7 @@ const getMyPayments = async (req, res) => {
 
 const addBankCheck = (checkData) => {
     return new Promise((myResolve, myReject) => {
-        User.findOne({_id: checkData.userID}, {firstName: 1, lastName: 1, mobile: 1, units: 1})
+        User.findOne({_id: checkData.userID}, {firstName: 1, lastName: 1, mobile: 1, units: 1, payments: 1})
             .then(async (user) => {
                 if (!user) {
                     return myReject('incorrectUserID');
@@ -2099,6 +2099,30 @@ const addBankCheck = (checkData) => {
                         if (unit.contractDate === undefined) {
                             return myReject('noBankCheck');
                         }
+
+                        if (unit.completionDate !== undefined) {
+                            return myReject('noChecksNeeded');
+                        }
+
+                        const myCheck = unit.bankChecks.filter((check) => check.bankName === checkData.bankName && check.number === checkData.number);
+                        if (myCheck[0] !== undefined) {
+                            return myReject('repeatedCheck');
+                        }
+
+                        const priceDetails = unit.priceDetails.filter((item) => item.category === unit.category);
+                        const grossAmount = Number(priceDetails[0].grossAmount);
+                        let paidAmount = 0;
+                        user.payments.map((item) => {
+                            paidAmount += Number(item.amount);
+                        });
+                        let totalChecks = 0;
+                        unit.bankChecks.map((check) => {
+                            totalChecks += Number(check.amount);
+                        });
+                        if (paidAmount + totalChecks >= grossAmount) {
+                            return myReject('noMoreChecks');
+                        }
+
                         checkData.userID = undefined;
                         checkData.unitId = undefined;
                         unit.bankChecks.push(checkData);
