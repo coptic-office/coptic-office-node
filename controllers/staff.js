@@ -1318,6 +1318,15 @@ const findPayment = async (req, res) => {
             });
         }
 
+        if (!referenceNumber.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.noPaymentFound'),
+                    message: {}
+                })
+        }
+
         Payment.findPaymentByRef(referenceNumber)
             .then((payment) => {
                 const paymentData = {};
