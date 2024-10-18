@@ -207,7 +207,8 @@
     "noBankCheck": "Cannot add a bank check before signing a contract and updating the user info",
     "repeatedCheck": "This is a repeated bank check",
     "noChecksNeeded": "Cannot add bank checks to this unit because it is fully paid",
-    "noMoreChecks": "No more bank checks can be added to this unit"
+    "noMoreChecks": "No more bank checks can be added to this unit",
+    "repeatedTransaction": "This is a repeated payment transaction"
   },
   "admin": {
     "aggregatorRequired": "SMS aggregator name is required",

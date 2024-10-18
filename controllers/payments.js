@@ -5,6 +5,7 @@ const {generateUUID} = require('../utils/codeGenerator');
 const axios = require('axios');
 const {isNumeric} = require('../utils/numberUtils');
 const {completePayment, checkUnitId, checkCategory} = require('../controllers/users');
+const {stdout} = require("process");
 
 const BANQUE_MISR_URL = 'https://banquemisr.gateway.mastercard.com/api/rest/version/82/merchant/COPTIC/session';
 const createPayment = async (req, res) => {
@@ -215,7 +216,7 @@ const findPayment = (resultIndicator) => {
 
 const findPaymentByRef = (referenceNumber) => {
     return new Promise((myResolve, myReject) => {
-        Payment.findOne({_id: referenceNumber}, {_id: 0, userID: 0})
+        Payment.findOne({_id: referenceNumber})
             .then((payment) => {
                 if (!payment) {
                     return myReject('noPaymentFound');
@@ -231,17 +232,29 @@ const findPaymentByRef = (referenceNumber) => {
 
 const addPayment = (paymentData) => {
     return new Promise(async (myResolve, myReject) => {
-        await Payment.create(paymentData)
-            .then((payment) => {
-                if (!payment) {
-                    myReject('creationFailed');
+        const query = {'paymentDetails.paymentMethod': paymentData.paymentDetails.paymentMethod, 'paymentDetails.transactionNumber': paymentData.paymentDetails.transactionNumber};
+        Payment.findOne(query, {_id: 1})
+            .then(async (foundPayment) => {
+                if (!foundPayment) {
+                    await Payment.create(paymentData)
+                        .then((payment) => {
+                            if (!payment) {
+                                myReject('creationFailed');
+                            } else {
+                                myResolve({paymentId: payment._id});
+                            }
+                        })
+                        .catch((err) => {
+                            myReject(err);
+                        });
                 }
                 else {
-                    myResolve({paymentId: payment._id});
+                    myReject('repeatedTransaction');
                 }
+
             })
             .catch((err) => {
-                myReject(err);
+                myReject('creationFailed');
             });
     })
 }

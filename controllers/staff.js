@@ -1106,14 +1106,23 @@ const addPayment = async (req, res) => {
                 }
             })
             .catch((err) => {
-                res.status(500).json(
-                    {
+                if (err.toString() === 'repeatedTransaction') {
+                    res.status(400).json({
                         status: "failed",
-                        error: req.i18n.t('general.internalError'),
-                        message: {
-                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
-                        }
+                        error: req.i18n.t('payment.repeatedTransaction'),
+                        message: {}
                     })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
             });
     }
     catch (err) {
@@ -1312,6 +1321,7 @@ const findPayment = async (req, res) => {
         Payment.findPaymentByRef(referenceNumber)
             .then((payment) => {
                 const paymentData = {};
+                paymentData.id = payment._id;
                 paymentData.userName = payment.userName;
                 paymentData.mobile = payment.mobile;
                 paymentData.unitId = payment.unitId;
@@ -1467,7 +1477,7 @@ const addBankCheck = async (req, res) => {
                 checkData.status = {};
                 checkData.status.current = 'outstanding';
                 checkData.status.history = [];
-                checkData.status.history.push({status: 'outstanding', staffID, date: new Date()});
+                checkData.status.history.push({status: 'outstanding', staffID, adviceDate: new Date(dueDate), date: new Date()});
                 checkData.image  = checkUrl;
 
                 User.addBankCheck(checkData)
