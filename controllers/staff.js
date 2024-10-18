@@ -1497,7 +1497,15 @@ const addBankCheck = async (req, res) => {
                         checkData.userID = id;
 
                         Check.addBankCheck(checkData)
-                            .then(() => {
+                            .then(async (result) => {
+                                if (result === 'repeatedCheck') {
+                                    await User.removeBankCheck(checkData);
+                                    return res.status(400).json({
+                                        status: "failed",
+                                        error: req.i18n.t(`payment.repeatedCheck`),
+                                        message: {}
+                                    })
+                                }
                                 res.status(200).json({
                                     status: "success",
                                     error: "",

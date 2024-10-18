@@ -8,11 +8,16 @@ const addBankCheck = (checkData) => {
                     myReject('creationFailed');
                 }
                 else {
-                    myResolve();
+                    myResolve('');
                 }
         })
             .catch((err) => {
-                myReject(err);
+                if (err.toString().includes('bankName_1_number_1')) {
+                    myResolve('repeatedCheck');
+                }
+                else {
+                    myReject(err);
+                }
             })
     })
 }

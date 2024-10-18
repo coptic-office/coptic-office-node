@@ -2180,6 +2180,36 @@ const updateCheckStatus = (updateData) => {
     })
 }
 
+const removeBankCheck = (checkData) => {
+    return new Promise((myResolve, myReject) => {
+        const {bankName, number, userID, unitId} = checkData;
+        User.findOne({_id: userID}, {units: 1})
+            .then(async (user) => {
+                user.units.map((unit) => {
+                    if (unit.id === unitId) {
+                        for (let i = 0; i < unit.bankChecks.length; i++) {
+                            if (unit.bankChecks[i].bankName === bankName && unit.bankChecks[i].number === number) {
+                                unit.bankChecks.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                await user.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 const addContract = (contractData) => {
     return new Promise((myResolve, myReject) => {
         const {id, unitId, unitNumber, contractDate, contractUrl, staffID} = contractData;
@@ -3054,6 +3084,7 @@ module.exports = {
     getMyPayments,
     addBankCheck,
     updateCheckStatus,
+    removeBankCheck,
     addContract,
     getMyUnits,
     updatePhoto,
