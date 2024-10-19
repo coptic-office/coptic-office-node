@@ -299,4 +299,18 @@ const updatePayment = (paymentData) => {
     })
 }
 
-module.exports = {createPayment, findPayment, findPaymentByRef, addPayment, updatePayment}
+const createPaymentsReport = (fromDate, toDate) => {
+    return new Promise((myResolve, myReject) => {
+        const query = {'paymentDetails.adviceDate': {$gte: fromDate, $lt: toDate}, 'paymentDetails.status': 'Succeeded'};
+        const projection = {paymentType: 1, 'paymentDetails.paymentMethod': 1, 'paymentDetails.amount': 1, _id: 0};
+        Payment.find(query, projection)
+            .then((payments) => {
+                myResolve(payments);
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
+module.exports = {createPayment, findPayment, findPaymentByRef, addPayment, updatePayment, createPaymentsReport}

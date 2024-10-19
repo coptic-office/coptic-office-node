@@ -1905,7 +1905,7 @@ const selectUnitType = async (req, res) => {
     }
 }
 
-const addContract  =async (req, res) => {
+const addContract  = async (req, res) => {
     try {
         const region = process.env.S3_REGION;
         const accessKeyId = process.env.S3_ACCESS_KEY_ID;
@@ -2030,6 +2030,186 @@ const addContract  =async (req, res) => {
     }
 }
 
+const createPaymentsReport = async (req, res) => {
+    try {
+        const {fromDate, toDate} = await req.body;
+
+        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        Payment.createPaymentsReport(new Date(fromDate), new Date(toDate))
+            .then((payments) => {
+                let cardBooking = 0, cardContracting = 0, cardCashing = 0, cardTotal = 0, cardCount = 0;
+                let depositBooking = 0, depositContracting = 0, depositCashing = 0, depositTotal = 0, depositCount = 0;
+                let transferBooking = 0, transferContracting = 0, transferCashing = 0, transferTotal = 0, transferCount = 0;
+                let instaBooking = 0, instaContracting = 0, instaCashing = 0, instaTotal = 0, instaCount = 0;
+
+                payments.map((payment) => {
+                    const method = payment.paymentDetails.paymentMethod.toString();
+                    const type = payment.paymentType;
+                    const amount = Number(payment.paymentDetails.amount);
+
+                    if (method === 'creditCard' && type === 'booking') {
+                        cardBooking += amount;
+                        cardTotal += amount;
+                        cardCount++;
+                    }
+                    else if (method === 'creditCard' && type === 'contracting') {
+                        cardContracting += amount;
+                        cardTotal += amount;
+                        cardCount++;
+                    }
+                    else if (method === 'creditCard' && type === 'cashing') {
+                        cardCashing += amount;
+                        cardTotal += amount;
+                        cardCount++;
+                    }
+                    else if (method === 'bankDeposit' && type === 'booking') {
+                        depositBooking += amount;
+                        depositTotal += amount;
+                        depositCount++;
+                    }
+                    else if (method === 'bankDeposit' && type === 'contracting') {
+                        depositContracting += amount;
+                        depositTotal += amount;
+                        depositCount++;
+                    }
+                    else if (method === 'bankDeposit' && type === 'cashing') {
+                        depositCashing += amount;
+                        depositTotal += amount;
+                        depositCount++;
+                    }
+                    else if (method === 'bankTransfer' && type === 'booking') {
+                        transferBooking += amount;
+                        transferTotal += amount;
+                        transferCount++;
+                    }
+                    else if (method === 'bankTransfer' && type === 'contracting') {
+                        transferContracting += amount;
+                        transferTotal += amount;
+                        transferCount++;
+                    }
+                    else if (method === 'bankTransfer' && type === 'cashing') {
+                        transferCashing += amount;
+                        transferTotal += amount;
+                        transferCount++;
+                    }
+                    else if (method === 'instaPay' && type === 'booking') {
+                        instaBooking += amount;
+                        instaTotal += amount;
+                        instaCount++;
+                    }
+                    else if (method === 'instaPay' && type === 'contracting') {
+                        instaContracting += amount;
+                        instaTotal += amount;
+                        instaCount++;
+                    }
+                    else if (method === 'instaPay' && type === 'cashing') {
+                        instaCashing += amount;
+                        instaTotal += amount;
+                        instaCount++;
+                    }
+                });
+
+                const grandTotal = cardTotal + depositTotal + transferTotal + instaTotal;
+                const grandCount = cardCount + depositCount + transferCount + instaCount;
+
+                const report = {};
+                report.creditCard = {};
+                report.creditCard.count = cardCount;
+                report.creditCard.booking = {};
+                report.creditCard.booking.amount = cardBooking;
+                report.creditCard.booking.percent = Math.round((cardBooking / cardTotal) * 100);
+                report.creditCard.contracting = {};
+                report.creditCard.contracting.amount = cardContracting;
+                report.creditCard.contracting.percent = Math.round((cardContracting / cardTotal) * 100);
+                report.creditCard.cashing = {};
+                report.creditCard.cashing.amount = cardCashing;
+                report.creditCard.cashing.percent = Math.round((cardCashing / cardTotal) * 100);
+                report.bankDeposit = {};
+                report.bankDeposit.count = depositCount;
+                report.bankDeposit.booking = {};
+                report.bankDeposit.booking.amount = depositBooking;
+                report.bankDeposit.booking.percent = Math.round((depositBooking / depositTotal) * 100);
+                report.bankDeposit.contracting = {};
+                report.bankDeposit.contracting.amount = depositContracting;
+                report.bankDeposit.contracting.percent = Math.round((depositContracting / depositTotal) * 100);
+                report.bankDeposit.cashing = {};
+                report.bankDeposit.cashing.amount = depositCashing;
+                report.bankDeposit.cashing.percent = Math.round((depositCashing / depositTotal) * 100);
+                report.bankTransfer = {};
+                report.bankTransfer.count = transferCount;
+                report.bankTransfer.booking = {};
+                report.bankTransfer.booking.amount = transferBooking;
+                report.bankTransfer.booking.percent = Math.round((transferBooking / transferTotal) * 100);
+                report.bankTransfer.contracting = {};
+                report.bankTransfer.contracting.amount = transferContracting;
+                report.bankTransfer.contracting.percent = Math.round((transferContracting / transferTotal) * 100);
+                report.bankTransfer.cashing = {};
+                report.bankTransfer.cashing.amount = transferCashing;
+                report.bankTransfer.cashing.percent = Math.round((transferCashing / transferTotal) * 100);
+                report.instaPay = {};
+                report.instaPay.count = instaCount;
+                report.instaPay.booking = {};
+                report.instaPay.booking.amount = instaBooking;
+                report.instaPay.booking.percent = Math.round((instaBooking / instaTotal) * 100);
+                report.instaPay.contracting = {};
+                report.instaPay.contracting.amount = instaContracting;
+                report.instaPay.contracting.percent = Math.round((instaContracting / instaTotal) * 100);
+                report.instaPay.cashing = {};
+                report.instaPay.cashing.amount = instaCashing;
+                report.instaPay.cashing.percent = Math.round((instaCashing / instaTotal) * 100);
+                report.total = {};
+                report.total.count = grandCount;
+                report.total.creditCard = {};
+                report.total.creditCard.amount = cardTotal;
+                report.total.creditCard.percent = Math.round((cardTotal / grandTotal) * 100);
+                report.total.bankDeposit = {};
+                report.total.bankDeposit.amount = depositTotal;
+                report.total.bankDeposit.percent = Math.round((depositTotal / grandTotal) * 100);
+                report.total.bankTransfer = {};
+                report.total.bankTransfer.amount = transferTotal;
+                report.total.bankTransfer.percent = Math.round((transferTotal / grandTotal) * 100);
+                report.total.instaPay = {};
+                report.total.instaPay.amount = instaTotal;
+                report.total.instaPay.percent = Math.round((instaTotal / grandTotal) * 100);
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        report
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -2085,5 +2265,6 @@ module.exports = {
     updateCheckStatus,
     getUnitTypes,
     selectUnitType,
-    addContract
+    addContract,
+    createPaymentsReport
 }
