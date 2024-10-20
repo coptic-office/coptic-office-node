@@ -12,6 +12,7 @@ const bankCheckSchema = new Schema({
     bankName: String,
     status: {
         current: String,
+        adviceDate: Date,
         history: [
             {
                 _id: false,

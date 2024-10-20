@@ -1560,6 +1560,7 @@ const addBankCheck = async (req, res) => {
                 checkData.bankName = bankName;
                 checkData.status = {};
                 checkData.status.current = 'outstanding';
+                checkData.status.adviceDate = new Date(dueDate);
                 checkData.status.history = [];
                 checkData.status.history.push({status: 'outstanding', staffID, adviceDate: new Date(dueDate), date: new Date()});
                 checkData.image  = checkUrl;
