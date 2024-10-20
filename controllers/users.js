@@ -2111,14 +2111,14 @@ const addBankCheck = (checkData) => {
 
                         const priceDetails = unit.priceDetails.filter((item) => item.category === unit.category);
                         const grossAmount = Number(priceDetails[0].grossAmount);
-                        let paidAmount = 0;
-                        user.payments.map((item) => {
-                            paidAmount += Number(item.amount);
-                        });
+                        const paymentSubset = user.payments.filter((item) => item.unitId === unit.id);
+                        const paidAmount = paymentSubset.reduce((sum, item) => sum + Number(item.amount), 0);
+
                         let totalChecks = 0;
                         unit.bankChecks.map((check) => {
                             totalChecks += Number(check.amount);
                         });
+
                         if (paidAmount + totalChecks >= grossAmount) {
                             return myReject('noMoreChecks');
                         }
