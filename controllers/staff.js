@@ -1384,6 +1384,81 @@ const findPayment = async (req, res) => {
     }
 }
 
+const findTransaction = async (req, res) => {
+    try {
+        const {transactionNumber, paymentMethod} = await req.body;
+        const paymentMethodList = ['bankDeposit', 'bankTransfer', 'instaPay', 'creditCard'];
+
+        if (transactionNumber === undefined || paymentMethod === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingData'),
+                message: {}
+            });
+        }
+
+        if (!paymentMethodList.includes(paymentMethod)) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidMethod'),
+                message: {}
+            });
+        }
+
+        Payment.findTransaction(transactionNumber, paymentMethod)
+            .then(({id, amount, date}) => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        id,
+                        amount,
+                        date
+                    }
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'noPaymentFound') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.noPaymentFound'),
+                            message: {}
+                        })
+                }
+                else if (err.toString() === 'paymentLinked') {
+                    return res.status(400).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('payment.paymentLinked'),
+                            message: {}
+                        })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('general.internalError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const addBankCheck = async (req, res) => {
     try {
         const region = process.env.S3_REGION;
@@ -2260,6 +2335,7 @@ module.exports = {
     addPayment,
     linkPayment,
     findPayment,
+    findTransaction,
     addBankCheck,
     findBankCheck,
     updateCheckStatus,

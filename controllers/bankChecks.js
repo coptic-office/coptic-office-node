@@ -39,6 +39,20 @@ const findBankCheck = ({bankName, number}) => {
     })
 }
 
+const createChecksReport = (fromDate, toDate) => {
+    return new Promise((myResolve, myReject) => {
+        const query = {};
+        const projection = {userID: 0, unitId: 0, image: 0};
+        Check.find(query, projection)
+            .then((checks) => {
+                myResolve(checks);
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 const updateCheckStatus = ({staffID, bankName, number, newStatus, adviceDate}) => {
     return new Promise((myResolve, myReject) => {
         const statusRecord = {status: newStatus, staffID, adviceDate: new Date(adviceDate), date: new Date()};
@@ -59,4 +73,4 @@ const updateCheckStatus = ({staffID, bankName, number, newStatus, adviceDate}) =
     })
 }
 
-module.exports = {addBankCheck, findBankCheck, updateCheckStatus};
+module.exports = {addBankCheck, findBankCheck, updateCheckStatus, createChecksReport};

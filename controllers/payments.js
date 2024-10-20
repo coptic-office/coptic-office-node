@@ -230,6 +230,29 @@ const findPaymentByRef = (referenceNumber) => {
     })
 }
 
+const findTransaction = (transactionNumber, paymentMethod) => {
+    return new Promise((myResolve, myReject) => {
+        const query = {'paymentDetails.paymentMethod': paymentMethod, 'paymentDetails.transactionNumber': transactionNumber};
+        const projection = {userID: 1, 'paymentDetails.amount': 1, 'paymentDetails.adviceDate': 1};
+
+        Payment.findOne(query, projection)
+            .then((payment) => {
+                if (!payment) {
+                    return myReject('noPaymentFound');
+                }
+
+                if (payment.userID !== undefined) {
+                    return myReject('paymentLinked');
+                }
+
+                myResolve({id: payment._id, amount: Number(payment.paymentDetails.amount), date: payment.paymentDetails.adviceDate});
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 const addPayment = (paymentData) => {
     return new Promise(async (myResolve, myReject) => {
         const query = {'paymentDetails.paymentMethod': paymentData.paymentDetails.paymentMethod, 'paymentDetails.transactionNumber': paymentData.paymentDetails.transactionNumber};
@@ -313,4 +336,4 @@ const createPaymentsReport = (fromDate, toDate) => {
     })
 }
 
-module.exports = {createPayment, findPayment, findPaymentByRef, addPayment, updatePayment, createPaymentsReport}
+module.exports = {createPayment, findPayment, findPaymentByRef, findTransaction, addPayment, updatePayment, createPaymentsReport}
