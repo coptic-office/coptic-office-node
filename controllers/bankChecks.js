@@ -41,7 +41,7 @@ const findBankCheck = ({bankName, number}) => {
 
 const createChecksReport = (fromDate, toDate) => {
     return new Promise((myResolve, myReject) => {
-        const query = {};
+        const query = {'status.adviceDate': {$gte: fromDate, $lt: toDate}};
         const projection = {userID: 0, unitId: 0, image: 0};
         Check.find(query, projection)
             .then((checks) => {

@@ -2286,6 +2286,150 @@ const createPaymentsReport = async (req, res) => {
     }
 }
 
+const createChecksReport = async (req, res) => {
+    try {
+        const {fromDate, toDate} = await req.body;
+
+        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        Check.createChecksReport(new Date(fromDate), new Date(toDate))
+            .then((checks) => {
+                let clearedAmount = 0, clearedCount = 0;
+                let outstandingAmount = 0, outstandingCount = 0;
+                let rejectedAmount = 0, rejectedCount = 0;
+                let cashedAmount = 0, cashedCount = 0;
+
+                const report = {};
+                report.cleared = {};
+                report.cleared.checks = [];
+                report.outstanding = {};
+                report.outstanding.checks = [];
+                report.rejected = {};
+                report.rejected.checks = [];
+                report.cashed = {};
+                report.cashed.checks = [];
+
+                checks.map((check) => {
+                    const status = check.status.current;
+                    const userName = check.userName;
+                    const mobileNumber = check.mobile.number;
+                    const bankName = check.bankName;
+                    const checkNumber = check.number;
+                    const amount = Number(check.amount);
+                    const dueDate = check.dueDate;
+                    const checkData = {userName, mobileNumber, bankName, checkNumber, amount, dueDate};
+
+                    switch (status) {
+                        case 'cleared':
+                            clearedAmount += amount;
+                            clearedCount++;
+                            report.cleared.checks.push(checkData);
+                            break;
+
+                        case 'outstanding':
+                            outstandingAmount += amount;
+                            outstandingCount++;
+                            report.outstanding.checks.push(checkData);
+                            break;
+
+                        case 'rejected':
+                            rejectedAmount += amount;
+                            rejectedCount++;
+                            report.rejected.checks.push(checkData);
+                            break;
+
+                        case 'cashed':
+                            cashedAmount += amount;
+                            cashedCount++;
+                            report.cashed.checks.push(checkData);
+                            break;
+                    }
+                });
+
+                report.cleared.amount = clearedAmount;
+                report.cleared.count = clearedCount;
+                report.outstanding.amount = outstandingAmount;
+                report.outstanding.count = outstandingCount;
+                report.rejected.amount = rejectedAmount;
+                report.rejected.count = rejectedCount;
+                report.cashed.amount = cashedAmount;
+                report.cashed.count = cashedCount;
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        report
+                    }
+                })
+
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const getProfileInfo = async (req, res) => {
+    try {
+        const {user: {id: staffID}} = await req.body;
+
+        Staff.findOne({_id: staffID}, {_id: 0, firstName: 1, lastName: 1, mobile: 1, profilePhoto: 1, email: 1})
+            .then((user) => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    Message: {
+                        user
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const actionError = (req, res, err) => {
     if (err.errors !== undefined) {
         let resourceID = ''
@@ -2343,5 +2487,7 @@ module.exports = {
     getUnitTypes,
     selectUnitType,
     addContract,
-    createPaymentsReport
+    createPaymentsReport,
+    createChecksReport,
+    getProfileInfo
 }

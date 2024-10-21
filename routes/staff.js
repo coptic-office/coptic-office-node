@@ -79,4 +79,12 @@ router.post('/add-contract', [authorize('Access', addContractRoles), multipartPa
 const paymentReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-payments-report', authorize('Access', paymentReportRoles), staff.createPaymentsReport);
 
+/** Create checks report for a certain period */
+const checkReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/create-checks-report', authorize('Access', checkReportRoles), staff.createChecksReport);
+
+/** Return the staff profile information */
+const getProfileRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/get-profile-info', authorize('Access', getProfileRoles), staff.getProfileInfo);
+
 module.exports = router;
