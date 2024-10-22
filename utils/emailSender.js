@@ -3,14 +3,40 @@ const errorLog = debug('app-emailSender:error');
 const nodemailer = require('nodemailer');
 const MailGen = require('mailgen');
 const i18n = require('i18next');
+const {google} = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
 
-// const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//         user: process.env.EMAIL_GMAIL_APP_USER,
-//         pass: process.env.EMAIL_GMAIL_APP_PASSWORD
-//     }
-// })
+const oauth2Client = new OAuth2(
+    process.env.EMAIL_GMAIL_CLIENT_ID,
+    process.env.EMAIL_GMAIL_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground"
+);
+
+oauth2Client.setCredentials({
+    refresh_token: process.env.EMAIL_GMAIL_REFRESH_TOKEN,
+});
+
+const accessToken = new Promise((resolve, reject) => {
+    oauth2Client.getAccessToken((err, token) => {
+        if (err) {
+            console.log('Google access token creation failed for email sending')
+            reject();
+        }
+        resolve(token);
+    });
+});
+
+const transporterGmail = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        type: "OAuth2",
+        user: process.env.EMAIL_GMAIL_USER,
+        accessToken,
+        clientId: process.env.EMAIL_GMAIL_CLIENT_ID,
+        clientSecret: process.env.EMAIL_GMAIL_CLIENT_SECRET,
+        refreshToken: process.env.EMAIL_GMAIL_REFRESH_TOKEN,
+    },
+});
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SMTP_SERVER,
@@ -66,13 +92,13 @@ const sendOTP = (locale, params) => {
     return new Promise((myResolve, myReject) => {
 
         const message = {
-            from: process.env.EMAIL_USER_NAME,
+            from: process.env.EMAIL_GMAIL_USER,
             to: params.receiver,
             subject: i18n.t('email.otp.subject', {lng: locale}),
             html: emailBody
         };
 
-        transporter.sendMail(message)
+        transporterGmail.sendMail(message)
             .then((res) => {
                 myResolve(res);
             })
@@ -148,13 +174,13 @@ const sendPaymentReceipt = (locale, params) => {
     return new Promise((myResolve, myReject) => {
 
         const message = {
-            from: process.env.EMAIL_USER_NAME,
+            from: process.env.EMAIL_GMAIL_USER,
             to: params.receiver,
             subject: i18n.t('email.paymentReceipt.subject', {lng: locale}),
             html: emailBody
         };
 
-        transporter.sendMail(message)
+        transporterGmail.sendMail(message)
             .then((res) => {
                 myResolve(res);
             })

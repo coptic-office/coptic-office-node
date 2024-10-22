@@ -3060,6 +3060,18 @@ const getUserDetails = async (mobileNumber) => {
     })
 }
 
+const createSalesReport = () => {
+    return new Promise((myResolve, myReject) => {
+        User.find({}, {_id: 0, units: 1})
+            .then((users) => {
+                myResolve(users)
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 module.exports = {
     createUser,
     login,
@@ -3092,6 +3104,7 @@ module.exports = {
     updateNationalId,
     getNotifications,
     getProfileInfo,
-    getUserDetails
+    getUserDetails,
+    createSalesReport
 }
 

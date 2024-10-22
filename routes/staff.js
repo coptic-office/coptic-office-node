@@ -83,6 +83,10 @@ router.post('/create-payments-report', authorize('Access', paymentReportRoles), 
 const checkReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-checks-report', authorize('Access', checkReportRoles), staff.createChecksReport);
 
+/** Create sales report for a certain period */
+const checkSalesRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/create-sales-report', authorize('Access', checkSalesRoles), staff.createSalesReport);
+
 /** Return the staff profile information */
 const getProfileRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/get-profile-info', authorize('Access', getProfileRoles), staff.getProfileInfo);

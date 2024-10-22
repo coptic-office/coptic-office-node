@@ -2304,6 +2304,7 @@ const createChecksReport = async (req, res) => {
                 let outstandingAmount = 0, outstandingCount = 0;
                 let rejectedAmount = 0, rejectedCount = 0;
                 let cashedAmount = 0, cashedCount = 0;
+                let grandTotal = 0
 
                 const report = {};
                 report.cleared = {};
@@ -2319,7 +2320,7 @@ const createChecksReport = async (req, res) => {
                     const status = check.status.current;
                     const userName = check.userName;
                     const mobileNumber = check.mobile.number;
-                    const bankName = check.bankName;
+                    const bankName = i18n.t(`payment.banks.${check.bankName}`, {lng: 'ar'});
                     const checkNumber = check.number;
                     const amount = Number(check.amount);
                     const dueDate = check.dueDate;
@@ -2328,24 +2329,28 @@ const createChecksReport = async (req, res) => {
                     switch (status) {
                         case 'cleared':
                             clearedAmount += amount;
+                            grandTotal += amount;
                             clearedCount++;
                             report.cleared.checks.push(checkData);
                             break;
 
                         case 'outstanding':
                             outstandingAmount += amount;
+                            grandTotal += amount;
                             outstandingCount++;
                             report.outstanding.checks.push(checkData);
                             break;
 
                         case 'rejected':
                             rejectedAmount += amount;
+                            grandTotal += amount;
                             rejectedCount++;
                             report.rejected.checks.push(checkData);
                             break;
 
                         case 'cashed':
                             cashedAmount += amount;
+                            grandTotal += amount;
                             cashedCount++;
                             report.cashed.checks.push(checkData);
                             break;
@@ -2354,12 +2359,16 @@ const createChecksReport = async (req, res) => {
 
                 report.cleared.amount = clearedAmount;
                 report.cleared.count = clearedCount;
+                report.cleared.percent = Math.round((clearedAmount / grandTotal) * 100);
                 report.outstanding.amount = outstandingAmount;
                 report.outstanding.count = outstandingCount;
+                report.outstanding.percent = Math.round((outstandingAmount / grandTotal) * 100);
                 report.rejected.amount = rejectedAmount;
                 report.rejected.count = rejectedCount;
+                report.rejected.percent = Math.round((rejectedAmount / grandTotal) * 100);
                 report.cashed.amount = cashedAmount;
                 report.cashed.count = cashedCount;
+                report.cashed.percent = Math.round((cashedAmount / grandTotal) * 100);
 
                 res.status(200).json({
                     status: "success",
@@ -2369,6 +2378,88 @@ const createChecksReport = async (req, res) => {
                     }
                 })
 
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const createSalesReport = async (req, res) => {
+    try {
+        let {fromDate, toDate} = await req.body;
+
+        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        fromDate = new Date(fromDate);
+        toDate = new Date(toDate);
+
+        let bookingCount = 0, contractingCount = 0, contractsCount = 0;
+        let middlesCount = 0, cornersCount = 0, streetCornersCount = 0;
+
+        User.createSalesReport()
+            .then((users) => {
+                users.map((user) => {
+                    user.units.map((unit) => {
+                        if (unit.bookingDate >= fromDate && unit.bookingDate < toDate) {
+                            bookingCount++;
+                        }
+                        if (unit.contractingDate !== undefined && unit.contractingDate >= fromDate && unit.contractingDate < toDate) {
+                            contractingCount++;
+                        }
+                        if (unit.contractDate !== undefined && unit.contractDate >= fromDate && unit.contractDate < toDate) {
+                            contractsCount++;
+                            if (unit.category === 'category1') {
+                                middlesCount++;
+                            }
+                            else if (unit.category === 'category2') {
+                                cornersCount++;
+                            }
+                            else {
+                                streetCornersCount++;
+                            }
+                        }
+                    })
+                });
+
+                const report = {};
+                report.bookingCount = bookingCount;
+                report.contractingCount = contractingCount;
+                report.contractsCount = contractsCount;
+                report.middlesCount = middlesCount;
+                report.cornersCount = cornersCount;
+                report.streetCornersCount = streetCornersCount;
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        report
+                    }
+                });
             })
             .catch((err) => {
                 res.status(500).json(
@@ -2489,5 +2580,6 @@ module.exports = {
     addContract,
     createPaymentsReport,
     createChecksReport,
+    createSalesReport,
     getProfileInfo
 }
