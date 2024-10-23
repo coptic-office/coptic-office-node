@@ -800,7 +800,6 @@ const getUserDetails = async (req, res) => {
                 bankChecks.map((check) => {
                     check.bankName = req.i18n.t(`payment.banks.${check.bankName}`);
                     check._doc.statusText = req.i18n.t(`payment.checkStatus.${check.status.current}`);
-                    check.image = undefined;
                 })
 
                 user.units.map((unit) => {
