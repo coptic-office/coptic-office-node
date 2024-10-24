@@ -1537,7 +1537,7 @@ const addBankCheck = async (req, res) => {
         const width = Number(process.env.IMAGE_CHECK_MAX_WIDTH);
         const {buffer} = await Image.compress(file.buffer, width);
         const fileStream = Readable.from(buffer);
-        const fileKey = `users/${id}/checks/${arabicBankName}#${number}.jpg`;
+        const fileKey = `users/${id}/checks/${arabicBankName}_${number}.jpg`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -2107,7 +2107,7 @@ const addContract  = async (req, res) => {
 
 const createPaymentsReport = async (req, res) => {
     try {
-        const {fromDate, toDate} = await req.body;
+        let {fromDate, toDate} = await req.body;
 
         if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
             return res.status(400).json({
@@ -2117,7 +2117,10 @@ const createPaymentsReport = async (req, res) => {
             });
         }
 
-        Payment.createPaymentsReport(new Date(fromDate), new Date(toDate))
+        fromDate = new Date(fromDate);
+        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+
+        Payment.createPaymentsReport(fromDate, toDate)
             .then((payments) => {
                 let cardBooking = 0, cardContracting = 0, cardCashing = 0, cardTotal = 0, cardCount = 0;
                 let depositBooking = 0, depositContracting = 0, depositCashing = 0, depositTotal = 0, depositCount = 0;
@@ -2287,7 +2290,7 @@ const createPaymentsReport = async (req, res) => {
 
 const createChecksReport = async (req, res) => {
     try {
-        const {fromDate, toDate} = await req.body;
+        let {fromDate, toDate} = await req.body;
 
         if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
             return res.status(400).json({
@@ -2297,7 +2300,10 @@ const createChecksReport = async (req, res) => {
             });
         }
 
-        Check.createChecksReport(new Date(fromDate), new Date(toDate))
+        fromDate = new Date(fromDate);
+        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+
+        Check.createChecksReport(fromDate, toDate)
             .then((checks) => {
                 let clearedAmount = 0, clearedCount = 0;
                 let outstandingAmount = 0, outstandingCount = 0;
@@ -2414,7 +2420,7 @@ const createSalesReport = async (req, res) => {
         }
 
         fromDate = new Date(fromDate);
-        toDate = new Date(toDate);
+        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
 
         let bookingCount = 0, contractingCount = 0, contractsCount = 0;
         let middlesCount = 0, cornersCount = 0, streetCornersCount = 0;

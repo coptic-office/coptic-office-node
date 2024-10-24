@@ -105,6 +105,9 @@ const createUser = async (req, res) => {
                         bodyData.notifications.messages = [];
                         bodyData.notifications.messages.push(message);
 
+                        bodyData.firstName = bodyData.firstName.trim();
+                        bodyData.lastName = bodyData.lastName.trim();
+
                         await User.create(bodyData)
                             .then(async (user) => {
                                 if (!user) {
