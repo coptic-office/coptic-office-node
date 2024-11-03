@@ -79,6 +79,10 @@ router.post('/add-contract', [authorize('Access', addContractRoles), multipartPa
 const paymentReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-payments-report', authorize('Access', paymentReportRoles), staff.createPaymentsReport);
 
+/** Create payments chart data for a certain period */
+const paymentChartRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/create-payments-chart', authorize('Access', paymentChartRoles), staff.createPaymentChart);
+
 /** Create checks report for a certain period */
 const checkReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-checks-report', authorize('Access', checkReportRoles), staff.createChecksReport);

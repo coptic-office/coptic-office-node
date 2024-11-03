@@ -49,7 +49,7 @@ const paymentSchema = new Schema({
         linkStaffID: String,
         comments: String
     }
-})
+});
 
 const paymentModel = model('payment', paymentSchema);
 

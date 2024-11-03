@@ -24,7 +24,7 @@ const bankCheckSchema = new Schema({
         ]
     },
     image: String,
-})
+});
 
 bankCheckSchema.index({bankName: 1, number: 1}, {unique: true});
 

@@ -35,7 +35,9 @@ const addStaff = async (req, res) => {
 
         const country = mobile.country;
         bodyData.mobile['primary'] = {'number': mobile.number, country};
-        bodyData.email['primary'] = email;
+        bodyData.email = undefined;
+        bodyData.email = {};
+        bodyData.email.primary = email;
 
         await Staff.create(bodyData)
             .then((staff) => {
@@ -2288,6 +2290,67 @@ const createPaymentsReport = async (req, res) => {
     }
 }
 
+const createPaymentChart = async (req, res) => {
+    try {
+        let {fromDate, toDate} = await req.body;
+
+        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.invalidDate'),
+                message: {}
+            });
+        }
+
+        fromDate = new Date(fromDate);
+        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+
+        Payment.createPaymentsReport(fromDate, toDate)
+            .then((payments) => {
+                let day = fromDate;
+                let totalPayments = 0;
+                const chartList = [];
+                while (day < toDate) {
+                    let nextDay = new Date(day.getTime() + (24 * 60 * 60 * 1000));
+                    const paymentsSubset = payments.filter((payment) => payment.paymentDetails.adviceDate >= day &&
+                        payment.paymentDetails.adviceDate < nextDay);
+                    const dayPayments = paymentsSubset.reduce((sum, payment) => sum + Number(payment.paymentDetails.amount), 0);
+                    totalPayments += dayPayments;
+                    chartList.push({day: day.toLocaleString(), dayPayments, totalPayments});
+                    day = nextDay;
+                }
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        chartData: chartList
+                    }
+                })
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const createChecksReport = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
@@ -2584,6 +2647,7 @@ module.exports = {
     selectUnitType,
     addContract,
     createPaymentsReport,
+    createPaymentChart,
     createChecksReport,
     createSalesReport,
     getProfileInfo

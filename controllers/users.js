@@ -1374,6 +1374,7 @@ const changePassword = async (req, res) => {
                         if (verificationCode === preUser.verificationCode) {
                             User.findOne({$or: [{'mobile.primary.number': mobileNumber}, {'email.primary': email}]})
                                 .then(async (user) => {
+                                    console.log(newPassword)
                                     user.password = newPassword;
                                     await user.save()
                                         .then(async () => {
@@ -1737,6 +1738,7 @@ const completePayment = (paymentData) => {
                             return item.unitId === unitId && item.paymentType === 'contracting'
                         });
                         const paidContracting = contractingPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+
                         if (paidContracting >= Number(contractingAmount)) {
                             user.units.map((item) => {
                                 if (item.id === unitId) {
@@ -2162,6 +2164,7 @@ const updateCheckStatus = (updateData) => {
                         unit.bankChecks.map((check) => {
                             if (check.bankName === bankName && check.number === number) {
                                 check.status.current = newStatus;
+                                check.status.adviceDate = new Date(adviceDate);
                                 const statusRecord = {status: newStatus, staffID, adviceDate: new Date(adviceDate), date: new Date()};
                                 check.status.history.push(statusRecord);
                             }
