@@ -202,7 +202,7 @@ const userSchema = new Schema({
 userSchema.pre('validate', function(next) {
     const user = this;
     if (!user.isModified('role')) return next();
-
+    console.log(user.isModified('role'))
     this.role = this.role.toUpperCase();
     next();
 });
