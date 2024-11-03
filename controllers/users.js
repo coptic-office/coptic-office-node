@@ -1372,7 +1372,7 @@ const changePassword = async (req, res) => {
                     }
                     else {
                         if (verificationCode === preUser.verificationCode) {
-                            User.findOne({$or: [{'mobile.primary.number': mobileNumber}]})
+                            User.findOne({'mobile.primary.number': mobileNumber}, {password: 1})
                                 .then(async (user) => {
                                     user.password = newPassword;
                                     await user.save()
