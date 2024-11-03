@@ -201,9 +201,9 @@ const userSchema = new Schema({
 
 userSchema.pre('validate', function(next) {
     const user = this;
-    console.log(user.isModified('role'))
+
     if (!user.isModified('role')) return next();
-    
+
     this.role = this.role.toUpperCase();
     next();
 });
@@ -224,6 +224,8 @@ userSchema.pre('save', function(next) {
             if (err) return next(err);
 
             // override the cleartext password with the hashed one
+            console.log(pepperedPassword)
+            console.log(salt)
             console.log(hash)
             user.password = hash;
             next();
