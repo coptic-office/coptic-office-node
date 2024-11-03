@@ -227,7 +227,7 @@ userSchema.pre('save', function(next) {
             console.log(pepperedPassword)
             console.log(salt)
             console.log(hash)
-            user.password = hash;
+            user.password = hash.toString();
             next();
         })
     })
