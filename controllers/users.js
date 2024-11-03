@@ -1389,6 +1389,7 @@ const changePassword = async (req, res) => {
                                                 })
                                         })
                                         .catch((err) => {
+                                            console.log(err)
                                             actionError(req, res, err);
                                         })
                                 })
