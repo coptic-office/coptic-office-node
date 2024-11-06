@@ -88,8 +88,12 @@ const checkReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-checks-report', authorize('Access', checkReportRoles), staff.createChecksReport);
 
 /** Create sales report for a certain period */
-const checkSalesRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
-router.post('/create-sales-report', authorize('Access', checkSalesRoles), staff.createSalesReport);
+const salesReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/create-sales-report', authorize('Access', salesReportRoles), staff.createSalesReport);
+
+/** Create details report for all the users that have booked or bought units */
+const detailsReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/create-details-report', authorize('Access', detailsReportRoles), staff.createDetailsReport);
 
 /** Return the staff profile information */
 const getProfileRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];

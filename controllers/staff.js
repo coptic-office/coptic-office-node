@@ -2552,6 +2552,69 @@ const createSalesReport = async (req, res) => {
     }
 }
 
+const createDetailsReport = async (req, res) => {
+    try {
+        User.createDetailsReport()
+            .then((users) => {
+                let totalAmount = 0;
+                users.map((user) => {
+                    user._doc.userName = `${user.firstName} ${user.lastName}`;
+                    user.firstName = undefined;
+                    user.lastName = undefined;
+                    user._doc.mobileNumber = user.mobile.primary.number;
+                    user.mobile = undefined;
+                    const paidAmount = user.payments.reduce((sum, item) => sum + Number(item.amount), 0);
+                    user._doc.paidAmount = paidAmount;
+                    totalAmount += paidAmount;
+                    user.payments = undefined;
+                    user._doc.unitsCount = user.units.length;
+                    const units = [];
+                    user.units.forEach((unit) => {
+                        if (unit.category !== undefined) {
+                            units.push(i18n.t(`product.${unit.category}.name`, {lng: 'ar'}));
+                        }
+                        else {
+                            units.push('لم تتحدد بعد');
+                        }
+
+                    });
+                    user._doc.unitsList = units;
+                    user.units = undefined;
+                });
+
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {
+                        usersCount: users.length,
+                        totalAmount,
+                        users
+                    }
+                });
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
+            })
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const getProfileInfo = async (req, res) => {
     try {
         const {user: {id: staffID}} = await req.body;
@@ -2650,5 +2713,6 @@ module.exports = {
     createPaymentChart,
     createChecksReport,
     createSalesReport,
+    createDetailsReport,
     getProfileInfo
 }

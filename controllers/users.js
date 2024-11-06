@@ -3077,6 +3077,20 @@ const createSalesReport = () => {
     })
 }
 
+const createDetailsReport = () => {
+    return new Promise((myResolve, myReject) => {
+        const query = {'payments.0': {$exists: true}};
+        const projection = {firstName: 1, lastName: 1, 'mobile.primary.number': 1, payments: 1, units: 1, _id: 0};
+        User.find(query, projection)
+            .then((users) => {
+                myResolve(users);
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
 module.exports = {
     createUser,
     login,
@@ -3110,6 +3124,7 @@ module.exports = {
     getNotifications,
     getProfileInfo,
     getUserDetails,
-    createSalesReport
+    createSalesReport,
+    createDetailsReport
 }
 
