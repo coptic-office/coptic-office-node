@@ -2128,11 +2128,16 @@ const createPaymentsReport = async (req, res) => {
                 let depositBooking = 0, depositContracting = 0, depositCashing = 0, depositTotal = 0, depositCount = 0;
                 let transferBooking = 0, transferContracting = 0, transferCashing = 0, transferTotal = 0, transferCount = 0;
                 let instaBooking = 0, instaContracting = 0, instaCashing = 0, instaTotal = 0, instaCount = 0;
+                const transList = [];
 
                 payments.map((payment) => {
                     const method = payment.paymentDetails.paymentMethod.toString();
                     const type = payment.paymentType;
                     const amount = Number(payment.paymentDetails.amount);
+                    let transNumber = undefined;
+                    if (payment.paymentDetails.transactionNumber !== undefined) {
+                        transNumber = payment.paymentDetails.transactionNumber.toString();
+                    }
 
                     if (method === 'creditCard' && type === 'booking') {
                         cardBooking += amount;
@@ -2152,47 +2157,119 @@ const createPaymentsReport = async (req, res) => {
                     else if (method === 'bankDeposit' && type === 'booking') {
                         depositBooking += amount;
                         depositTotal += amount;
-                        depositCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                depositCount++;
+                            }
+                        }
+                        else {
+                            depositCount++;
+                        }
                     }
                     else if (method === 'bankDeposit' && type === 'contracting') {
                         depositContracting += amount;
                         depositTotal += amount;
-                        depositCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                depositCount++;
+                            }
+                        }
+                        else {
+                            depositCount++;
+                        }
                     }
                     else if (method === 'bankDeposit' && type === 'cashing') {
                         depositCashing += amount;
                         depositTotal += amount;
-                        depositCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                depositCount++;
+                            }
+                        }
+                        else {
+                            depositCount++;
+                        }
                     }
                     else if (method === 'bankTransfer' && type === 'booking') {
                         transferBooking += amount;
                         transferTotal += amount;
-                        transferCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                transferCount++;
+                            }
+                        }
+                        else {
+                            transferCount++;
+                        }
                     }
                     else if (method === 'bankTransfer' && type === 'contracting') {
                         transferContracting += amount;
                         transferTotal += amount;
-                        transferCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                transferCount++;
+                            }
+                        }
+                        else {
+                            transferCount++;
+                        }
                     }
                     else if (method === 'bankTransfer' && type === 'cashing') {
                         transferCashing += amount;
                         transferTotal += amount;
-                        transferCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                transferCount++;
+                            }
+                        }
+                        else {
+                            transferCount++;
+                        }
                     }
                     else if (method === 'instaPay' && type === 'booking') {
                         instaBooking += amount;
                         instaTotal += amount;
-                        instaCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                instaCount++;
+                            }
+                        }
+                        else {
+                            instaCount++;
+                        }
                     }
                     else if (method === 'instaPay' && type === 'contracting') {
                         instaContracting += amount;
                         instaTotal += amount;
-                        instaCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                instaCount++;
+                            }
+                        }
+                        else {
+                            instaCount++;
+                        }
                     }
                     else if (method === 'instaPay' && type === 'cashing') {
                         instaCashing += amount;
                         instaTotal += amount;
-                        instaCount++;
+                        if (transNumber !== undefined && transNumber.split('@').length === 2) {
+                            if (!transList.includes(transNumber.split('@')[0])) {
+                                transList.push(transNumber.split('@')[0]);
+                                instaCount++;
+                            }
+                        }
+                        else {
+                            instaCount++;
+                        }
                     }
                 });
 
