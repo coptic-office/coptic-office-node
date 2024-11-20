@@ -946,6 +946,16 @@ const addPayment = async (req, res) => {
             });
         }
 
+        if (transactionNumber.split('@').length === 2) {
+            if (transactionNumber.split('@')[0].length <= 3) {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidTransaction'),
+                    message: {}
+                });
+            }
+        }
+
         let isCompletePayment = false;
         const uniqueId = generateUUID();
         const paymentData = {};
@@ -1982,7 +1992,7 @@ const selectUnitType = async (req, res) => {
     }
 }
 
-const addContract  = async (req, res) => {
+const addContract = async (req, res) => {
     try {
         const region = process.env.S3_REGION;
         const accessKeyId = process.env.S3_ACCESS_KEY_ID;
