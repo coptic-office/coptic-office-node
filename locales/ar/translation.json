@@ -121,6 +121,7 @@
     "incorrectType": "نوعية عملية الدفع غير صحيحة",
     "invalidMethod": "طريقة الدفع غير سليمة",
     "invalidUnitId": "كود الحجز غير سليم",
+    "invalidUnitNumber": "كود الوحدة غير سليم",
     "invalidCategory": "لا يمكن الاستمرار بالدفع النقدي بينما الوحدة ليس لها فئة بعد",
     "invalidAmount": "القيمة غير سليمة",
     "invalidNumber": "الرقم غير سليم",

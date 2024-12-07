@@ -2024,7 +2024,7 @@ const addContract = async (req, res) => {
                     status: "failed",
                     error: req.i18n.t('payment.incorrectUserID'),
                     message: {}
-                })
+                });
         }
 
         if (new Date(contractDate) == 'Invalid Date') {
@@ -2033,6 +2033,26 @@ const addContract = async (req, res) => {
                 error: req.i18n.t('payment.invalidDate'),
                 message: {}
             });
+        }
+
+        const unitCodeList = ['أ', 'ب', 'ج', 'د'];
+        const unitCodeMatchList = ['A', 'B', 'C', 'D'];
+        let validUnitNumber = false;
+        let unitNumberMatch;
+        unitCodeList.forEach((code, index) => {
+            if (unitNumber.includes(code)) {
+                validUnitNumber = true;
+                unitNumberMatch = unitNumber.replace(code, unitCodeMatchList[index]);
+                unitNumberMatch = unitNumberMatch.replace('/', '-');
+            }
+        });
+        if (!validUnitNumber) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidUnitNumber'),
+                    message: {}
+                });
         }
 
         const {fileTypeFromBuffer} = await import('file-type');
@@ -2048,7 +2068,7 @@ const addContract = async (req, res) => {
         }
 
         const fileStream = Readable.from(file.buffer);
-        const fileKey = `staff/${staffID}/contract/${unitNumber}.pdf`;
+        const fileKey = `users/${id}/contract/${unitNumberMatch}.pdf`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,

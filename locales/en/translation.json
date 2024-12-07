@@ -121,6 +121,7 @@
     "incorrectType": "Incorrect Payment Type",
     "invalidMethod": "Invalid payment method",
     "invalidUnitId": "Invalid booking code",
+    "invalidUnitNumber": "Invalid Unit Number",
     "invalidCategory": "Cannot proceed with the cashing payment type while the unit has no category yet",
     "invalidAmount": "Invalid amount",
     "invalidNumber": "Invalid Number",
