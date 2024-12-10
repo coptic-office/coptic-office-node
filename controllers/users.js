@@ -2248,7 +2248,7 @@ const addContract = (contractData) => {
                 myUnit[0].info.ar = messages.ar;
                 myUnit[0].info.en = messages.en;
                 myUnit[0].contract = {};
-                myUnit[0].contract.pdfUrl = contractUrl;
+                myUnit[0].contract.pdfUrl = customUrl;
                 myUnit[0].contract.date = new Date();
                 myUnit[0].contract.staffID = staffID;
                 myUnit[0].contract.history = [];
