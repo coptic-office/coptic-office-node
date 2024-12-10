@@ -2236,10 +2236,10 @@ const addContract = (contractData) => {
                 }
 
                 const {messages} = await Notification.findOne({name: 'contracted'}, {_id: 0, messages: 1});
-                let customUrl = contractUrl.replace('https:', '');
+                // let customUrl = contractUrl.replace('https:', '');
                 // customUrl = customUrl.replaceAll(':', '%3A');
-                customUrl = customUrl.replaceAll('+', '%2B');
-                customUrl = `https:${customUrl}`;
+                // customUrl = customUrl.replaceAll('+', '%2B');
+                // customUrl = `https:${customUrl}`;
 
                 myUnit[0].unitNumber = unitNumber;
                 myUnit[0].contractDate = contractDate;
@@ -2248,12 +2248,12 @@ const addContract = (contractData) => {
                 myUnit[0].info.ar = messages.ar;
                 myUnit[0].info.en = messages.en;
                 myUnit[0].contract = {};
-                myUnit[0].contract.pdfUrl = customUrl;
+                myUnit[0].contract.pdfUrl = contractUrl;
                 myUnit[0].contract.date = new Date();
                 myUnit[0].contract.staffID = staffID;
                 myUnit[0].contract.history = [];
                 myUnit[0].contract.history[0] = {};
-                myUnit[0].contract.history[0].pdfUrl = customUrl;
+                myUnit[0].contract.history[0].pdfUrl = contractUrl;
                 myUnit[0].contract.history[0].date = new Date();
                 myUnit[0].contract.history[0].staffID = staffID;
 
