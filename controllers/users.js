@@ -2237,8 +2237,8 @@ const addContract = (contractData) => {
 
                 const {messages} = await Notification.findOne({name: 'contracted'}, {_id: 0, messages: 1});
                 let customUrl = contractUrl.replace('https:', '');
-                customUrl = customUrl.replace(':', '%3A');
-                customUrl = customUrl.replace('+', '%2B');
+                // customUrl = customUrl.replaceAll(':', '%3A');
+                customUrl = customUrl.replaceAll('+', '%2B');
                 customUrl = `https:${customUrl}`;
 
                 myUnit[0].unitNumber = unitNumber;
