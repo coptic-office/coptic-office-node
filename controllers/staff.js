@@ -2083,7 +2083,7 @@ const addContract = async (req, res) => {
         upload.done()
             .then(async () => {
                 const contractUrl = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
-                const contractData = {id, unitId, unitNumber, contractDate: new Date(contractDate), contractUrl, staffID};
+                const contractData = {id, unitId, unitNumber, contractDate, contractUrl, staffID};
 
                 await User.addContract(contractData);
 
