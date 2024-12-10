@@ -2044,6 +2044,7 @@ const addContract = async (req, res) => {
                 validUnitNumber = true;
                 unitNumberMatch = unitNumber.replace(code, unitCodeMatchList[index]);
                 unitNumberMatch = unitNumberMatch.replace('/', '-');
+                unitNumberMatch = unitNumberMatch.replace(' ', '');
             }
         });
         if (!validUnitNumber) {
@@ -2068,7 +2069,8 @@ const addContract = async (req, res) => {
         }
 
         const fileStream = Readable.from(file.buffer);
-        const fileKey = `users/${id}/contract/${unitNumberMatch}.pdf`;
+        const uploadDateTime = new Date();
+        const fileKey = `users/${id}/contract/${unitNumberMatch}${uploadDateTime}.pdf`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,

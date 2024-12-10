@@ -2247,6 +2247,11 @@ const addContract = (contractData) => {
                 myUnit[0].contract.pdfUrl = contractUrl;
                 myUnit[0].contract.date = new Date();
                 myUnit[0].contract.staffID = staffID;
+                myUnit[0].contract.history = [];
+                myUnit[0].contract.history[0] = {};
+                myUnit[0].contract.history[0].pdfUrl = contractUrl;
+                myUnit[0].contract.history[0].date = new Date();
+                myUnit[0].contract.history[0].staffID = staffID;
 
                 await user.save()
                     .then(() => {
