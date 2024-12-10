@@ -2069,7 +2069,8 @@ const addContract = async (req, res) => {
         }
 
         const fileStream = Readable.from(file.buffer);
-        const uploadDateTime = new Date();
+        let uploadDateTime = new Date();
+        uploadDateTime = uploadDateTime.replace(' (Coordinated Universal Time)', '');
         const fileKey = `users/${id}/contract/${unitNumberMatch}${uploadDateTime}.pdf`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({

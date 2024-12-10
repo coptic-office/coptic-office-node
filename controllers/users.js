@@ -2239,7 +2239,6 @@ const addContract = (contractData) => {
                 let customUrl = contractUrl.replace('https:', '');
                 customUrl = customUrl.replace(':', '%3A');
                 customUrl = customUrl.replace('+', '%2B');
-                customUrl = customUrl.replace(' (Coordinated Universal Time)', '');
                 customUrl = `https:${customUrl}`;
 
                 myUnit[0].unitNumber = unitNumber;
