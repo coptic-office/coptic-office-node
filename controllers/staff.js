@@ -2148,7 +2148,7 @@ const updateContract = async (req, res) => {
         const bucket = process.env.S3_BUCKET;
         const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
 
-        const {user: {id: staffID}, id, unitId} = await req.body;
+        const {user: {id: staffID}, id, unitId, unitNumber} = await req.body;
         const filesNumber = await req.files.length;
         if (filesNumber !== 1) {
             return res.status(400).json({
@@ -2171,6 +2171,27 @@ const updateContract = async (req, res) => {
                 {
                     status: "failed",
                     error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                });
+        }
+
+        const unitCodeList = ['أ', 'ب', 'ج', 'د'];
+        const unitCodeMatchList = ['A', 'B', 'C', 'D'];
+        let validUnitNumber = false;
+        let unitNumberMatch;
+        unitCodeList.forEach((code, index) => {
+            if (unitNumber.includes(code)) {
+                validUnitNumber = true;
+                unitNumberMatch = unitNumber.replace(code, unitCodeMatchList[index]);
+                unitNumberMatch = unitNumberMatch.replace('/', '-');
+                unitNumberMatch = unitNumberMatch.replace(' ', '');
+            }
+        });
+        if (!validUnitNumber) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidUnitNumber'),
                     message: {}
                 });
         }
