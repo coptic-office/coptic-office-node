@@ -2140,6 +2140,125 @@ const addContract = async (req, res) => {
     }
 }
 
+const updateContract = async (req, res) => {
+    try {
+        const region = process.env.S3_REGION;
+        const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+        const bucket = process.env.S3_BUCKET;
+        const client = new S3Client({region, credentials: {accessKeyId, secretAccessKey}});
+
+        const {user: {id: staffID}, id, unitId} = await req.body;
+        const filesNumber = await req.files.length;
+        if (filesNumber !== 1) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t(`user.contractFileRequired`),
+                message: {}
+            })
+        }
+
+        if (id === undefined || unitId === undefined) {
+            return res.status(400).json({
+                status: "failed",
+                error: req.i18n.t('payment.missingContractData'),
+                message: {}
+            });
+        }
+
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                });
+        }
+
+        const {fileTypeFromBuffer} = await import('file-type');
+        const file = req.files[0];
+        const type = await fileTypeFromBuffer(file.buffer);
+        const ext = type['ext'].toString().toLowerCase();
+        if (ext !== 'pdf') {
+            return res.status(400).json({
+                status: "Failed",
+                error: req.i18n.t(`user.notPdfFile`),
+                message: {}
+            })
+        }
+
+        const fileStream = Readable.from(file.buffer);
+        let uploadDateTime = new Date();
+        uploadDateTime = uploadDateTime.toString().replace(' (Coordinated Universal Time)', '');
+        const fileKey = `users/${id}/contract/${unitNumberMatch}${uploadDateTime}.pdf`;
+        const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
+        const upload = new Upload({
+            client,
+            params,
+            tags: [], // optional tags
+            queueSize: 4, // optional concurrency configuration
+            partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+            leavePartsOnError: false, // optional manually handle dropped parts
+        });
+        upload.done()
+            .then(async () => {
+                const contractUrl = `https://s3.${region}.amazonaws.com/${bucket}/${fileKey}`;
+                const contractData = {id, unitId, contractUrl, staffID};
+
+                await User.updateContract(contractData);
+
+                return res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {}
+                })
+            })
+            .catch((err) => {
+                if (err.toString() === 'incorrectUserID') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.incorrectUserID`),
+                        message: {}
+                    })
+                }
+                else if (err.toString() === 'invalidUnitId') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.invalidUnitId`),
+                        message: {}
+                    })
+                }
+                else if (err.toString() === 'noContractUpdate') {
+                    return res.status(400).json({
+                        status: "failed",
+                        error: req.i18n.t(`payment.noContractUpdate`),
+                        message: {}
+                    })
+                }
+                else {
+                    res.status(500).json(
+                        {
+                            status: "failed",
+                            error: req.i18n.t('user.fileSavingError'),
+                            message: {
+                                info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                            }
+                        })
+                }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
 const createPaymentsReport = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
@@ -2819,6 +2938,7 @@ module.exports = {
     getUnitTypes,
     selectUnitType,
     addContract,
+    updateContract,
     createPaymentsReport,
     createPaymentChart,
     createChecksReport,

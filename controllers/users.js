@@ -2237,10 +2237,6 @@ const addContract = (contractData) => {
 
                 const {messages} = await Notification.findOne({name: 'contracted'}, {_id: 0, messages: 1});
                 let customUrl = contractUrl.replaceAll('+', '%2B');
-                // let customUrl = contractUrl.replace('https:', '');
-                // customUrl = customUrl.replaceAll(':', '%3A');
-                // customUrl = customUrl.replaceAll('+', '%2B');
-                // customUrl = `https:${customUrl}`;
 
                 myUnit[0].unitNumber = unitNumber;
                 myUnit[0].contractDate = contractDate;
@@ -2266,6 +2262,46 @@ const addContract = (contractData) => {
                         myReject(err);
                     });
 
+            })
+            .catch((err) => {
+                myReject(err);
+            });
+    })
+}
+
+const updateContract= (contractData) => {
+    return new Promise((myResolve, myReject) => {
+        const {id, unitId, contractUrl, staffID} = contractData;
+
+        User.findOne({_id: id}, {units: 1})
+            .then(async (user) => {
+                if (!user) {
+                    return myReject('incorrectUserID');
+                }
+
+                const myUnit = user.units.filter((unit) => unit.id === unitId);
+                if (myUnit[0] === undefined) {
+                    return myReject('invalidUnitId');
+                }
+
+                if (myUnit[0].contractDate === undefined) {
+                    return myReject('noContractUpdate');
+                }
+
+                let customUrl = contractUrl.replaceAll('+', '%2B');
+
+                myUnit[0].contract.pdfUrl = customUrl;
+                myUnit[0].contract.date = new Date();
+                myUnit[0].contract.staffID = staffID;
+                myUnit[0].contract.history.unshift({pdfUrl: customUrl, date: new Date(), staffID});
+
+                await user.save()
+                    .then(() => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    });
             })
             .catch((err) => {
                 myReject(err);
@@ -3127,6 +3163,7 @@ module.exports = {
     updateCheckStatus,
     removeBankCheck,
     addContract,
+    updateContract,
     getMyUnits,
     updatePhoto,
     deletePhoto,

@@ -75,6 +75,10 @@ const addContractRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 const options3 = {maxFileSize: 2, maxFilesCount: 1, fileTypesList: ['pdf']};
 router.post('/add-contract', [authorize('Access', addContractRoles), multipartParser(options3, 'pdfFile')], staff.addContract);
 
+/** Update the contract of a unit for a specific user */
+const updateContractRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/update-contract', [authorize('Access', updateContractRoles), multipartParser(options3, 'pdfFile')], staff.updateContract);
+
 /** Create payments report for a certain period */
 const paymentReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-payments-report', authorize('Access', paymentReportRoles), staff.createPaymentsReport);

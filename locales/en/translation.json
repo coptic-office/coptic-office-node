@@ -205,6 +205,7 @@
     "missingContractData": "Missing contract data",
     "missingCheckData": "Missing check data",
     "noContract": "Cannot add a contract for this unit",
+    "noContractUpdate": "Cannot update the contract for this unit",
     "noBankCheck": "Cannot add a bank check before signing a contract and updating the user info",
     "repeatedCheck": "This is a repeated bank check",
     "noChecksNeeded": "Cannot add bank checks to this unit because it is fully paid",
