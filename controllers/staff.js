@@ -2068,7 +2068,7 @@ const addContract = async (req, res) => {
         const fileStream = Readable.from(file.buffer);
         let uploadDateTime = new Date();
         uploadDateTime = uploadDateTime.toString().replace(' (Coordinated Universal Time)', '');
-        const fileKey = `users/${id}/contract/${unitNumberMatch}${uploadDateTime}.pdf`;
+        const fileKey = `users/${id}/contract/${unitNumberMatch} ${uploadDateTime}.pdf`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
@@ -2173,15 +2173,12 @@ const updateContract = async (req, res) => {
         }
 
         const unitCodeList = ['أ', 'ب', 'ج', 'د'];
-        const unitCodeMatchList = ['A', 'B', 'C', 'D'];
         let validUnitNumber = false;
         let unitNumberMatch;
         unitCodeList.forEach((code, index) => {
-            if (unitNumber.includes(code)) {
+            if (unitNumber.startsWith(code)) {
                 validUnitNumber = true;
-                unitNumberMatch = unitNumber.replace(code, unitCodeMatchList[index]);
-                unitNumberMatch = unitNumberMatch.replace('/', '-');
-                unitNumberMatch = unitNumberMatch.replace(' ', '');
+                unitNumberMatch = unitNumberMatch.replaceAll('/', '-');
             }
         });
         if (!validUnitNumber) {
@@ -2208,7 +2205,7 @@ const updateContract = async (req, res) => {
         const fileStream = Readable.from(file.buffer);
         let uploadDateTime = new Date();
         uploadDateTime = uploadDateTime.toString().replace(' (Coordinated Universal Time)', '');
-        const fileKey = `users/${id}/contract/${unitNumberMatch}${uploadDateTime}.pdf`;
+        const fileKey = `users/${id}/contract/${unitNumberMatch} ${uploadDateTime}.pdf`;
         const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
         const upload = new Upload({
             client,
