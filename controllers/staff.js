@@ -2827,6 +2827,9 @@ const createDetailsReport = async (req, res) => {
                                     day: 'numeric',
                                 });
                             }
+                            else {
+                                contractDate = 'لم يتم بعد';
+                            }
                         }
                         else {
                             category = 'لم تتحدد بعد';
