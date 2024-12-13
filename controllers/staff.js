@@ -2036,15 +2036,12 @@ const addContract = async (req, res) => {
         }
 
         const unitCodeList = ['أ', 'ب', 'ج', 'د'];
-        const unitCodeMatchList = ['A', 'B', 'C', 'D'];
         let validUnitNumber = false;
         let unitNumberMatch;
         unitCodeList.forEach((code, index) => {
-            if (unitNumber.includes(code)) {
+            if (unitNumber.startsWith(code)) {
                 validUnitNumber = true;
-                unitNumberMatch = unitNumber.replace(code, unitCodeMatchList[index]);
-                unitNumberMatch = unitNumberMatch.replace('/', '-');
-                unitNumberMatch = unitNumberMatch.replace(' ', '');
+                unitNumberMatch = unitNumberMatch.replaceAll('/', '-');
             }
         });
         if (!validUnitNumber) {
@@ -2819,14 +2816,23 @@ const createDetailsReport = async (req, res) => {
                     user.payments = undefined;
                     user._doc.unitsCount = user.units.length;
                     const units = [];
+                    let category, contractDate;
                     user.units.forEach((unit) => {
                         if (unit.category !== undefined) {
-                            units.push(i18n.t(`product.${unit.category}.name`, {lng: 'ar'}));
+                            category = i18n.t(`product.${unit.category}.name`, {lng: 'ar'});
+                            if (unit.contractDate !== undefined) {
+                                contractDate = unit.contractDate.toLocaleDateString('ar', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                });
+                            }
                         }
                         else {
-                            units.push('لم تتحدد بعد');
+                            category = 'لم تتحدد بعد';
+                            contractDate = 'لم يتم بعد';
                         }
-
+                        units.push({category, contractDate});
                     });
                     user._doc.unitsList = units;
                     user.units = undefined;
