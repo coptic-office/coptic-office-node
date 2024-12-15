@@ -2037,11 +2037,11 @@ const addContract = async (req, res) => {
 
         const unitCodeList = ['أ', 'ب', 'ج', 'د'];
         let validUnitNumber = false;
-        let unitNumberMatch;
+        let unitNumberMatch = unitNumber;
         unitCodeList.forEach((code, index) => {
             if (unitNumber.startsWith(code)) {
                 validUnitNumber = true;
-                unitNumberMatch = unitNumberMatch.toString().replaceAll('/', '-');
+                unitNumberMatch = unitNumberMatch.replaceAll('/', '-');
             }
         });
         if (!validUnitNumber) {
