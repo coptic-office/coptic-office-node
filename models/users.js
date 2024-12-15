@@ -11,7 +11,7 @@ const userSchema = new Schema({
     lastName: {
         type: String,
         required: [true, 'lastNameRequired'],
-        maxLength: [20, 'nameMaxLength'],
+        maxLength: [40, 'nameMaxLength'],
     },
     mobile: {
         primary: {country: String, number: String},
