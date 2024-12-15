@@ -2041,7 +2041,7 @@ const addContract = async (req, res) => {
         unitCodeList.forEach((code, index) => {
             if (unitNumber.startsWith(code)) {
                 validUnitNumber = true;
-                unitNumberMatch = unitNumberMatch.replaceAll('/', '-');
+                unitNumberMatch = unitNumberMatch.toString().replaceAll('/', '-');
             }
         });
         if (!validUnitNumber) {
@@ -2178,7 +2178,7 @@ const updateContract = async (req, res) => {
         unitCodeList.forEach((code, index) => {
             if (unitNumber.startsWith(code)) {
                 validUnitNumber = true;
-                unitNumberMatch = unitNumberMatch.replaceAll('/', '-');
+                unitNumberMatch = unitNumberMatch.toString().replaceAll('/', '-');
             }
         });
         if (!validUnitNumber) {
