@@ -2911,7 +2911,7 @@ const updateNationalId = async (req, res) => {
                 const width = Number(process.env.IMAGE_ID_MAX_WIDTH);
                 const {buffer} = await Image.compress(file.buffer, width);
                 const fileStream = Readable.from(buffer);
-                const fileKey = `users/${userID}/identification/ID${index + 1}.jpg`;
+                const fileKey = `users/${userID}/identification/ID${index + 1}@${new Date().toISOString()}.jpg`;
                 const params = {Bucket: bucket, Key: fileKey, Body: fileStream, ACL: "public-read"};
                 const upload = new Upload({
                     client,
