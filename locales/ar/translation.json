@@ -64,6 +64,7 @@
     "profilePhotoRequired": "يجب تحميل صورة واحدة للملف الشخصي",
     "checkPhotoRequired": "يجب تحميل صورة واحدة للشيك البنكي",
     "idImagesRequired": "يجب تحميل صورتين ، واحدة لوجه بطاقة التعريف والأخرى لظهرها",
+    "noIdAfterContacting": "لا يمكن تحديث بطاقة الرقم القومي بعد إتمام التعاقد",
     "notImageFile": "يتم قبول ملفات الصور فقط",
     "notPdfFile": "يتم قبول ملفات PDF فقط",
     "fileSavingError": "حدث خطأ أثناء حفظ الملف",

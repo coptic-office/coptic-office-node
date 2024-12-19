@@ -64,6 +64,7 @@
     "profilePhotoRequired": "One profile photo is required",
     "checkPhotoRequired": "One bank check is required",
     "idImagesRequired": "Two images are required, one for the ID front and another for the ID back",
+    "noIdAfterContacting": "ID cannot be updated after contracting",
     "notImageFile": "Only image files are accepted",
     "notPdfFile": "Only PDF files are accepted",
     "fileSavingError": "Failed while saving the file",

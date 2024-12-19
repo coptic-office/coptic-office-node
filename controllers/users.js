@@ -2888,8 +2888,19 @@ const updateNationalId = async (req, res) => {
                 status: "failed",
                 error: req.i18n.t(`user.idImagesRequired`),
                 message: {}
-            })
+            });
         }
+
+        const user = await User.findOne({_id: userID}, {units: 1});
+        user.units.forEach((unit) => {
+            if (unit.contractDate !== undefined) {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t(`user.noIdAfterContacting`),
+                    message: {}
+                });
+            }
+        });
 
         const {fileTypeFromBuffer} = await import('file-type');
         const IDs = [];
