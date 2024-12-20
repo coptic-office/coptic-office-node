@@ -3004,6 +3004,26 @@ const updateNationalId = async (req, res) => {
     }
 }
 
+const unlockAccount = (id) => {
+    return new Promise((myResolve, myReject) => {
+        User.findOne({_id: id}, {isActive: 1})
+            .then(async (user) => {
+                user.isActive.login.failedTrials = 0;
+                user.isActive.login.nextTrial = new Date();
+                await user.save()
+                    .then(async () => {
+                        myResolve();
+                    })
+                    .catch((err) => {
+                        myReject(err);
+                    })
+            })
+            .catch((err) => {
+                myReject(err);
+            })
+    });
+}
+
 const getNotifications = async (req, res) => {
     try {
         const {user: {id: userID}} = await req.body;
@@ -3179,6 +3199,7 @@ module.exports = {
     updatePhoto,
     deletePhoto,
     updateNationalId,
+    unlockAccount,
     getNotifications,
     getProfileInfo,
     getUserDetails,

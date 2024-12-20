@@ -79,6 +79,10 @@ router.post('/add-contract', [authorize('Access', addContractRoles), multipartPa
 const updateContractRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/update-contract', [authorize('Access', updateContractRoles), multipartParser(options3, 'pdfFile')], staff.updateContract);
 
+/** Unlock locked account for a certain user */
+const unlockAccountRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
+router.post('/unlock-account', authorize('Access', unlockAccountRoles), staff.unlockAccount);
+
 /** Create payments report for a certain period */
 const paymentReportRoles = ['ADMIN', 'EMPLOYEE', 'SUPERVISOR', 'MANAGER'];
 router.post('/create-payments-report', authorize('Access', paymentReportRoles), staff.createPaymentsReport);

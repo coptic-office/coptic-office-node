@@ -2251,7 +2251,6 @@ const updateContract = async (req, res) => {
                     })
                 }
                 else {
-
                     res.status(500).json(
                         {
                             status: "failed",
@@ -2261,6 +2260,50 @@ const updateContract = async (req, res) => {
                             }
                         })
                 }
+            });
+    }
+    catch (err) {
+        res.status(500).json(
+            {
+                status: "failed",
+                error: req.i18n.t('general.internalError'),
+                message: {
+                    info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                }
+            })
+    }
+}
+
+const unlockAccount = async (req, res) => {
+    try {
+        const {id} = await req.body;
+
+        if (id === undefined || !id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json(
+                {
+                    status: "failed",
+                    error: req.i18n.t('payment.incorrectUserID'),
+                    message: {}
+                });
+        }
+
+        User.unlockAccount(id)
+            .then(() => {
+                res.status(200).json({
+                    status: "success",
+                    error: "",
+                    message: {}
+                });
+            })
+            .catch((err) => {
+                res.status(500).json(
+                    {
+                        status: "failed",
+                        error: req.i18n.t('general.internalError'),
+                        message: {
+                            info: (process.env.ERROR_SHOW_DETAILS) === 'true' ? err.toString() : undefined
+                        }
+                    })
             });
     }
     catch (err) {
@@ -2967,6 +3010,7 @@ module.exports = {
     selectUnitType,
     addContract,
     updateContract,
+    unlockAccount,
     createPaymentsReport,
     createPaymentChart,
     createChecksReport,
