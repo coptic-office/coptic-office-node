@@ -2322,16 +2322,18 @@ const createPaymentsReport = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
 
-        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
-            return res.status(400).json({
-                status: "failed",
-                error: req.i18n.t('payment.invalidDate'),
-                message: {}
-            });
-        }
+        if (fromDate !== undefined && toDate !== undefined) {
+            if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidDate'),
+                    message: {}
+                });
+            }
 
-        fromDate = new Date(fromDate);
-        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+            fromDate = new Date(fromDate);
+            toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+        }
 
         Payment.createPaymentsReport(fromDate, toDate)
             .then((payments) => {
@@ -2582,16 +2584,18 @@ const createPaymentChart = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
 
-        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
-            return res.status(400).json({
-                status: "failed",
-                error: req.i18n.t('payment.invalidDate'),
-                message: {}
-            });
-        }
+        if (fromDate !== undefined && toDate !== undefined) {
+            if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidDate'),
+                    message: {}
+                });
+            }
 
-        fromDate = new Date(fromDate);
-        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+            fromDate = new Date(fromDate);
+            toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+        }
 
         Payment.createPaymentsReport(fromDate, toDate)
             .then((payments) => {
@@ -2643,16 +2647,18 @@ const createChecksReport = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
 
-        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
-            return res.status(400).json({
-                status: "failed",
-                error: req.i18n.t('payment.invalidDate'),
-                message: {}
-            });
-        }
+        if (fromDate !== undefined && toDate !== undefined) {
+            if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidDate'),
+                    message: {}
+                });
+            }
 
-        fromDate = new Date(fromDate);
-        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+            fromDate = new Date(fromDate);
+            toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+        }
 
         Check.createChecksReport(fromDate, toDate)
             .then((checks) => {
@@ -2762,16 +2768,22 @@ const createSalesReport = async (req, res) => {
     try {
         let {fromDate, toDate} = await req.body;
 
-        if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
-            return res.status(400).json({
-                status: "failed",
-                error: req.i18n.t('payment.invalidDate'),
-                message: {}
-            });
-        }
+        if (fromDate !== undefined && toDate !== undefined) {
+            if (new Date(fromDate) == 'Invalid Date' || new Date(toDate) == 'Invalid Date') {
+                return res.status(400).json({
+                    status: "failed",
+                    error: req.i18n.t('payment.invalidDate'),
+                    message: {}
+                });
+            }
 
-        fromDate = new Date(fromDate);
-        toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+            fromDate = new Date(fromDate);
+            toDate = new Date(new Date(toDate).getTime() + (24 * 60 * 60 * 1000));
+        }
+        else {
+            fromDate = new Date(0);
+            toDate = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+        }
 
         let bookingCount = 0, contractingCount = 0, contractsCount = 0;
         let middlesCount = 0, cornersCount = 0, streetCornersCount = 0;

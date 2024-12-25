@@ -3,7 +3,10 @@ const {Schema, model} = mongoose;
 
 const unitListingSchema = new Schema({
     _id: false,
-    unitNumber: String,
+    phase: String,
+    row: Number,
+    blockNumber: Number,
+    unitNumber: Number,
     category: {
         type: String,
         enum: {
@@ -20,9 +23,10 @@ const unitListingSchema = new Schema({
     userName: String,
     mobile: {country: String, number: String},
     unitId: String,
+    contractDate: Date
 });
 
-unitListingSchema.index({unitNumber: 1}, {unique: true});
+unitListingSchema.index({blockNumber: 1, unitNumber: 1}, {unique: true});
 
 const unitListingModel = model('unit_listing', unitListingSchema);
 

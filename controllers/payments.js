@@ -324,7 +324,13 @@ const updatePayment = (paymentData) => {
 
 const createPaymentsReport = (fromDate, toDate) => {
     return new Promise((myResolve, myReject) => {
-        const query = {'paymentDetails.adviceDate': {$gte: fromDate, $lt: toDate}, 'paymentDetails.status': 'Succeeded'};
+        let query;
+        if (fromDate === undefined && toDate === undefined) {
+            query = {'paymentDetails.status': 'Succeeded'};
+        }
+        else {
+            query = {'paymentDetails.adviceDate': {$gte: fromDate, $lt: toDate}, 'paymentDetails.status': 'Succeeded'};
+        }
         const projection = {paymentType: 1, 'paymentDetails.paymentMethod': 1, 'paymentDetails.amount': 1, 'paymentDetails.adviceDate': 1, 'paymentDetails.transactionNumber': 1, _id: 0};
         Payment.find(query, projection)
             .then((payments) => {
